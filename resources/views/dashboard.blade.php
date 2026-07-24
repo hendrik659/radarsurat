@@ -3,28 +3,226 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Dashboard · Radarsurat</title>
+        <meta name="color-scheme" content="light">
+        <title>Dashboard - Radarsurat</title>
         <style>
-            body { margin: 0; color: #252b3a; background: #f6f7fb; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-            main { display: grid; min-height: 100vh; padding: 28px; place-items: center; }
-            section { width: min(100%, 680px); padding: 46px; border: 1px solid #e2e5ed; border-radius: 18px; background: #fff; box-shadow: 0 18px 45px rgba(49, 60, 95, .08); }
-            p { color: #747c8e; line-height: 1.65; }
-            h1 { margin: 0; font-size: 32px; letter-spacing: -.04em; }
-            form { margin-top: 28px; }
-            button { padding: 11px 15px; border: 1px solid #c8d9e8; border-radius: 9px; color: #2C5282; background: #fff; cursor: pointer; font: inherit; font-weight: 700; }
-            button:hover { color: #fff; background: #3182CE; }
+            :root {
+                --primary: #3182CE;
+                --primary-dark: #2C5282;
+                --ink: #1f2937;
+                --muted: #6b7280;
+                --line: #e5e7eb;
+                --canvas: #f7f9fc;
+                --navbar-height: 68px;
+                --sidebar-width: 260px;
+            }
+
+            * { box-sizing: border-box; }
+
+            body {
+                min-width: 320px;
+                min-height: 100vh;
+                margin: 0;
+                color: var(--ink);
+                background: var(--canvas);
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            }
+
+            button { font: inherit; }
+
+            .topbar {
+                position: sticky;
+                top: 0;
+                z-index: 40;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: var(--navbar-height);
+                padding: 0 28px;
+                color: #fff;
+                background: #109BDA;
+                box-shadow: 0 2px 12px rgba(31, 41, 55, .12);
+            }
+
+            .topbar-start,
+            .topbar-end {
+                display: flex;
+                align-items: center;
+                min-width: 0;
+            }
+
+            .topbar-start { gap: 13px; }
+            .topbar-end { gap: 18px; }
+
+            .brand {
+                color: #fff;
+                font-size: 19px;
+                font-weight: 800;
+                letter-spacing: -.025em;
+                text-decoration: none;
+            }
+
+            .menu-button {
+                display: none;
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                border: 1px solid rgba(255, 255, 255, .45);
+                border-radius: 9px;
+                color: #fff;
+                background: transparent;
+                cursor: pointer;
+            }
+
+            .menu-button:hover { background: rgba(255, 255, 255, .14); }
+            .menu-button:focus-visible,
+            .logout-button:focus-visible { outline: 3px solid rgba(255, 255, 255, .75); outline-offset: 3px; }
+
+            .user-name {
+                overflow: hidden;
+                max-width: 240px;
+                color: #fff;
+                font-size: 14px;
+                font-weight: 650;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .logout-form { margin: 0; }
+
+            .logout-button {
+                min-height: 38px;
+                padding: 0 14px;
+                border: 1px solid rgba(255, 255, 255, .6);
+                border-radius: 8px;
+                color: #fff;
+                background: transparent;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+            .logout-button:hover { color: var(--primary-dark); background: #fff; }
+
+            .app-shell {
+                display: flex;
+                min-height: calc(100vh - var(--navbar-height));
+            }
+
+            .sidebar {
+                z-index: 30;
+                flex: 0 0 var(--sidebar-width);
+                width: var(--sidebar-width);
+                min-height: calc(100vh - var(--navbar-height));
+                border-right: 1px solid var(--line);
+                background: #06658F;
+            }
+
+            .content {
+                flex: 1;
+                min-width: 0;
+                padding: 36px;
+            }
+
+            .content-heading {
+                margin: 0;
+                color: var(--primary-dark);
+                font-size: 26px;
+                font-weight: 800;
+                letter-spacing: -.035em;
+            }
+
+            .sidebar-overlay {
+                display: none;
+            }
+
+            @media (max-width: 760px) {
+                .topbar { padding: 0 18px; }
+                .menu-button { display: inline-grid; place-items: center; }
+                .topbar-end { gap: 10px; }
+                .user-name { max-width: 125px; }
+
+                .sidebar {
+                    position: fixed;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    min-height: 100vh;
+                    box-shadow: 14px 0 35px rgba(31, 41, 55, .16);
+                    transform: translateX(-100%);
+                    transition: transform .2s ease;
+                }
+
+                body.sidebar-open { overflow: hidden; }
+                body.sidebar-open .sidebar { transform: translateX(0); }
+
+                .sidebar-overlay {
+                    position: fixed;
+                    z-index: 20;
+                    inset: 0;
+                    background: rgba(15, 23, 42, .42);
+                }
+
+                body.sidebar-open .sidebar-overlay { display: block; }
+                .content { padding: 28px 20px; }
+            }
+
+            @media (max-width: 430px) {
+                .topbar { padding: 0 14px; }
+                .topbar-start { gap: 10px; }
+                .brand { font-size: 17px; }
+                .user-name { max-width: 90px; }
+                .logout-button { padding: 0 10px; }
+            }
         </style>
     </head>
     <body>
-        <main>
-            <section>
-                <h1>Selamat datang, {{ auth()->user()->name }}.</h1>
-                <p>Anda berhasil masuk ke Radarsurat. Dashboard operasional dapat dikembangkan dari halaman ini.</p>
-                <form method="POST" action="{{ route('logout') }}">
+        <header class="topbar">
+            <div class="topbar-start">
+                <button class="menu-button" type="button" aria-label="Buka sidebar" aria-controls="sidebar" aria-expanded="false" data-sidebar-toggle>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-linecap="round" stroke-width="2"/>
+                    </svg>
+                </button>
+                <a class="brand" href="{{ route('dashboard') }}">Radarsurat</a>
+            </div>
+
+            <div class="topbar-end">
+                <span class="user-name" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</span>
+                <form class="logout-form" method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit">Keluar</button>
+                    <button class="logout-button" type="submit">Keluar</button>
                 </form>
-            </section>
-        </main>
+            </div>
+        </header>
+
+        <div class="app-shell">
+            <aside id="sidebar" class="sidebar" aria-label="Sidebar"></aside>
+            <div class="sidebar-overlay" aria-hidden="true" data-sidebar-overlay></div>
+
+            <main class="content">
+                <h1 class="content-heading">Dashboard</h1>
+            </main>
+        </div>
+
+        <script>
+            const toggle = document.querySelector('[data-sidebar-toggle]');
+            const overlay = document.querySelector('[data-sidebar-overlay]');
+
+            const setSidebarState = (isOpen) => {
+                document.body.classList.toggle('sidebar-open', isOpen);
+                toggle.setAttribute('aria-expanded', String(isOpen));
+                toggle.setAttribute('aria-label', isOpen ? 'Tutup sidebar' : 'Buka sidebar');
+            };
+
+            toggle.addEventListener('click', () => setSidebarState(!document.body.classList.contains('sidebar-open')));
+            overlay.addEventListener('click', () => setSidebarState(false));
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    setSidebarState(false);
+                }
+            });
+        </script>
     </body>
 </html>

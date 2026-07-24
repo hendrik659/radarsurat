@@ -51,5 +51,17 @@ class AuthenticationPageTest extends TestCase
             'email' => 'baru@example.test',
             'is_active' => true,
         ]);
+
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Radarsurat')
+            ->assertSee('Pengguna Baru')
+            ->assertSee('Keluar')
+            ->assertSee('id="sidebar"', false);
+
+        $this->post(route('logout'))
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
     }
 }
