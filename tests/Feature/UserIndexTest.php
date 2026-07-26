@@ -139,6 +139,26 @@ class UserIndexTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_last_login_is_displayed_in_wib_and_null_is_informative(): void
+    {
+        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
+        $manager = $this->makeUser($managerRole, 'Admin Surat', [
+            'last_login_at' => '2026-07-26 02:15:00',
+        ]);
+        $this->makeUser($managerRole, 'Belum Login', ['last_login_at' => null]);
+
+        $this->actingAs($manager)
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertSee('26 Jul 2026, 09:15 WIB')
+            ->assertSee('Belum pernah login');
+
+        $this->actingAs($manager)
+            ->get(route('users.show', $manager))
+            ->assertOk()
+            ->assertSee('26 Jul 2026, 09:15 WIB');
+    }
+
     private function makeUser(Role $role, string $name, array $attributes = []): User
     {
         $user = new User;
