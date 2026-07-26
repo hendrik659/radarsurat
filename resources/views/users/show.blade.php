@@ -43,6 +43,14 @@
             <div><dt>Role</dt><dd>{{ $user->role?->name ?? '-' }}</dd></div>
             <div><dt>Divisi</dt><dd>{{ $user->division?->name ?? '-' }}</dd></div>
             <div><dt>Status</dt><dd>{{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}</dd></div>
+            <div>
+                <dt>Terakhir login</dt>
+                <dd>
+                    {{ $user->last_login_at
+                        ? $user->last_login_at->copy()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y, H:i').' WIB'
+                        : 'Belum pernah login' }}
+                </dd>
+            </div>
         </dl>
         <div class="detail-actions">
             <a class="detail-action detail-action-primary" href="{{ route('users.edit', $user) }}">

@@ -107,7 +107,7 @@
                 </select>
             </div>
             <div class="filter-actions">
-                <button class="button button-primary" type="submit">Terapkan</button>
+                <button class="button button-primary" type="submit">Cari</button>
                 <a class="button button-secondary" href="{{ route('users.index') }}">Reset</a>
             </div>
         </form>
@@ -139,7 +139,11 @@
                             <td>{{ $user->role?->name ?: '-' }}</td>
                             <td>{{ $user->division?->name ?: '-' }}</td>
                             <td><span class="status {{ $user->is_active ? 'status-active' : 'status-inactive' }}">{{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}</span></td>
-                            <td>{{ $user->last_login_at?->translatedFormat('d M Y, H:i') ?: '-' }}</td>
+                            <td>
+                                {{ $user->last_login_at
+                                    ? $user->last_login_at->copy()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y, H:i').' WIB'
+                                    : 'Belum pernah login' }}
+                            </td>
                             <td>
                                 <div class="row-actions">
                                     <a class="action-button action-view" href="{{ route('users.show', $user) }}" aria-label="Lihat detail {{ $user->name }}">

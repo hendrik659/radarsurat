@@ -8,6 +8,7 @@
         <style>
             :root { --primary: #3182CE; --primary-dark: #2C5282; --navbar: #109BDA; --ink: #1f2937; --muted: #6b7280; --line: #e2e8f0; --canvas: #f7f9fc; --navbar-height: 68px; --sidebar-width: 260px; }
             * { box-sizing: border-box; }
+            html, body { max-width: 100%; overflow-x: hidden; }
             body { min-width: 320px; min-height: 100vh; margin: 0; color: var(--ink); background: var(--canvas); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
             button { font: inherit; }
             .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; min-height: var(--navbar-height); padding: 0 28px; color: #fff; background: var(--navbar); box-shadow: 0 2px 12px rgba(31, 41, 55, .12); }
@@ -37,8 +38,20 @@
             .summary-card strong { display: block; margin-top: 10px; color: var(--primary-dark); font-size: 32px; letter-spacing: -.04em; }
             .primary-button { display: inline-flex; align-items: center; min-height: 42px; padding: 0 15px; border-radius: 8px; color: #fff; background: var(--primary); font-size: 14px; font-weight: 750; text-decoration: none; }
             .primary-button:hover { background: var(--primary-dark); }
-            .sidebar-overlay { display: none; }
-            @media (max-width: 760px) { .topbar { padding: 0 18px; } .menu-button { display: inline-grid; place-items: center; } .topbar-end { gap: 10px; } .user-name { max-width: 125px; } .sidebar { position: fixed; top: 0; bottom: 0; left: 0; min-height: 100vh; box-shadow: 14px 0 35px rgba(31, 41, 55, .16); transform: translateX(-100%); transition: transform .2s ease; } body.sidebar-open { overflow: hidden; } body.sidebar-open .sidebar { transform: translateX(0); } .sidebar-overlay { position: fixed; z-index: 20; inset: 0; background: rgba(15, 23, 42, .42); } body.sidebar-open .sidebar-overlay { display: block; } .content { padding: 28px 20px; } .summary-grid { grid-template-columns: 1fr; } }
+            .sidebar-overlay { position: fixed; z-index: 20; inset: var(--navbar-height) 0 0; visibility: hidden; background: rgba(15, 23, 42, .46); opacity: 0; pointer-events: none; transition: opacity .25s ease, visibility .25s ease; }
+            @media (max-width: 768px) {
+                .topbar { padding: 0 18px; }
+                .menu-button { display: inline-grid; place-items: center; }
+                .topbar-end { gap: 10px; }
+                .user-name { max-width: 125px; }
+                .app-shell { width: 100%; }
+                .sidebar { position: fixed; top: var(--navbar-height); bottom: 0; left: 0; z-index: 30; width: min(82vw, 280px); min-height: 0; overflow-y: auto; overscroll-behavior: contain; box-shadow: 14px 0 35px rgba(31, 41, 55, .16); transform: translateX(-100%); transition: transform .25s ease; }
+                body.sidebar-open { overflow: hidden; }
+                body.sidebar-open .sidebar { transform: translateX(0); }
+                body.sidebar-open .sidebar-overlay { visibility: visible; opacity: 1; pointer-events: auto; }
+                .content { width: 100%; min-width: 0; margin-left: 0; padding: 28px 20px; }
+                .summary-grid { grid-template-columns: 1fr; }
+            }
             @media (max-width: 430px) { .topbar { padding: 0 14px; } .topbar-start { gap: 10px; } .brand { font-size: 17px; } .user-name { max-width: 90px; } .logout-button { padding: 0 10px; } }
         </style>
         @stack('styles')
@@ -73,12 +86,28 @@
             <main class="content">@yield('content')</main>
         </div>
         <script>
+            const sidebar = document.getElementById('sidebar');
             const toggle = document.querySelector('[data-sidebar-toggle]');
             const overlay = document.querySelector('[data-sidebar-overlay]');
-            const setSidebarState = (isOpen) => { document.body.classList.toggle('sidebar-open', isOpen); toggle.setAttribute('aria-expanded', String(isOpen)); toggle.setAttribute('aria-label', isOpen ? 'Tutup sidebar' : 'Buka sidebar'); };
+            const mobileSidebar = window.matchMedia('(max-width: 768px)');
+            const setSidebarState = (isOpen) => {
+                const shouldOpen = mobileSidebar.matches && isOpen;
+                document.body.classList.toggle('sidebar-open', shouldOpen);
+                toggle.setAttribute('aria-expanded', String(shouldOpen));
+                toggle.setAttribute('aria-label', shouldOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+            };
+
             toggle.addEventListener('click', () => setSidebarState(!document.body.classList.contains('sidebar-open')));
             overlay.addEventListener('click', () => setSidebarState(false));
-            document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setSidebarState(false); });
+            sidebar.querySelectorAll('a').forEach((link) => {
+                link.addEventListener('click', () => {
+                    if (mobileSidebar.matches) setSidebarState(false);
+                });
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') setSidebarState(false);
+            });
+            mobileSidebar.addEventListener('change', () => setSidebarState(false));
         </script>
         @stack('scripts')
     </body>
