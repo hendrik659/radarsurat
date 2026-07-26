@@ -19,14 +19,16 @@ Route::middleware('guest')->group(function () {
     Route::post('/daftar', [RegisteredUserController::class, 'store'])->name('register.store');
 });
 
-Route::middleware('auth')
+Route::middleware(['auth', 'active'])
     ->prefix('dashboard')
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
 
-        Route::get('/users', [UserController::class, 'index'])
-            ->middleware('role:admin_surat')
-            ->name('users.index');
+        Route::middleware('role:admin_surat')->group(function () {
+            Route::patch('/users/{user}/status', [UserController::class, 'updateStatus'])
+                ->name('users.status');
+            Route::resource('users', UserController::class)->except('destroy');
+        });
     });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])

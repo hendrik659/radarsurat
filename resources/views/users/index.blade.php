@@ -33,7 +33,22 @@
         .status { display: inline-flex; padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
         .status-active { color: #16803c; background: #e8f7ed; }
         .status-inactive { color: #c2414b; background: #fff0f1; }
-        .action-placeholder { color: #94a3b8; font-size: 13px; font-style: italic; white-space: nowrap; }
+        .page-actions { display: flex; justify-content: flex-end; margin: -8px 0 18px; }
+        .alert-success { padding: 12px 14px; border: 1px solid #bbebca; border-radius: 9px; color: #166534; background: #effbf3; }
+        .row-actions { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .row-actions form { margin: 0; }
+        .action-button { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 7px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 750; line-height: 1; text-decoration: none; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+        .action-button:hover { transform: translateY(-1px); }
+        .action-button svg { flex: 0 0 auto; }
+        .action-view { border-color: #bfdbfe; color: #1d4f91; background: #eff6ff; }
+        .action-view:hover { border-color: #93c5fd; background: #dbeafe; }
+        .action-edit { border-color: #cbd5e1; color: #475569; background: #fff; }
+        .action-edit:hover { border-color: #94a3b8; background: #f8fafc; }
+        .action-deactivate { border-color: #fecdd3; color: #be123c; background: #fff1f2; }
+        .action-deactivate:hover { border-color: #fda4af; background: #ffe4e6; }
+        .action-activate { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
+        .action-activate:hover { border-color: #86efac; background: #dcfce7; }
+        .self-account-note { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 9px; border-radius: 7px; color: #64748b; background: #f1f5f9; font-size: 12px; font-weight: 700; }
         .empty { padding: 46px 20px; color: var(--muted); text-align: center; }
         .pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
         .pagination-actions { display: flex; gap: 8px; }
@@ -49,6 +64,14 @@
     <div class="page-heading">
         <h1>Data Pengguna</h1>
         <p>Daftar akun pengguna Radarsurat.</p>
+    </div>
+
+    @if (session('success'))
+        <p class="alert-success" role="status">{{ session('success') }}</p>
+    @endif
+
+    <div class="page-actions">
+        <a class="button button-primary" href="{{ route('users.create') }}">Tambah Pengguna</a>
     </div>
 
     <section class="filter-card" aria-label="Filter pengguna">
@@ -117,7 +140,39 @@
                             <td>{{ $user->division?->name ?: '-' }}</td>
                             <td><span class="status {{ $user->is_active ? 'status-active' : 'status-inactive' }}">{{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}</span></td>
                             <td>{{ $user->last_login_at?->translatedFormat('d M Y, H:i') ?: '-' }}</td>
-                            <td><span class="action-placeholder">Belum tersedia</span></td>
+                            <td>
+                                <div class="row-actions">
+                                    <a class="action-button action-view" href="{{ route('users.show', $user) }}" aria-label="Lihat detail {{ $user->name }}">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.4-5.5 9.5-5.5 9.5 5.5 9.5 5.5-3.4 5.5-9.5 5.5S2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.8"/></svg>
+                                        Detail
+                                    </a>
+                                    <a class="action-button action-edit" href="{{ route('users.edit', $user) }}" aria-label="Edit {{ $user->name }}">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14.7 5.3 4 4M4 20l4.7-1 10-10a2.8 2.8 0 0 0-4-4l-10 10L4 20Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                                        Edit
+                                    </a>
+                                    @if (auth()->user()->is($user) && $user->is_active)
+                                        <span class="self-account-note" title="Akun yang sedang digunakan tidak dapat dinonaktifkan">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4.5 6v5c0 4.7 3.2 8.4 7.5 10 4.3-1.6 7.5-5.3 7.5-10V6L12 3Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/></svg>
+                                            Akun Anda
+                                        </span>
+                                    @else
+                                        <form method="POST" action="{{ route('users.status', $user) }}" data-status-form data-user-name="{{ $user->name }}" data-next-status="{{ $user->is_active ? 'nonaktif' : 'aktif' }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="is_active" value="{{ $user->is_active ? 0 : 1 }}">
+                                            <button class="action-button {{ $user->is_active ? 'action-deactivate' : 'action-activate' }}" type="submit">
+                                                @if ($user->is_active)
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="m8.8 8.8 6.4 6.4" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+                                                    Nonaktifkan
+                                                @else
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4.2 4.2L19 6.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                                                    Aktifkan
+                                                @endif
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr><td class="empty" colspan="9">Tidak ada pengguna yang sesuai dengan pencarian atau filter.</td></tr>
@@ -137,3 +192,19 @@
         @endif
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.querySelectorAll('[data-status-form]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                const userName = form.dataset.userName;
+                const nextStatus = form.dataset.nextStatus;
+                const action = nextStatus === 'aktif' ? 'mengaktifkan' : 'menonaktifkan';
+
+                if (!window.confirm(`Yakin ingin ${action} akun ${userName}?`)) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+@endpush

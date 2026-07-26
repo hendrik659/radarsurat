@@ -75,9 +75,73 @@ class UserIndexTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_can_manage_users_without_permanent_delete_routes(): void
+    {
+        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
+        $memberRole = Role::query()->create(['name' => 'Anggota Divisi', 'slug' => 'anggota_divisi']);
+        $manager = $this->makeUser($managerRole, 'Admin Surat');
+
+        $response = $this->actingAs($manager)->post(route('users.store'), [
+            'name' => 'Pengguna Baru',
+            'email' => 'pengguna.baru@example.test',
+            'role_id' => $memberRole->id,
+            'division_id' => '',
+            'is_active' => '1',
+            'password' => 'password-baru',
+            'password_confirmation' => 'password-baru',
+        ]);
+
+        $user = User::query()->where('email', 'pengguna.baru@example.test')->firstOrFail();
+        $response->assertRedirect(route('users.show', $user));
+
+        $this->actingAs($manager)
+            ->get(route('users.show', $user))
+            ->assertOk()
+            ->assertSee('Anggota Divisi')
+            ->assertSee('<dd>-</dd>', false);
+
+        $this->actingAs($manager)
+            ->patch(route('users.status', $user), ['is_active' => false])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'is_active' => false,
+            'deleted_at' => null,
+        ]);
+
+        $this->assertFalse(collect(app('router')->getRoutes())->contains(
+            fn ($route) => $route->getName() === 'users.destroy',
+        ));
+    }
+
+    public function test_admin_cannot_deactivate_own_account(): void
+    {
+        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
+        $manager = $this->makeUser($managerRole, 'Admin Surat');
+
+        $this->actingAs($manager)
+            ->patch(route('users.status', $manager), ['is_active' => false])
+            ->assertUnprocessable();
+
+        $this->assertTrue($manager->fresh()->is_active);
+    }
+
+    public function test_inactive_authenticated_user_is_logged_out(): void
+    {
+        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
+        $manager = $this->makeUser($managerRole, 'Admin Nonaktif', ['is_active' => false]);
+
+        $this->actingAs($manager)
+            ->get(route('dashboard'))
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+    }
+
     private function makeUser(Role $role, string $name, array $attributes = []): User
     {
-        $user = new User();
+        $user = new User;
         $user->forceFill(array_merge([
             'name' => $name,
             'email' => strtolower(str_replace(' ', '.', $name)).'@example.test',
