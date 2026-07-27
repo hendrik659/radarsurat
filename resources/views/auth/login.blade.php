@@ -268,8 +268,6 @@
                             <button class="submit-button" type="submit">Masuk</button>
                         </form>
 
-                        <p class="form-footer">Gunakan akun organisasi Anda untuk mengakses Radarsurat.</p>
-                        <p class="auth-switch">Belum punya akun? <a href="{{ route('register') }}">Daftar sekarang</a></p>
                     </div>
                 </div>
             </section>
