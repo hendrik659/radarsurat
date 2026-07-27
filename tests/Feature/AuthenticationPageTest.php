@@ -27,44 +27,16 @@ class AuthenticationPageTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    public function test_the_registration_page_is_available(): void
+    public function test_public_registration_routes_are_unavailable(): void
     {
-        $this->get(route('register'))
-            ->assertOk()
-            ->assertSee('Buat akun')
-            ->assertSee('name="password_confirmation"', false);
-    }
+        $this->get('/daftar')->assertNotFound();
 
-    public function test_a_guest_can_register_and_is_signed_in(): void
-    {
-        $response = $this->post(route('register.store'), [
+        $this->post('/daftar', [
             'name' => 'Pengguna Baru',
             'email' => 'baru@example.test',
             'password' => 'KataSandi123!',
             'password_confirmation' => 'KataSandi123!',
-        ]);
-
-        $response->assertRedirect(route('dashboard'));
-        $this->assertAuthenticated();
-        $this->assertDatabaseHas('roles', [
-            'name' => 'Pengguna',
-            'slug' => 'user',
-        ]);
-        $this->assertDatabaseHas('users', [
-            'name' => 'Pengguna Baru',
-            'email' => 'baru@example.test',
-            'is_active' => true,
-        ]);
-
-        $this->get(route('dashboard'))
-            ->assertOk()
-            ->assertSee('Radarsurat')
-            ->assertSee('Pengguna Baru')
-            ->assertSee('Keluar')
-            ->assertSee('id="sidebar"', false);
-
-        $this->post(route('logout'))
-            ->assertRedirect(route('login'));
+        ])->assertNotFound();
 
         $this->assertGuest();
     }
