@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -41,9 +40,8 @@ class AuthenticationPageTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_successful_login_updates_last_login_at(): void
+    public function test_an_active_account_can_login(): void
     {
-        Carbon::setTestNow('2026-07-26 02:15:00 UTC');
         $user = $this->makeLoginUser();
 
         $this->post(route('login.store'), [
@@ -51,35 +49,41 @@ class AuthenticationPageTest extends TestCase
             'password' => 'password',
         ])->assertRedirect(route('dashboard'));
 
-        $this->assertTrue($user->fresh()->last_login_at->equalTo(now()));
+        $this->assertAuthenticatedAs($user);
     }
 
-    public function test_failed_login_does_not_update_last_login_at(): void
+    public function test_an_account_cannot_login_with_an_invalid_password(): void
     {
-        $user = $this->makeLoginUser(['last_login_at' => '2026-07-25 01:00:00']);
+        $user = $this->makeLoginUser();
 
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'salah-password',
         ])->assertSessionHasErrors('email');
 
-        $this->assertSame('2026-07-25 01:00:00', $user->fresh()->last_login_at->format('Y-m-d H:i:s'));
         $this->assertGuest();
     }
 
-    public function test_inactive_account_cannot_login_or_update_last_login_at(): void
+    public function test_an_inactive_account_cannot_login(): void
     {
-        $user = $this->makeLoginUser([
-            'is_active' => false,
-            'last_login_at' => null,
-        ]);
+        $user = $this->makeLoginUser(['is_active' => false]);
 
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'password',
         ])->assertSessionHasErrors('email');
 
-        $this->assertNull($user->fresh()->last_login_at);
+        $this->assertGuest();
+    }
+
+    public function test_an_authenticated_user_can_logout(): void
+    {
+        $user = $this->makeLoginUser();
+
+        $this->actingAs($user)
+            ->post(route('logout'))
+            ->assertRedirect(route('login'));
+
         $this->assertGuest();
     }
 

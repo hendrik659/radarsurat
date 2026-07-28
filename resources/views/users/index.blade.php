@@ -22,7 +22,7 @@
         .button-secondary:hover { background: #f8fafc; }
         .table-card { overflow: hidden; }
         .table-scroll { overflow-x: auto; }
-        .user-table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+        .user-table { width: 100%; min-width: 860px; border-collapse: collapse; }
         .user-table th,
         .user-table td { padding: 16px 18px; border-bottom: 1px solid #edf0f4; text-align: left; vertical-align: middle; }
         .user-table th { color: #475569; background: #f8fafc; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
@@ -30,12 +30,11 @@
         .user-table tbody tr:last-child td { border-bottom: 0; }
         .user-table tbody tr:hover { background: #fbfdff; }
         .primary-text { color: var(--ink); font-weight: 700; }
-        .status { display: inline-flex; padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
-        .status-active { color: #16803c; background: #e8f7ed; }
-        .status-inactive { color: #c2414b; background: #fff0f1; }
         .page-actions { display: flex; justify-content: flex-end; margin: -8px 0 18px; }
         .alert-success { padding: 12px 14px; border: 1px solid #bbebca; border-radius: 9px; color: #166534; background: #effbf3; }
-        .row-actions { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .user-table th.actions-heading,
+        .user-table td.actions-cell { text-align: center; }
+        .row-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; }
         .row-actions form { margin: 0; }
         .action-button { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 7px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 750; line-height: 1; text-decoration: none; transition: border-color .15s ease, background .15s ease, transform .15s ease; }
         .action-button:hover { transform: translateY(-1px); }
@@ -122,11 +121,8 @@
                         <th>Email</th>
                         <th>Nomor pegawai</th>
                         <th>Jabatan</th>
-                        <th>Role</th>
                         <th>Divisi</th>
-                        <th>Status akun</th>
-                        <th>Terakhir login</th>
-                        <th>Aksi</th>
+                        <th class="actions-heading">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,15 +132,8 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->employee_number ?: '-' }}</td>
                             <td>{{ $user->position ?: '-' }}</td>
-                            <td>{{ $user->role?->name ?: '-' }}</td>
                             <td>{{ $user->division?->name ?: '-' }}</td>
-                            <td><span class="status {{ $user->is_active ? 'status-active' : 'status-inactive' }}">{{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}</span></td>
-                            <td>
-                                {{ $user->last_login_at
-                                    ? $user->last_login_at->copy()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y, H:i').' WIB'
-                                    : 'Belum pernah login' }}
-                            </td>
-                            <td>
+                            <td class="actions-cell">
                                 <div class="row-actions">
                                     <a class="action-button action-view" href="{{ route('users.show', $user) }}" aria-label="Lihat detail {{ $user->name }}">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.4-5.5 9.5-5.5 9.5 5.5 9.5 5.5-3.4 5.5-9.5 5.5S2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -179,7 +168,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td class="empty" colspan="9">Tidak ada pengguna yang sesuai dengan pencarian atau filter.</td></tr>
+                        <tr><td class="empty" colspan="6">Tidak ada pengguna yang sesuai dengan pencarian atau filter.</td></tr>
                     @endforelse
                 </tbody>
             </table>
