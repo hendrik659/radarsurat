@@ -26,7 +26,6 @@ class UserIndexTest extends TestCase
             'position' => 'Reporter',
             'division_id' => $editorial->id,
             'is_active' => true,
-            'last_login_at' => now()->subHour(),
         ]);
         $this->makeUser($memberRole, 'Budi Tidak Cocok', [
             'division_id' => $marketing->id,
@@ -48,10 +47,28 @@ class UserIndexTest extends TestCase
             ->assertSee($matchingUser->name)
             ->assertSee('EMP-001')
             ->assertSee('Reporter')
-            ->assertSee('Anggota Divisi')
             ->assertSee('Editorial')
-            ->assertSee('Aktif')
+            ->assertDontSee('<th>Role</th>', false)
+            ->assertDontSee('<th>Status akun</th>', false)
+            ->assertSee('<th class="actions-heading">Aksi</th>', false)
             ->assertDontSee('Budi Tidak Cocok');
+
+        $this->actingAs($manager)
+            ->get(route('users.index', ['status' => 'inactive']))
+            ->assertOk()
+            ->assertSee('Budi Tidak Cocok')
+            ->assertDontSee($matchingUser->name);
+
+        $this->actingAs($manager)
+            ->get(route('users.index', ['role' => $managerRole->id]))
+            ->assertOk()
+            ->assertSee($manager->name)
+            ->assertDontSee($matchingUser->name);
+
+        $this->actingAs($manager)
+            ->get(route('users.index', ['search' => 'tidak-ada-pengguna']))
+            ->assertOk()
+            ->assertSee('colspan="6"', false);
 
         $this->actingAs($manager)
             ->get(route('users.index'))
@@ -137,26 +154,6 @@ class UserIndexTest extends TestCase
             ->assertRedirect(route('login'));
 
         $this->assertGuest();
-    }
-
-    public function test_last_login_is_displayed_in_wib_and_null_is_informative(): void
-    {
-        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
-        $manager = $this->makeUser($managerRole, 'Admin Surat', [
-            'last_login_at' => '2026-07-26 02:15:00',
-        ]);
-        $this->makeUser($managerRole, 'Belum Login', ['last_login_at' => null]);
-
-        $this->actingAs($manager)
-            ->get(route('users.index'))
-            ->assertOk()
-            ->assertSee('26 Jul 2026, 09:15 WIB')
-            ->assertSee('Belum pernah login');
-
-        $this->actingAs($manager)
-            ->get(route('users.show', $manager))
-            ->assertOk()
-            ->assertSee('26 Jul 2026, 09:15 WIB');
     }
 
     private function makeUser(Role $role, string $name, array $attributes = []): User

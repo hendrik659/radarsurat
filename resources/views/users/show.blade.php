@@ -7,6 +7,7 @@
         .detail-card { max-width: 820px; padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 8px 26px rgba(31, 41, 55, .05); }
         .detail-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 0; }
         .detail-list div { padding-bottom: 14px; border-bottom: 1px solid #edf0f4; }
+        .detail-list .detail-wide { grid-column: 1 / -1; }
         .detail-list dt { color: var(--muted); font-size: 13px; font-weight: 700; }
         .detail-list dd { margin: 6px 0 0; font-weight: 650; }
         .detail-actions { display: flex; align-items: center; gap: 10px; margin-top: 24px; }
@@ -42,15 +43,7 @@
             <div><dt>Jabatan</dt><dd>{{ $user->position ?: '-' }}</dd></div>
             <div><dt>Role</dt><dd>{{ $user->role?->name ?? '-' }}</dd></div>
             <div><dt>Divisi</dt><dd>{{ $user->division?->name ?? '-' }}</dd></div>
-            <div><dt>Status</dt><dd>{{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}</dd></div>
-            <div>
-                <dt>Terakhir login</dt>
-                <dd>
-                    {{ $user->last_login_at
-                        ? $user->last_login_at->copy()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y, H:i').' WIB'
-                        : 'Belum pernah login' }}
-                </dd>
-            </div>
+            <div class="detail-wide"><dt>Status</dt><dd>{{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}</dd></div>
         </dl>
         <div class="detail-actions">
             <a class="detail-action detail-action-primary" href="{{ route('users.edit', $user) }}">
