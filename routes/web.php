@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return Auth::check()
@@ -26,6 +27,10 @@ Route::middleware(['auth', 'active'])
             Route::patch('/users/{user}/status', [UserController::class, 'updateStatus'])
                 ->name('users.status');
             Route::resource('users', UserController::class)->except('destroy');
+
+            Route::patch('/divisions/{division}/status', [DivisionController::class, 'updateStatus'])
+                ->name('divisions.status');
+            Route::resource('divisions', DivisionController::class)->except('destroy');
         });
     });
 

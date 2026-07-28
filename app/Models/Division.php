@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Division extends Model
 {
-
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
     protected $fillable = [
         'name',
         'code',
         'is_active',
     ];
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 
     protected function casts(): array
     {
