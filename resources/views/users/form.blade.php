@@ -50,7 +50,11 @@
                     <label class="form-label" for="role_id">Role</label>
                     <select class="form-select @error('role_id') is-invalid @enderror" id="role_id" name="role_id" required>
                         @foreach ($roles as $role)
-                            <option value="{{ $role->id }}" @selected(old('role_id', $user->role_id ?? null) == $role->id)>
+                            <option
+                                value="{{ $role->id }}"
+                                data-role-slug="{{ $role->slug }}"
+                                @selected(old('role_id', $user->role_id ?? null) == $role->id)
+                            >
                                 {{ $role->name }}
                             </option>
                         @endforeach
@@ -62,14 +66,20 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="division_id">Divisi</label>
-                    <select class="form-select @error('division_id') is-invalid @enderror" id="division_id" name="division_id">
-                        <option value="">-</option>
+                    <select
+                        class="form-select @error('division_id') is-invalid @enderror"
+                        id="division_id"
+                        name="division_id"
+                        data-testid="user-division-select"
+                    >
+                        <option value="">Pilih Divisi</option>
                         @foreach ($divisions as $division)
                             <option value="{{ $division->id }}" @selected(old('division_id', $user->division_id ?? null) == $division->id)>
-                                {{ $division->name }}
+                                {{ $division->name }}{{ $division->is_active ? '' : ' (Nonaktif)' }}
                             </option>
                         @endforeach
                     </select>
+                    <div class="form-text">Divisi wajib dipilih untuk Ketua Divisi dan Anggota Divisi.</div>
                     @error('division_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

@@ -25,7 +25,6 @@ class DivisionBackendTest extends TestCase
         $response = $this->actingAs($admin)->post(route('divisions.store'), [
             'name' => '  Redaksi Digital  ',
             'code' => '  rd-01  ',
-            'is_active' => '1',
         ]);
 
         $division = Division::query()->firstOrFail();
@@ -67,13 +66,13 @@ class DivisionBackendTest extends TestCase
         $admin = $this->makeUser('admin_surat', 'Admin Surat');
 
         $this->actingAs($admin)
-            ->post(route('divisions.store'), ['is_active' => '1'])
+            ->post(route('divisions.store'))
             ->assertSessionHasErrors(['name', 'code']);
 
         $this->assertDatabaseCount('divisions', 0);
     }
 
-    public function test_status_is_required_and_must_be_boolean(): void
+    public function test_store_ignores_submitted_inactive_status(): void
     {
         $admin = $this->makeUser('admin_surat', 'Admin Surat');
 
@@ -81,18 +80,15 @@ class DivisionBackendTest extends TestCase
             ->post(route('divisions.store'), [
                 'name' => 'Editorial',
                 'code' => 'EDT',
+                'is_active' => '0',
             ])
-            ->assertSessionHasErrors('is_active');
+            ->assertRedirect();
 
-        $this->actingAs($admin)
-            ->post(route('divisions.store'), [
-                'name' => 'Editorial',
-                'code' => 'EDT',
-                'is_active' => 'bukan-boolean',
-            ])
-            ->assertSessionHasErrors('is_active');
-
-        $this->assertDatabaseCount('divisions', 0);
+        $this->assertDatabaseHas('divisions', [
+            'name' => 'Editorial',
+            'code' => 'EDT',
+            'is_active' => true,
+        ]);
     }
 
     public function test_duplicate_name_is_rejected_after_trimming(): void
@@ -104,7 +100,6 @@ class DivisionBackendTest extends TestCase
             ->post(route('divisions.store'), [
                 'name' => '  Editorial  ',
                 'code' => 'OTHER',
-                'is_active' => '1',
             ])
             ->assertSessionHasErrors('name');
 
@@ -120,7 +115,6 @@ class DivisionBackendTest extends TestCase
             ->post(route('divisions.store'), [
                 'name' => 'Marketing',
                 'code' => 'edt',
-                'is_active' => '1',
             ])
             ->assertSessionHasErrors('code');
 
@@ -135,7 +129,6 @@ class DivisionBackendTest extends TestCase
             ->post(route('divisions.store'), [
                 'name' => 'Editorial',
                 'code' => 'EDT 01!',
-                'is_active' => '1',
             ])
             ->assertSessionHasErrors('code');
 
@@ -150,7 +143,7 @@ class DivisionBackendTest extends TestCase
         $response = $this->actingAs($admin)->put(route('divisions.update', $division), [
             'name' => '  Konten Kreatif  ',
             'code' => '  kk_02  ',
-            'is_active' => '1',
+            'is_active' => '0',
         ]);
 
         $response
@@ -190,7 +183,6 @@ class DivisionBackendTest extends TestCase
             ->put(route('divisions.update', $division), [
                 'name' => $other->name,
                 'code' => $other->code,
-                'is_active' => '1',
             ])
             ->assertSessionHasErrors(['name', 'code']);
 
@@ -236,7 +228,7 @@ class DivisionBackendTest extends TestCase
         $this->assertTrue($division->fresh()->is_active);
     }
 
-    public function test_full_update_cannot_deactivate_a_division_with_active_users(): void
+    public function test_full_update_ignores_status_for_a_division_with_active_users(): void
     {
         $admin = $this->makeUser('admin_surat', 'Admin Surat');
         $division = Division::query()->create($this->validDivisionData());
@@ -244,16 +236,16 @@ class DivisionBackendTest extends TestCase
 
         $this->actingAs($admin)
             ->put(route('divisions.update', $division), [
-                'name' => 'Nama Tidak Boleh Tersimpan',
+                'name' => 'Nama Baru',
                 'code' => 'NEW',
                 'is_active' => '0',
             ])
-            ->assertUnprocessable();
+            ->assertRedirect(route('divisions.show', $division));
 
         $this->assertDatabaseHas('divisions', [
             'id' => $division->id,
-            'name' => 'Editorial',
-            'code' => 'EDT',
+            'name' => 'Nama Baru',
+            'code' => 'NEW',
             'is_active' => true,
         ]);
     }

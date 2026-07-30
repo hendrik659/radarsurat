@@ -96,13 +96,18 @@ class UserIndexTest extends TestCase
     {
         $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
         $memberRole = Role::query()->create(['name' => 'Anggota Divisi', 'slug' => 'anggota_divisi']);
+        $division = Division::query()->create([
+            'name' => 'Editorial',
+            'code' => 'EDT',
+            'is_active' => true,
+        ]);
         $manager = $this->makeUser($managerRole, 'Admin Surat');
 
         $response = $this->actingAs($manager)->post(route('users.store'), [
             'name' => 'Pengguna Baru',
             'email' => 'pengguna.baru@example.test',
             'role_id' => $memberRole->id,
-            'division_id' => '',
+            'division_id' => $division->id,
             'is_active' => '1',
             'password' => 'password-baru',
             'password_confirmation' => 'password-baru',
@@ -115,7 +120,7 @@ class UserIndexTest extends TestCase
             ->get(route('users.show', $user))
             ->assertOk()
             ->assertSee('Anggota Divisi')
-            ->assertSee('<dd>-</dd>', false);
+            ->assertSee('Editorial');
 
         $this->actingAs($manager)
             ->patch(route('users.status', $user), ['is_active' => false])
