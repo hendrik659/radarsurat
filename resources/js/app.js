@@ -22,6 +22,16 @@ document.querySelectorAll('[data-password-toggle]').forEach((button) => {
 
 document.querySelectorAll('[data-status-form]').forEach((form) => {
     form.addEventListener('submit', (event) => {
+        const confirmationMessage = form.dataset.statusConfirm;
+
+        if (confirmationMessage) {
+            if (!window.confirm(confirmationMessage)) {
+                event.preventDefault();
+            }
+
+            return;
+        }
+
         const action = form.dataset.statusAction;
         const userName = form.dataset.userName;
 

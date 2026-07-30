@@ -72,14 +72,18 @@
                                     <span>Data Pengguna</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link rs-nav-link {{ request()->routeIs('divisions.*') ? 'active' : '' }}"
+                                    href="{{ route('divisions.index') }}"
+                                    data-testid="division-menu-mobile"
+                                    @if (request()->routeIs('divisions.*')) aria-current="page" @endif
+                                >
+                                    <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
+                                    <span>Data Divisi</span>
+                                </a>
+                            </li>
                         @endif
-
-                        <li class="nav-item">
-                            <span class="nav-link disabled rs-nav-disabled" aria-disabled="true">
-                                <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
-                                <span>Data Divisi</span>
-                            </span>
-                        </li>
                     </ul>
                 </nav>
             </div>
@@ -111,14 +115,18 @@
                                     <span>Data Pengguna</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link rs-nav-link {{ request()->routeIs('divisions.*') ? 'active' : '' }}"
+                                    href="{{ route('divisions.index') }}"
+                                    data-testid="division-menu-desktop"
+                                    @if (request()->routeIs('divisions.*')) aria-current="page" @endif
+                                >
+                                    <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
+                                    <span>Data Divisi</span>
+                                </a>
+                            </li>
                         @endif
-
-                        <li class="nav-item">
-                            <span class="nav-link disabled rs-nav-disabled" aria-disabled="true">
-                                <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
-                                <span>Data Divisi</span>
-                            </span>
-                        </li>
                     </ul>
                 </nav>
             </aside>

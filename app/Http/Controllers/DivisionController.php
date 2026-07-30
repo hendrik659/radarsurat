@@ -33,8 +33,7 @@ class DivisionController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
         return view('divisions.index', compact('divisions'));
     }
