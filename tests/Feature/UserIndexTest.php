@@ -50,7 +50,7 @@ class UserIndexTest extends TestCase
             ->assertSee('Editorial')
             ->assertDontSee('<th>Role</th>', false)
             ->assertDontSee('<th>Status akun</th>', false)
-            ->assertSee('<th class="actions-heading">Aksi</th>', false)
+            ->assertSee('<th class="text-center" scope="col">Aksi</th>', false)
             ->assertDontSee('Budi Tidak Cocok');
 
         $this->actingAs($manager)
