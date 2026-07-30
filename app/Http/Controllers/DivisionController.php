@@ -12,26 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DivisionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        if (is_string($request->input('search'))) {
-            $request->merge(['search' => trim($request->input('search'))]);
-        }
-
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:100'],
-        ]);
-
-        $search = $filters['search'] ?? null;
-
         $divisions = Division::query()
             ->withCount('users')
-            ->when($search !== null && $search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('code', 'like', "%{$search}%");
-                });
-            })
             ->orderBy('name')
             ->get();
 

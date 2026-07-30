@@ -14,36 +14,6 @@
         </a>
     </header>
 
-    <section class="card rs-card shadow-sm mb-4" aria-label="Pencarian divisi">
-        <div class="card-body p-3 p-md-4">
-            <form method="GET" action="{{ route('divisions.index') }}" class="row g-3 align-items-end">
-                <div class="col-12 col-lg-8">
-                    <label class="form-label" for="search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="search"
-                        name="search"
-                        type="search"
-                        value="{{ request('search') }}"
-                        placeholder="Cari nama atau kode divisi"
-                    >
-                </div>
-                <div class="col-12 col-lg-4">
-                    <div class="d-grid d-sm-flex gap-2">
-                        <button class="btn btn-primary flex-sm-fill d-inline-flex align-items-center justify-content-center gap-2" type="submit">
-                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                            <span>Cari</span>
-                        </button>
-                        <a class="btn btn-outline-secondary flex-sm-fill d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('divisions.index') }}">
-                            <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
-                            <span>Reset</span>
-                        </a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </section>
-
     <section class="card rs-card shadow-sm overflow-hidden" aria-label="Daftar divisi">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 rs-table">
@@ -88,12 +58,8 @@
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="4">
                                 <i class="fa-solid fa-building-circle-xmark d-block fs-3 mb-2" aria-hidden="true"></i>
-                                @if (request()->filled('search'))
-                                    Data divisi yang dicari tidak ditemukan.
-                                @else
-                                    <span class="d-block">Belum ada data divisi.</span>
-                                    <span class="d-block">Silakan tambahkan divisi baru.</span>
-                                @endif
+                                <span class="d-block">Belum ada data divisi.</span>
+                                <span class="d-block">Silakan tambahkan divisi baru.</span>
                             </td>
                         </tr>
                     @endforelse
