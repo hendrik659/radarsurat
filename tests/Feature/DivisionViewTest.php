@@ -20,7 +20,9 @@ class DivisionViewTest extends TestCase
             ->assertOk()
             ->assertViewIs('divisions.index')
             ->assertSee('Data Divisi')
-            ->assertSee('Kelola data divisi yang tersedia pada Radar Kediri.');
+            ->assertSee('Kelola data divisi yang tersedia pada Radar Kediri.')
+            ->assertDontSee('name="search"', false)
+            ->assertDontSee('Cari nama atau kode divisi');
     }
 
     public function test_index_displays_division_data_user_count_and_detail_edit_actions(): void
@@ -81,32 +83,6 @@ class DivisionViewTest extends TestCase
         }
     }
 
-    public function test_index_can_search_division_by_name(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->makeDivision('Editorial Digital', 'EDG');
-        $this->makeDivision('Keuangan', 'KEU');
-
-        $this->actingAs($admin)
-            ->get(route('divisions.index', ['search' => 'Editorial']))
-            ->assertOk()
-            ->assertSee('Editorial Digital')
-            ->assertDontSee('Keuangan');
-    }
-
-    public function test_index_can_search_division_by_code(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->makeDivision('Editorial Digital', 'EDG');
-        $this->makeDivision('Keuangan', 'KEU');
-
-        $this->actingAs($admin)
-            ->get(route('divisions.index', ['search' => 'KEU']))
-            ->assertOk()
-            ->assertSee('Keuangan')
-            ->assertDontSee('Editorial Digital');
-    }
-
     public function test_index_displays_initial_empty_state(): void
     {
         $this->actingAs($this->makeAdmin())
@@ -114,19 +90,6 @@ class DivisionViewTest extends TestCase
             ->assertOk()
             ->assertSee('Belum ada data divisi.')
             ->assertSee('Silakan tambahkan divisi baru.')
-            ->assertSee('colspan="4"', false);
-    }
-
-    public function test_index_displays_search_empty_state(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->makeDivision();
-
-        $this->actingAs($admin)
-            ->get(route('divisions.index', ['search' => 'tidak-ada']))
-            ->assertOk()
-            ->assertSee('Data divisi yang dicari tidak ditemukan.')
-            ->assertDontSee('Silakan tambahkan divisi baru.')
             ->assertSee('colspan="4"', false);
     }
 
