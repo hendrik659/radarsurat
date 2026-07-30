@@ -29,7 +29,10 @@ class DivisionController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $division = Division::query()->create($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $data['is_active'] = true;
+
+        $division = Division::query()->create($data);
 
         return redirect()
             ->route('divisions.show', $division)
@@ -56,14 +59,6 @@ class DivisionController extends Controller
     public function update(Request $request, Division $division): RedirectResponse
     {
         $data = $this->validatedData($request, $division);
-
-        abort_if(
-            $division->is_active
-                && ! $data['is_active']
-                && $division->users()->where('is_active', true)->exists(),
-            Response::HTTP_UNPROCESSABLE_ENTITY,
-            'Divisi tidak dapat dinonaktifkan karena masih memiliki pengguna aktif.',
-        );
 
         $division->update($data);
 
@@ -124,10 +119,7 @@ class DivisionController extends Controller
                 'regex:/\A[A-Z0-9_-]+\z/',
                 Rule::unique('divisions', 'code')->ignore($division),
             ],
-            'is_active' => ['required', 'boolean'],
         ]);
-
-        $data['is_active'] = $request->boolean('is_active');
 
         return $data;
     }

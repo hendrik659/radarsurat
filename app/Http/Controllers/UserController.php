@@ -78,7 +78,7 @@ class UserController extends Controller
     public function edit(User $user): View
     {
         return view('users.form', array_merge(
-            $this->formOptions(),
+            $this->formOptions($user),
             compact('user'),
         ));
     }
@@ -127,11 +127,20 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function formOptions(): array
+    private function formOptions(?User $user = null): array
     {
         return [
             'roles' => Role::query()->orderBy('name')->get(),
-            'divisions' => Division::query()->orderBy('name')->get(),
+            'divisions' => Division::query()
+                ->where(function ($query) use ($user) {
+                    $query->where('is_active', true);
+
+                    if ($user?->division_id !== null) {
+                        $query->orWhere('id', $user->division_id);
+                    }
+                })
+                ->orderBy('name')
+                ->get(),
         ];
     }
 
@@ -140,6 +149,29 @@ class UserController extends Controller
      */
     private function validatedData(Request $request, ?User $user = null): array
     {
+        $requestedRoleId = $request->input('role_id');
+        $role = is_int($requestedRoleId)
+            || (is_string($requestedRoleId) && ctype_digit($requestedRoleId))
+                ? Role::query()->find((int) $requestedRoleId)
+                : null;
+
+        $divisionIsRequired = in_array(
+            $role?->slug,
+            ['ketua_divisi', 'anggota_divisi'],
+            true,
+        );
+
+        $allowedDivision = Rule::exists('divisions', 'id')
+            ->where(function ($query) use ($user) {
+                $query->where(function ($query) use ($user) {
+                    $query->where('is_active', true);
+
+                    if ($user?->division_id !== null) {
+                        $query->orWhere('id', $user->division_id);
+                    }
+                });
+            });
+
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user)],
@@ -152,7 +184,12 @@ class UserController extends Controller
             ],
             'position' => ['nullable', 'string', 'max:100'],
             'role_id' => ['required', 'integer', 'exists:roles,id'],
-            'division_id' => ['nullable', 'integer', 'exists:divisions,id'],
+            'division_id' => [
+                Rule::requiredIf($divisionIsRequired),
+                'nullable',
+                'integer',
+                $allowedDivision,
+            ],
             'is_active' => ['required', 'boolean'],
             'password' => [
                 $user ? 'nullable' : 'required',
