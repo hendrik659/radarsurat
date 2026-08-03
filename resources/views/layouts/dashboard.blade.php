@@ -61,6 +61,18 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a
+                                class="nav-link rs-nav-link {{ request()->routeIs('incoming-letters.*') ? 'active' : '' }}"
+                                href="{{ route('incoming-letters.index') }}"
+                                data-testid="incoming-letter-menu-mobile"
+                                @if (request()->routeIs('incoming-letters.*')) aria-current="page" @endif
+                            >
+                                <i class="fa-solid fa-envelope-open-text rs-nav-icon" aria-hidden="true"></i>
+                                <span>Surat Masuk</span>
+                            </a>
+                        </li>
+
                         @if ($currentUser?->role?->slug === 'admin_surat')
                             <li class="nav-item">
                                 <a
@@ -101,6 +113,18 @@
                             >
                                 <i class="fa-solid fa-house rs-nav-icon" aria-hidden="true"></i>
                                 <span>Dashboard</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link rs-nav-link {{ request()->routeIs('incoming-letters.*') ? 'active' : '' }}"
+                                href="{{ route('incoming-letters.index') }}"
+                                data-testid="incoming-letter-menu-desktop"
+                                @if (request()->routeIs('incoming-letters.*')) aria-current="page" @endif
+                            >
+                                <i class="fa-solid fa-envelope-open-text rs-nav-icon" aria-hidden="true"></i>
+                                <span>Surat Masuk</span>
                             </a>
                         </li>
 

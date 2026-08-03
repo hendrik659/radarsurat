@@ -48,11 +48,12 @@ class IncomingLetterBackendTest extends TestCase
         $division = $this->makeDivision();
 
         $this->actingAs($admin)
-            ->get(route('incoming-letters.create'))
+            ->getJson(route('incoming-letters.create'))
             ->assertOk()
             ->assertJsonPath('divisions.0.id', $division->id);
 
         $created = $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
             ->post(route('incoming-letters.store'), $this->letterPayload([
                 'agenda_number' => 'AGD-001',
                 'destination_division_id' => $division->id,
@@ -65,19 +66,20 @@ class IncomingLetterBackendTest extends TestCase
         $letter = IncomingLetter::query()->firstOrFail();
 
         $this->actingAs($admin)
-            ->get(route('incoming-letters.show', $letter))
+            ->getJson(route('incoming-letters.show', $letter))
             ->assertOk()
             ->assertJsonPath('creator.id', $admin->id)
             ->assertJsonPath('destination_division.id', $division->id);
 
         $this->actingAs($admin)
-            ->get(route('incoming-letters.edit', $letter))
+            ->getJson(route('incoming-letters.edit', $letter))
             ->assertOk()
             ->assertJsonPath('incoming_letter.id', $letter->id);
 
         $previousPath = $letter->document_path;
 
         $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
             ->put(route('incoming-letters.update', $letter), $this->letterPayload([
                 'agenda_number' => 'AGD-001-REV',
                 'subject' => 'Perihal Diperbarui',
@@ -101,6 +103,7 @@ class IncomingLetterBackendTest extends TestCase
         $admin = $this->makeUser('admin_surat', 'Admin Surat');
 
         $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
             ->post(route('incoming-letters.store'), $this->letterPayload([
                 'agenda_number' => 'AGD-UPLOAD',
                 'received_date' => '2026-08-03',
@@ -115,6 +118,37 @@ class IncomingLetterBackendTest extends TestCase
         $this->assertSame('dokumen-masuk.pdf', $letter->original_document_name);
         $this->assertSame('application/pdf', $letter->document_mime_type);
         $this->assertGreaterThan(0, $letter->document_size);
+    }
+
+    public function test_update_without_a_new_document_keeps_the_existing_document(): void
+    {
+        $admin = $this->makeUser('admin_surat', 'Admin Surat');
+        $letter = $this->makeLetter($admin);
+        $originalDocument = [
+            'path' => $letter->document_path,
+            'name' => $letter->original_document_name,
+            'mime_type' => $letter->document_mime_type,
+            'size' => $letter->document_size,
+        ];
+        $payload = $this->letterPayload([
+            'agenda_number' => $letter->agenda_number,
+            'subject' => 'Perihal Tanpa Dokumen Baru',
+        ]);
+        unset($payload['document']);
+
+        $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
+            ->put(route('incoming-letters.update', $letter), $payload)
+            ->assertOk()
+            ->assertJsonPath('subject', 'Perihal Tanpa Dokumen Baru');
+
+        $letter->refresh();
+
+        $this->assertSame($originalDocument['path'], $letter->document_path);
+        $this->assertSame($originalDocument['name'], $letter->original_document_name);
+        $this->assertSame($originalDocument['mime_type'], $letter->document_mime_type);
+        $this->assertSame($originalDocument['size'], $letter->document_size);
+        Storage::disk('local')->assertExists($originalDocument['path']);
     }
 
     public function test_active_user_can_preview_and_download_an_incoming_letter(): void
@@ -149,7 +183,7 @@ class IncomingLetterBackendTest extends TestCase
             'letter_number' => '001/RS/VIII/2026',
             'sender_name' => 'Kantor Pajak',
             'subject' => 'Undangan Rapat Pajak',
-            'priority' => 'tinggi',
+            'priority' => 'segera',
             'status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
             'destination_division_id' => $marketing->id,
             'received_date' => '2026-08-03',
@@ -158,21 +192,21 @@ class IncomingLetterBackendTest extends TestCase
             'agenda_number' => 'AGD-LAIN',
             'sender_name' => 'Pemasok',
             'subject' => 'Kontrak Tahunan',
-            'priority' => 'normal',
+            'priority' => 'biasa',
             'destination_division_id' => $finance->id,
             'received_date' => '2026-08-02',
         ]);
 
         $this->actingAs($admin)
-            ->get(route('incoming-letters.index', ['search' => 'Pajak']))
+            ->getJson(route('incoming-letters.index', ['search' => 'Pajak']))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $matchingLetter->id);
 
         $this->actingAs($admin)
-            ->get(route('incoming-letters.index', [
+            ->getJson(route('incoming-letters.index', [
                 'status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
-                'priority' => 'tinggi',
+                'priority' => 'segera',
                 'destination_division_id' => $marketing->id,
                 'received_date' => '2026-08-03',
             ]))
@@ -187,7 +221,7 @@ class IncomingLetterBackendTest extends TestCase
         $letter = $this->makeLetter($admin);
 
         $this->actingAs($admin)
-            ->patch(route('incoming-letters.submit-for-review', $letter))
+            ->patchJson(route('incoming-letters.submit-for-review', $letter))
             ->assertOk()
             ->assertJsonPath('status', IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN);
 
@@ -196,6 +230,34 @@ class IncomingLetterBackendTest extends TestCase
             'status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
         ]);
         $this->assertNotNull($letter->fresh()->submitted_for_review_at);
+    }
+
+    public function test_priority_must_be_biasa_or_segera(): void
+    {
+        $admin = $this->makeUser('admin_surat', 'Admin Surat');
+
+        $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
+            ->post(route('incoming-letters.store'), $this->letterPayload([
+                'priority' => 'prioritas_lain',
+            ]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('priority');
+
+        $this->assertDatabaseCount('incoming_letters', 0);
+
+        $letter = $this->makeLetter($admin);
+
+        $this->actingAs($admin)
+            ->withHeader('Accept', 'application/json')
+            ->put(route('incoming-letters.update', $letter), $this->letterPayload([
+                'agenda_number' => $letter->agenda_number,
+                'priority' => 'prioritas_lain',
+            ]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('priority');
+
+        $this->assertSame('biasa', $letter->fresh()->priority);
     }
 
     private function makeDivision(string $name = 'Redaksi', string $code = 'RED'): Division
@@ -236,10 +298,9 @@ class IncomingLetterBackendTest extends TestCase
             'addressed_to' => 'Radar Surat',
             'letter_date' => '2026-08-01',
             'received_date' => '2026-08-03',
-            'received_via' => 'Kurir',
+            'received_via' => 'fisik',
             'subject' => 'Undangan Rapat',
-            'summary' => 'Ringkasan surat masuk.',
-            'priority' => 'normal',
+            'priority' => 'biasa',
             'destination_division_id' => null,
             'document' => UploadedFile::fake()->create('surat-masuk.pdf', 20, 'application/pdf'),
         ], $overrides);
@@ -260,10 +321,9 @@ class IncomingLetterBackendTest extends TestCase
             'addressed_to' => 'Radar Surat',
             'letter_date' => '2026-08-01',
             'received_date' => '2026-08-03',
-            'received_via' => 'Kurir',
+            'received_via' => 'fisik',
             'subject' => 'Undangan Rapat',
-            'summary' => null,
-            'priority' => 'normal',
+            'priority' => 'biasa',
             'destination_division_id' => null,
             'document_path' => $path,
             'original_document_name' => 'surat.pdf',

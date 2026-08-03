@@ -9,17 +9,19 @@ use App\Models\IncomingLetter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class IncomingLetterController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:255'],
@@ -29,7 +31,7 @@ class IncomingLetterController extends Controller
             'received_date' => ['nullable', 'date'],
         ]);
 
-        $letters = IncomingLetter::query()
+        $incomingLetters = IncomingLetter::query()
             ->with([
                 'creator:id,name',
                 'destinationDivision:id,name,code',
@@ -57,20 +59,32 @@ class IncomingLetterController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return response()->json($letters);
-    }
+        if ($request->expectsJson()) {
+            return response()->json($incomingLetters);
+        }
 
-    public function create(): JsonResponse
-    {
-        return response()->json([
-            'divisions' => Division::query()
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->get(['id', 'name', 'code']),
+        return view('incoming-letters.index', [
+            'incomingLetters' => $incomingLetters,
+            'divisions' => Division::query()->orderBy('name')->get(['id', 'name']),
+            'filters' => $filters,
         ]);
     }
 
-    public function store(StoreIncomingLetterRequest $request): JsonResponse
+    public function create(Request $request): View|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'divisions' => Division::query()
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'code']),
+            ]);
+        }
+
+        return view('incoming-letters.form');
+    }
+
+    public function store(StoreIncomingLetterRequest $request): JsonResponse|RedirectResponse
     {
         $data = $request->validated();
         $document = $data['document'];
@@ -97,67 +111,102 @@ class IncomingLetterController extends Controller
 
         $letter->load($this->relations());
 
-        return response()->json($letter, 201);
+        if ($request->expectsJson()) {
+            return response()->json($letter, 201);
+        }
+
+        return redirect()
+            ->route('incoming-letters.show', $letter)
+            ->with('success', 'Surat masuk berhasil ditambahkan.');
     }
 
-    public function show(IncomingLetter $incomingLetter): JsonResponse
+    public function show(Request $request, IncomingLetter $incomingLetter): View|JsonResponse
     {
         $incomingLetter->load($this->relations());
 
-        return response()->json($incomingLetter);
+        if ($request->expectsJson()) {
+            return response()->json($incomingLetter);
+        }
+
+        return view('incoming-letters.show', compact('incomingLetter'));
     }
 
-    public function edit(IncomingLetter $incomingLetter): JsonResponse
+    public function edit(Request $request, IncomingLetter $incomingLetter): View|JsonResponse
     {
         $incomingLetter->load($this->relations());
 
-        return response()->json([
-            'incoming_letter' => $incomingLetter,
-            'divisions' => Division::query()
-                ->where(function (Builder $query) use ($incomingLetter) {
-                    $query->where('is_active', true);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'incoming_letter' => $incomingLetter,
+                'divisions' => Division::query()
+                    ->where(function (Builder $query) use ($incomingLetter) {
+                        $query->where('is_active', true);
 
-                    if ($incomingLetter->destination_division_id !== null) {
-                        $query->orWhere('id', $incomingLetter->destination_division_id);
-                    }
-                })
-                ->orderBy('name')
-                ->get(['id', 'name', 'code', 'is_active']),
-        ]);
+                        if ($incomingLetter->destination_division_id !== null) {
+                            $query->orWhere('id', $incomingLetter->destination_division_id);
+                        }
+                    })
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'code', 'is_active']),
+            ]);
+        }
+
+        return view('incoming-letters.form', compact('incomingLetter'));
     }
 
-    public function update(UpdateIncomingLetterRequest $request, IncomingLetter $incomingLetter): JsonResponse
-    {
+    public function update(
+        UpdateIncomingLetterRequest $request,
+        IncomingLetter $incomingLetter,
+    ): JsonResponse|RedirectResponse {
         $data = $request->validated();
-        $document = $data['document'];
+        $document = $data['document'] ?? null;
         unset($data['document']);
 
-        $documentPath = $this->storeDocument($document, $data['received_date']);
         $previousDocumentPath = $incomingLetter->document_path;
+        $documentPath = null;
+        $documentData = [];
+
+        if ($document !== null) {
+            $documentPath = $this->storeDocument($document, $data['received_date']);
+            $documentData = $this->documentMetadata($document, $documentPath);
+        }
 
         try {
-            $letter = DB::transaction(function () use ($data, $document, $documentPath, $incomingLetter) {
+            $letter = DB::transaction(function () use ($data, $documentData, $incomingLetter) {
                 $incomingLetter->update(array_merge(
                     $data,
-                    $this->documentMetadata($document, $documentPath),
+                    $documentData,
                 ));
 
                 return $incomingLetter;
             });
         } catch (\Throwable $exception) {
-            Storage::disk('local')->delete($documentPath);
+            if ($documentPath !== null) {
+                Storage::disk('local')->delete($documentPath);
+            }
 
             throw $exception;
         }
 
-        Storage::disk('local')->delete($previousDocumentPath);
+        if ($documentPath !== null) {
+            Storage::disk('local')->delete($previousDocumentPath);
+        }
+
         $letter->refresh()->load($this->relations());
 
-        return response()->json($letter);
+        if ($request->expectsJson()) {
+            return response()->json($letter);
+        }
+
+        return redirect()
+            ->route('incoming-letters.show', $letter)
+            ->with('success', 'Surat masuk berhasil diperbarui.');
     }
 
-    public function submitForReview(IncomingLetter $incomingLetter): JsonResponse
-    {
+    public function submitForReview(
+        Request $request,
+        IncomingLetter $incomingLetter,
+    ): JsonResponse|RedirectResponse {
         $submittedAt = now();
 
         $updated = IncomingLetter::query()
@@ -172,7 +221,13 @@ class IncomingLetterController extends Controller
 
         $incomingLetter->refresh()->load($this->relations());
 
-        return response()->json($incomingLetter);
+        if ($request->expectsJson()) {
+            return response()->json($incomingLetter);
+        }
+
+        return redirect()
+            ->route('incoming-letters.show', $incomingLetter)
+            ->with('success', 'Surat masuk berhasil dikirim untuk pemeriksaan.');
     }
 
     public function preview(IncomingLetter $incomingLetter): BinaryFileResponse

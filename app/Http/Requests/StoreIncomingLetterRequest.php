@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreIncomingLetterRequest extends FormRequest
 {
@@ -12,7 +13,7 @@ class StoreIncomingLetterRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {
@@ -25,8 +26,7 @@ class StoreIncomingLetterRequest extends FormRequest
             'received_date' => ['required', 'date'],
             'received_via' => ['required', 'string', 'max:100'],
             'subject' => ['required', 'string', 'max:500'],
-            'summary' => ['nullable', 'string'],
-            'priority' => ['required', 'string', 'max:50'],
+            'priority' => ['required', 'string', Rule::in(['biasa', 'segera'])],
             'destination_division_id' => ['nullable', 'integer', 'exists:divisions,id'],
             'document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ];
