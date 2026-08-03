@@ -4,11 +4,24 @@
 
 @section('content')
     @php
-        $isAdminSurat = auth()->user()?->role?->slug === 'admin_surat';
+        $currentUser = auth()->user();
+        $isAdminSurat = $currentUser?->role?->slug === 'admin_surat';
+        $isPimpinan = $currentUser?->role?->slug === 'pimpinan';
+        $isSdmDivisionHead = $currentUser?->role?->slug === 'ketua_divisi'
+            && $currentUser?->division?->code === 'SDM';
         $canManage = $isAdminSurat && $incomingLetter->status === 'baru_diterima';
+        $canReview = ($isPimpinan || $isSdmDivisionHead)
+            && $incomingLetter->status === 'menunggu_pemeriksaan'
+            && $incomingLetter->review === null;
         $statusLabels = [
             'baru_diterima' => 'Baru Diterima',
             'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
+            'diteruskan_ke_divisi' => 'Diteruskan ke Divisi',
+        ];
+        $statusBadgeClasses = [
+            'baru_diterima' => 'text-bg-info',
+            'menunggu_pemeriksaan' => 'text-bg-warning',
+            'diteruskan_ke_divisi' => 'text-bg-success',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',
@@ -37,7 +50,7 @@
         <h1 class="rs-page-title h3 mb-1">Detail Surat Masuk</h1>
         <p class="rs-page-description text-body-secondary mb-2">Nomor agenda {{ $incomingLetter->agenda_number }}</p>
         <div class="d-flex flex-wrap gap-2">
-            <span class="badge {{ $incomingLetter->status === 'baru_diterima' ? 'text-bg-info' : 'text-bg-warning' }}">
+            <span class="badge {{ $statusBadgeClasses[$incomingLetter->status] ?? 'text-bg-secondary' }}">
                 {{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}
             </span>
             <span class="badge {{ $incomingLetter->priority === 'segera' ? 'text-bg-danger' : 'text-bg-primary' }}">
@@ -117,6 +130,70 @@
         </div>
     </section>
 
+    @if ($incomingLetter->review)
+        <section class="card rs-card shadow-sm mb-4" aria-label="Hasil pemeriksaan surat masuk">
+            <div class="card-header bg-body py-3">
+                <h2 class="h5 mb-0">Hasil Pemeriksaan</h2>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <dl class="row g-3 mb-0 rs-detail-list">
+                    @foreach ([
+                        ['Diperiksa oleh', $incomingLetter->review->reviewer?->name ?? '-'],
+                        ['Tanggal Pemeriksaan', $incomingLetter->review->reviewed_at?->format('d-m-Y H:i') ?? '-'],
+                        ['Divisi Tujuan', $incomingLetter->review->destinationDivision?->name ?? 'Belum ditentukan'],
+                    ] as [$label, $value])
+                        <div class="col-12 col-md-4 rs-detail-item border-bottom pb-3">
+                            <dt class="rs-detail-label small text-body-secondary">{{ $label }}</dt>
+                            <dd>{{ $value }}</dd>
+                        </div>
+                    @endforeach
+                    <div class="col-12 rs-detail-item">
+                        <dt class="rs-detail-label small text-body-secondary">Catatan Pemeriksa</dt>
+                        <dd class="text-break">
+                            @if (filled($incomingLetter->review->review_note))
+                                {!! nl2br(e($incomingLetter->review->review_note)) !!}
+                            @else
+                                Tidak ada catatan.
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+    @endif
+
+    <section class="card rs-card shadow-sm mb-4" aria-label="Riwayat status surat masuk">
+        <div class="card-header bg-body py-3">
+            <h2 class="h5 mb-0">Riwayat Status</h2>
+        </div>
+        <div class="card-body p-3 p-md-4">
+            @forelse ($incomingLetter->statusHistories as $history)
+                <article class="rs-status-history-item border-start border-3 border-primary ps-3 pb-4 {{ $loop->last ? 'pb-0' : 'mb-3' }}">
+                    <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-1 mb-2">
+                        <h3 class="h6 text-body-emphasis text-break mb-0">{{ $history->activity ?: '-' }}</h3>
+                        <time class="small text-body-secondary flex-shrink-0">
+                            {{ $history->created_at?->format('d-m-Y H:i') ?? '-' }}
+                        </time>
+                    </div>
+                    <p class="small mb-2">
+                        <span class="text-body-secondary">Status:</span>
+                        <span>{{ $history->previous_status ? ($statusLabels[$history->previous_status] ?? $history->previous_status) : '-' }}</span>
+                        <i class="fa-solid fa-arrow-right mx-1" aria-hidden="true"></i>
+                        <span>{{ $history->new_status ? ($statusLabels[$history->new_status] ?? $history->new_status) : '-' }}</span>
+                    </p>
+                    @if (filled($history->notes))
+                        <p class="small text-break mb-2">{{ $history->notes }}</p>
+                    @endif
+                    <p class="small text-body-secondary mb-0">
+                        Diubah oleh {{ $history->changedBy?->name ?? '-' }}
+                    </p>
+                </article>
+            @empty
+                <p class="text-body-secondary mb-0">Belum ada riwayat status.</p>
+            @endforelse
+        </div>
+    </section>
+
     <div class="d-grid d-sm-flex flex-wrap gap-2">
         <a class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('incoming-letters.index') }}">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
@@ -126,6 +203,16 @@
             <i class="fa-solid fa-download" aria-hidden="true"></i>
             <span>Download</span>
         </a>
+        @if ($canReview)
+            <a
+                class="btn btn-success d-inline-flex align-items-center justify-content-center gap-2"
+                href="{{ route('incoming-letters.review.create', $incomingLetter) }}"
+                data-testid="incoming-letter-review-link"
+            >
+                <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
+                <span>Periksa dan Teruskan</span>
+            </a>
+        @endif
         @if ($canManage)
             <a
                 class="btn btn-outline-warning d-inline-flex align-items-center justify-content-center gap-2"

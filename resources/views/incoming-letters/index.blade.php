@@ -8,6 +8,12 @@
         $statusLabels = [
             'baru_diterima' => 'Baru Diterima',
             'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
+            'diteruskan_ke_divisi' => 'Diteruskan ke Divisi',
+        ];
+        $statusBadgeClasses = [
+            'baru_diterima' => 'text-bg-info',
+            'menunggu_pemeriksaan' => 'text-bg-warning',
+            'diteruskan_ke_divisi' => 'text-bg-success',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',
@@ -136,7 +142,7 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge {{ $incomingLetter->status === 'baru_diterima' ? 'text-bg-info' : 'text-bg-warning' }}">
+                                <span class="badge {{ $statusBadgeClasses[$incomingLetter->status] ?? 'text-bg-secondary' }}">
                                     {{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}
                                 </span>
                             </td>
