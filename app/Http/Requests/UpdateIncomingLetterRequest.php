@@ -31,10 +31,9 @@ class UpdateIncomingLetterRequest extends FormRequest
             'received_date' => ['required', 'date'],
             'received_via' => ['required', 'string', 'max:100'],
             'subject' => ['required', 'string', 'max:500'],
-            'summary' => ['nullable', 'string'],
-            'priority' => ['required', 'string', 'max:50'],
+            'priority' => ['required', 'string', Rule::in(['biasa', 'segera'])],
             'destination_division_id' => ['nullable', 'integer', 'exists:divisions,id'],
-            'document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ];
     }
 }
