@@ -5,15 +5,19 @@
 @section('content')
     @php
         $isAdminSurat = auth()->user()?->role?->slug === 'admin_surat';
+        $isDivisionMember = auth()->user()?->role?->slug === 'anggota_divisi';
+        $isMyTasks = ($filters['my_tasks'] ?? null) === '1';
         $statusLabels = [
             'baru_diterima' => 'Baru Diterima',
             'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
             'diteruskan_ke_divisi' => 'Diteruskan ke Divisi',
+            'ditugaskan_ke_anggota' => 'Ditugaskan ke Anggota',
         ];
         $statusBadgeClasses = [
             'baru_diterima' => 'text-bg-info',
             'menunggu_pemeriksaan' => 'text-bg-warning',
             'diteruskan_ke_divisi' => 'text-bg-success',
+            'ditugaskan_ke_anggota' => 'text-bg-primary',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',
@@ -39,9 +43,36 @@
         @endif
     </header>
 
+    @if ($isDivisionMember)
+        <nav class="d-grid d-sm-flex flex-wrap gap-2 mb-4" aria-label="Lingkup daftar surat masuk">
+            <a
+                class="btn {{ $isMyTasks ? 'btn-primary active' : 'btn-outline-primary' }} d-inline-flex align-items-center justify-content-center gap-2"
+                href="{{ route('incoming-letters.index', array_merge(request()->except(['page', 'my_tasks']), ['my_tasks' => 1])) }}"
+                @if ($isMyTasks) aria-current="page" @endif
+                data-testid="incoming-letter-my-tasks-link"
+            >
+                <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+                <span>Tugas Saya</span>
+            </a>
+            @if ($isMyTasks)
+                <a
+                    class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
+                    href="{{ route('incoming-letters.index', request()->except(['page', 'my_tasks'])) }}"
+                    data-testid="incoming-letter-all-link"
+                >
+                    <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                    <span>Semua Surat</span>
+                </a>
+            @endif
+        </nav>
+    @endif
+
     <section class="card rs-card shadow-sm mb-4" aria-label="Pencarian dan filter surat masuk">
         <div class="card-body p-3 p-md-4">
             <form method="GET" action="{{ route('incoming-letters.index') }}" class="row g-3 align-items-end">
+                @if ($isMyTasks)
+                    <input name="my_tasks" type="hidden" value="1">
+                @endif
                 <div class="col-12 col-xl-4">
                     <label class="form-label" for="search">Pencarian</label>
                     <input
@@ -100,7 +131,7 @@
                         </button>
                         <a
                             class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
-                            href="{{ route('incoming-letters.index') }}"
+                            href="{{ route('incoming-letters.index', $isMyTasks ? ['my_tasks' => 1] : []) }}"
                         >
                             <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
                             <span>Reset</span>
@@ -122,6 +153,7 @@
                         <th scope="col">Pengirim</th>
                         <th scope="col">Perihal</th>
                         <th scope="col">Divisi Tujuan</th>
+                        <th scope="col">Penanggung Jawab</th>
                         <th scope="col">Prioritas</th>
                         <th scope="col">Status</th>
                         <th class="text-center" scope="col">Aksi</th>
@@ -136,6 +168,7 @@
                             <td>{{ $incomingLetter->sender_name ?: '-' }}</td>
                             <td>{{ $incomingLetter->subject ?: '-' }}</td>
                             <td>{{ $incomingLetter->destinationDivision?->name ?? 'Belum ditentukan' }}</td>
+                            <td>{{ $incomingLetter->assignment?->assignee?->name ?? 'Belum ditentukan' }}</td>
                             <td>
                                 <span class="badge {{ $incomingLetter->priority === 'segera' ? 'text-bg-danger' : 'text-bg-primary' }}">
                                     {{ $priorityLabels[$incomingLetter->priority] ?? $incomingLetter->priority }}
@@ -200,9 +233,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td class="rs-empty-state text-center text-body-secondary py-5" colspan="9">
+                            <td class="rs-empty-state text-center text-body-secondary py-5" colspan="10">
                                 <i class="fa-solid fa-envelope-open d-block fs-3 mb-2" aria-hidden="true"></i>
-                                @if ($hasFilters)
+                                @if ($isMyTasks)
+                                    Belum ada surat yang ditugaskan kepada Anda.
+                                @elseif ($hasFilters)
                                     Surat Masuk yang dicari tidak ditemukan.
                                 @else
                                     <span class="d-block mb-3">Belum ada Surat Masuk.</span>
