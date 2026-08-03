@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class IncomingLetter extends Model
 {
     public const STATUS_BARU_DITERIMA = 'baru_diterima';
 
     public const STATUS_MENUNGGU_PEMERIKSAAN = 'menunggu_pemeriksaan';
+
+    public const STATUS_DITERUSKAN_KE_DIVISI = 'diteruskan_ke_divisi';
 
     protected $fillable = [
         'agenda_number',
@@ -54,5 +58,17 @@ class IncomingLetter extends Model
     public function destinationDivision(): BelongsTo
     {
         return $this->belongsTo(Division::class, 'destination_division_id');
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(IncomingLetterReview::class);
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(IncomingLetterStatusHistory::class)
+            ->latest('created_at')
+            ->latest('id');
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\IncomingLetterController;
+use App\Http\Controllers\IncomingLetterReviewController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,10 @@ Route::middleware(['auth', 'active'])
             ->name('incoming-letters.preview');
         Route::get('/incoming-letters/{incomingLetter}/download', [IncomingLetterController::class, 'download'])
             ->name('incoming-letters.download');
+        Route::get('/incoming-letters/{incomingLetter}/review', [IncomingLetterReviewController::class, 'create'])
+            ->name('incoming-letters.review.create');
+        Route::post('/incoming-letters/{incomingLetter}/review', [IncomingLetterReviewController::class, 'store'])
+            ->name('incoming-letters.review.store');
 
         Route::middleware('role:admin_surat')->group(function () {
             Route::get('/incoming-letters/create', [IncomingLetterController::class, 'create'])

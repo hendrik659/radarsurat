@@ -172,6 +172,22 @@ class IncomingLetterBackendTest extends TestCase
             ->assertDownload('surat-masuk.pdf');
     }
 
+    public function test_private_document_path_is_not_exposed_by_letter_json_responses(): void
+    {
+        $reader = $this->makeUser('anggota_divisi', 'Anggota Divisi');
+        $letter = $this->makeLetter($reader);
+
+        $this->actingAs($reader)
+            ->getJson(route('incoming-letters.index'))
+            ->assertOk()
+            ->assertJsonMissingPath('data.0.document_path');
+
+        $this->actingAs($reader)
+            ->getJson(route('incoming-letters.show', $letter))
+            ->assertOk()
+            ->assertJsonMissingPath('document_path');
+    }
+
     public function test_index_searches_and_filters_incoming_letters(): void
     {
         $admin = $this->makeUser('admin_surat', 'Admin Surat');

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class IncomingLetterController extends Controller
@@ -25,7 +26,14 @@ class IncomingLetterController extends Controller
     {
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'in:'.IncomingLetter::STATUS_BARU_DITERIMA.','.IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN],
+            'status' => [
+                'nullable',
+                'in:'.implode(',', [
+                    IncomingLetter::STATUS_BARU_DITERIMA,
+                    IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
+                    IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                ]),
+            ],
             'priority' => ['nullable', 'string', 'max:50'],
             'destination_division_id' => ['nullable', 'integer', 'exists:divisions,id'],
             'received_date' => ['nullable', 'date'],
@@ -94,7 +102,7 @@ class IncomingLetterController extends Controller
 
         try {
             $letter = DB::transaction(function () use ($data, $document, $documentPath, $request) {
-                return IncomingLetter::query()->create(array_merge(
+                $letter = IncomingLetter::query()->create(array_merge(
                     $data,
                     $this->documentMetadata($document, $documentPath),
                     [
@@ -102,6 +110,16 @@ class IncomingLetterController extends Controller
                         'created_by' => $request->user()->id,
                     ],
                 ));
+
+                $letter->statusHistories()->create([
+                    'previous_status' => null,
+                    'new_status' => IncomingLetter::STATUS_BARU_DITERIMA,
+                    'activity' => 'Surat dicatat',
+                    'notes' => null,
+                    'changed_by' => $request->user()->id,
+                ]);
+
+                return $letter;
             });
         } catch (\Throwable $exception) {
             Storage::disk('local')->delete($documentPath);
@@ -122,7 +140,11 @@ class IncomingLetterController extends Controller
 
     public function show(Request $request, IncomingLetter $incomingLetter): View|JsonResponse
     {
-        $incomingLetter->load($this->relations());
+        $incomingLetter->load(array_merge($this->relations(), [
+            'review.reviewer:id,name',
+            'review.destinationDivision:id,name,code',
+            'statusHistories.changedBy:id,name',
+        ]));
 
         if ($request->expectsJson()) {
             return response()->json($incomingLetter);
@@ -133,6 +155,7 @@ class IncomingLetterController extends Controller
 
     public function edit(Request $request, IncomingLetter $incomingLetter): View|JsonResponse
     {
+        $this->ensureEditable($incomingLetter);
         $incomingLetter->load($this->relations());
 
         if ($request->expectsJson()) {
@@ -158,6 +181,8 @@ class IncomingLetterController extends Controller
         UpdateIncomingLetterRequest $request,
         IncomingLetter $incomingLetter,
     ): JsonResponse|RedirectResponse {
+        $this->ensureEditable($incomingLetter);
+
         $data = $request->validated();
         $document = $data['document'] ?? null;
         unset($data['document']);
@@ -173,12 +198,18 @@ class IncomingLetterController extends Controller
 
         try {
             $letter = DB::transaction(function () use ($data, $documentData, $incomingLetter) {
-                $incomingLetter->update(array_merge(
+                $lockedLetter = IncomingLetter::query()
+                    ->lockForUpdate()
+                    ->findOrFail($incomingLetter->id);
+
+                $this->ensureEditable($lockedLetter);
+
+                $lockedLetter->update(array_merge(
                     $data,
                     $documentData,
                 ));
 
-                return $incomingLetter;
+                return $lockedLetter;
             });
         } catch (\Throwable $exception) {
             if ($documentPath !== null) {
@@ -209,24 +240,41 @@ class IncomingLetterController extends Controller
     ): JsonResponse|RedirectResponse {
         $submittedAt = now();
 
-        $updated = IncomingLetter::query()
-            ->whereKey($incomingLetter)
-            ->where('status', IncomingLetter::STATUS_BARU_DITERIMA)
-            ->update([
+        $submittedLetter = DB::transaction(function () use ($incomingLetter, $request, $submittedAt) {
+            $lockedLetter = IncomingLetter::query()
+                ->lockForUpdate()
+                ->findOrFail($incomingLetter->id);
+
+            abort_unless(
+                $lockedLetter->status === IncomingLetter::STATUS_BARU_DITERIMA,
+                422,
+                'Surat masuk tidak dapat diajukan untuk pemeriksaan.',
+            );
+
+            $lockedLetter->update([
                 'status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
                 'submitted_for_review_at' => $submittedAt,
             ]);
 
-        abort_unless($updated === 1, 422, 'Surat masuk tidak dapat diajukan untuk pemeriksaan.');
+            $lockedLetter->statusHistories()->create([
+                'previous_status' => IncomingLetter::STATUS_BARU_DITERIMA,
+                'new_status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
+                'activity' => 'Surat dikirim untuk pemeriksaan',
+                'notes' => null,
+                'changed_by' => $request->user()->id,
+            ]);
 
-        $incomingLetter->refresh()->load($this->relations());
+            return $lockedLetter;
+        });
+
+        $submittedLetter->refresh()->load($this->relations());
 
         if ($request->expectsJson()) {
-            return response()->json($incomingLetter);
+            return response()->json($submittedLetter);
         }
 
         return redirect()
-            ->route('incoming-letters.show', $incomingLetter)
+            ->route('incoming-letters.show', $submittedLetter)
             ->with('success', 'Surat masuk berhasil dikirim untuk pemeriksaan.');
     }
 
@@ -295,6 +343,15 @@ class IncomingLetterController extends Controller
         abort_unless(Storage::disk('local')->exists($incomingLetter->document_path), 404);
 
         return Storage::disk('local')->path($incomingLetter->document_path);
+    }
+
+    private function ensureEditable(IncomingLetter $incomingLetter): void
+    {
+        abort_unless(
+            $incomingLetter->status === IncomingLetter::STATUS_BARU_DITERIMA,
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'Surat masuk hanya dapat diedit saat berstatus baru diterima.',
+        );
     }
 
     private function asciiFileName(string $fileName): string
