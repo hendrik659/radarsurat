@@ -32,17 +32,20 @@ class IncomingLetterController extends Controller
                     IncomingLetter::STATUS_BARU_DITERIMA,
                     IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
                     IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                    IncomingLetter::STATUS_DITUGASKAN_KE_ANGGOTA,
                 ]),
             ],
             'priority' => ['nullable', 'string', 'max:50'],
             'destination_division_id' => ['nullable', 'integer', 'exists:divisions,id'],
             'received_date' => ['nullable', 'date'],
+            'my_tasks' => ['nullable', 'in:1'],
         ]);
 
         $incomingLetters = IncomingLetter::query()
             ->with([
                 'creator:id,name',
                 'destinationDivision:id,name,code',
+                'assignment.assignee:id,name',
             ])
             ->when($filters['search'] ?? null, function (Builder $query, string $search) {
                 $query->where(function (Builder $query) use ($search) {
@@ -61,6 +64,14 @@ class IncomingLetterController extends Controller
             ->when(
                 $filters['received_date'] ?? null,
                 fn (Builder $query, string $receivedDate) => $query->whereDate('received_date', $receivedDate),
+            )
+            ->when(
+                ($filters['my_tasks'] ?? null) === '1',
+                fn (Builder $query) => $query->whereHas(
+                    'assignment',
+                    fn (Builder $assignmentQuery) => $assignmentQuery
+                        ->where('assigned_to', $request->user()->id),
+                ),
             )
             ->orderByDesc('received_date')
             ->latest('id')
@@ -143,6 +154,9 @@ class IncomingLetterController extends Controller
         $incomingLetter->load(array_merge($this->relations(), [
             'review.reviewer:id,name',
             'review.destinationDivision:id,name,code',
+            'assignment.assigner:id,name',
+            'assignment.assignee:id,name,email,position',
+            'assignment.division:id,name,code',
             'statusHistories.changedBy:id,name',
         ]));
 

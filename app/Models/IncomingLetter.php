@@ -15,6 +15,8 @@ class IncomingLetter extends Model
 
     public const STATUS_DITERUSKAN_KE_DIVISI = 'diteruskan_ke_divisi';
 
+    public const STATUS_DITUGASKAN_KE_ANGGOTA = 'ditugaskan_ke_anggota';
+
     protected $fillable = [
         'agenda_number',
         'letter_number',
@@ -63,6 +65,11 @@ class IncomingLetter extends Model
     public function review(): HasOne
     {
         return $this->hasOne(IncomingLetterReview::class);
+    }
+
+    public function assignment(): HasOne
+    {
+        return $this->hasOne(IncomingLetterAssignment::class);
     }
 
     public function statusHistories(): HasMany
