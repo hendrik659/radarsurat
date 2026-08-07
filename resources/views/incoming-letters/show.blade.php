@@ -13,23 +13,15 @@
         $canReview = ($isPimpinan || $isSdmDivisionHead)
             && $incomingLetter->status === 'menunggu_pemeriksaan'
             && $incomingLetter->review === null;
-        $isDestinationDivisionHead = $currentUser?->role?->slug === 'ketua_divisi'
-            && $currentUser?->division_id === $incomingLetter->destination_division_id;
-        $canAssign = $isDestinationDivisionHead
-            && $incomingLetter->status === 'diteruskan_ke_divisi'
-            && $incomingLetter->review !== null
-            && $incomingLetter->assignment === null;
         $statusLabels = [
             'baru_diterima' => 'Baru Diterima',
             'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-            'diteruskan_ke_divisi' => 'Diteruskan ke Divisi',
-            'ditugaskan_ke_anggota' => 'Ditugaskan ke Anggota',
+            'selesai' => 'Selesai',
         ];
         $statusBadgeClasses = [
             'baru_diterima' => 'text-bg-info',
             'menunggu_pemeriksaan' => 'text-bg-warning',
-            'diteruskan_ke_divisi' => 'text-bg-success',
-            'ditugaskan_ke_anggota' => 'text-bg-primary',
+            'selesai' => 'text-bg-success',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',
@@ -170,40 +162,6 @@
         </section>
     @endif
 
-    @if ($incomingLetter->assignment)
-        <section class="card rs-card shadow-sm mb-4" aria-label="Hasil penugasan surat masuk">
-            <div class="card-header bg-body py-3">
-                <h2 class="h5 mb-0">Hasil Penugasan</h2>
-            </div>
-            <div class="card-body p-3 p-md-4">
-                <dl class="row g-3 mb-0 rs-detail-list">
-                    @foreach ([
-                        ['Ditugaskan oleh', $incomingLetter->assignment->assigner?->name ?? '-'],
-                        ['Ditugaskan kepada', $incomingLetter->assignment->assignee?->name ?? '-'],
-                        ['Divisi', $incomingLetter->assignment->division?->name ?? '-'],
-                        ['Tanggal Penugasan', $incomingLetter->assignment->assigned_at?->format('d-m-Y H:i') ?? '-'],
-                        ['Batas Waktu', $incomingLetter->assignment->due_date?->format('d-m-Y') ?? 'Tidak ditentukan.'],
-                    ] as [$label, $value])
-                        <div class="col-12 col-md-6 col-xl-4 rs-detail-item border-bottom pb-3">
-                            <dt class="rs-detail-label small text-body-secondary">{{ $label }}</dt>
-                            <dd>{{ $value }}</dd>
-                        </div>
-                    @endforeach
-                    <div class="col-12 rs-detail-item">
-                        <dt class="rs-detail-label small text-body-secondary">Instruksi</dt>
-                        <dd class="text-break">
-                            @if (filled($incomingLetter->assignment->instruction))
-                                {!! nl2br(e($incomingLetter->assignment->instruction)) !!}
-                            @else
-                                Tidak ada instruksi.
-                            @endif
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-        </section>
-    @endif
-
     <section class="card rs-card shadow-sm mb-4" aria-label="Riwayat status surat masuk">
         <div class="card-header bg-body py-3">
             <h2 class="h5 mb-0">Riwayat Status</h2>
@@ -253,16 +211,6 @@
             >
                 <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
                 <span>Periksa dan Teruskan</span>
-            </a>
-        @endif
-        @if ($canAssign)
-            <a
-                class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2"
-                href="{{ route('incoming-letters.assignment.create', $incomingLetter) }}"
-                data-testid="incoming-letter-assignment-link"
-            >
-                <i class="fa-solid fa-user-check" aria-hidden="true"></i>
-                <span>Tugaskan Anggota</span>
             </a>
         @endif
         @if ($canManage)

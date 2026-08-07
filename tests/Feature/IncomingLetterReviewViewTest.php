@@ -7,6 +7,7 @@ use App\Models\IncomingLetter;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -78,8 +79,8 @@ class IncomingLetterReviewViewTest extends TestCase
         $pimpinan = $this->makeUser('pimpinan', 'Pimpinan');
         $division = $this->makeDivision();
         $newLetter = $this->makeLetter($pimpinan);
-        $forwardedLetter = $this->makeLetter($pimpinan, [
-            'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+        $completedLetter = $this->makeLetter($pimpinan, [
+            'status' => IncomingLetter::STATUS_SELESAI,
             'destination_division_id' => $division->id,
         ]);
         $reviewedWaitingLetter = $this->makeLetter($pimpinan, [
@@ -93,7 +94,7 @@ class IncomingLetterReviewViewTest extends TestCase
             'reviewed_at' => now(),
         ]);
 
-        foreach ([$newLetter, $forwardedLetter, $reviewedWaitingLetter] as $letter) {
+        foreach ([$newLetter, $completedLetter, $reviewedWaitingLetter] as $letter) {
             $this->actingAs($pimpinan)
                 ->get(route('incoming-letters.show', $letter))
                 ->assertOk()
@@ -134,11 +135,11 @@ class IncomingLetterReviewViewTest extends TestCase
 
     public function test_review_result_and_status_history_are_displayed_on_the_detail_page(): void
     {
-        $viewer = $this->makeUser('anggota_divisi', 'Anggota Divisi');
-        $reviewer = $this->makeUser('pimpinan', 'Pimpinan');
         $division = $this->makeDivision('Redaksi', 'RED');
+        $viewer = $this->makeUser('ketua_divisi', 'Ketua Divisi Tujuan', $division);
+        $reviewer = $this->makeUser('pimpinan', 'Pimpinan');
         $letter = $this->makeLetter($viewer, [
-            'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+            'status' => IncomingLetter::STATUS_SELESAI,
             'destination_division_id' => $division->id,
         ]);
         $letter->review()->create([
@@ -149,7 +150,7 @@ class IncomingLetterReviewViewTest extends TestCase
         ]);
         $letter->statusHistories()->create([
             'previous_status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
-            'new_status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+            'new_status' => IncomingLetter::STATUS_SELESAI,
             'activity' => 'Surat diperiksa dan diteruskan ke Divisi Redaksi',
             'notes' => 'Segera koordinasikan dengan redaksi.',
             'changed_by' => $reviewer->id,
@@ -166,7 +167,7 @@ class IncomingLetterReviewViewTest extends TestCase
             ->assertSee('Riwayat Status')
             ->assertSee('Surat diperiksa dan diteruskan ke Divisi Redaksi')
             ->assertSee('Menunggu Pemeriksaan')
-            ->assertSee('Diteruskan ke Divisi')
+            ->assertSee('Selesai')
             ->assertSee('Diubah oleh '.$reviewer->name);
     }
 
@@ -176,7 +177,7 @@ class IncomingLetterReviewViewTest extends TestCase
         $reviewer = $this->makeUser('pimpinan', 'Pimpinan');
         $division = $this->makeDivision();
         $letter = $this->makeLetter($viewer, [
-            'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+            'status' => IncomingLetter::STATUS_SELESAI,
             'destination_division_id' => $division->id,
         ]);
         $letter->review()->create([
@@ -192,29 +193,51 @@ class IncomingLetterReviewViewTest extends TestCase
             ->assertSee('Tidak ada catatan.');
     }
 
-    public function test_index_displays_the_forwarded_status_filter_badge_and_destination_division(): void
+    public function test_index_displays_the_completed_status_filter_badge_and_destination_division(): void
     {
         $viewer = $this->makeUser('anggota_divisi', 'Anggota Divisi');
         $division = $this->makeDivision('Pemasaran', 'PEM');
         $letter = $this->makeLetter($viewer, [
             'agenda_number' => 'AGD-FORWARDED-001',
-            'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+            'status' => IncomingLetter::STATUS_SELESAI,
             'destination_division_id' => $division->id,
         ]);
 
         $this->actingAs($viewer)
             ->get(route('incoming-letters.index', [
-                'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                'status' => IncomingLetter::STATUS_SELESAI,
             ]))
             ->assertOk()
             ->assertSee('AGD-FORWARDED-001')
-            ->assertSee('value="diteruskan_ke_divisi"', false)
+            ->assertSee('value="selesai"', false)
+            ->assertDontSee('value="diteruskan_ke_divisi"', false)
+            ->assertDontSee('value="ditugaskan_ke_anggota"', false)
             ->assertSee('class="badge text-bg-success"', false)
-            ->assertSee('Diteruskan ke Divisi')
-            ->assertSee($division->name);
+            ->assertSee('Selesai')
+            ->assertSee($division->name)
+            ->assertDontSee('Penanggung Jawab')
+            ->assertDontSee('Tugas Saya')
+            ->assertDontSee('Tugaskan Anggota');
     }
 
-    public function test_destination_and_forwarded_status_filters_persist_across_pagination(): void
+    public function test_assignment_routes_and_actions_are_removed(): void
+    {
+        $this->assertFalse(Route::has('incoming-letters.assignment.create'));
+        $this->assertFalse(Route::has('incoming-letters.assignment.store'));
+
+        $viewer = $this->makeUser('anggota_divisi', 'Anggota Divisi');
+        $letter = $this->makeLetter($viewer);
+
+        $this->actingAs($viewer)
+            ->get(route('incoming-letters.show', $letter))
+            ->assertOk()
+            ->assertDontSee('Tugaskan Anggota')
+            ->assertDontSee('Hasil Penugasan')
+            ->assertDontSee('Mulai Tindak Lanjut')
+            ->assertDontSee('Arsipkan');
+    }
+
+    public function test_destination_and_completed_status_filters_persist_across_pagination(): void
     {
         $viewer = $this->makeUser('anggota_divisi', 'Anggota Divisi');
         $targetDivision = $this->makeDivision('Pemasaran', 'PEM');
@@ -223,26 +246,26 @@ class IncomingLetterReviewViewTest extends TestCase
         foreach (range(1, 11) as $number) {
             $this->makeLetter($viewer, [
                 'agenda_number' => 'AGD-FILTER-'.str_pad((string) $number, 2, '0', STR_PAD_LEFT),
-                'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                'status' => IncomingLetter::STATUS_SELESAI,
                 'destination_division_id' => $targetDivision->id,
             ]);
         }
 
         $this->makeLetter($viewer, [
             'agenda_number' => 'AGD-OTHER-DIVISION',
-            'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+            'status' => IncomingLetter::STATUS_SELESAI,
             'destination_division_id' => $otherDivision->id,
         ]);
 
         $this->actingAs($viewer)
             ->get(route('incoming-letters.index', [
-                'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                'status' => IncomingLetter::STATUS_SELESAI,
                 'destination_division_id' => $targetDivision->id,
             ]))
             ->assertOk()
             ->assertSee('AGD-FILTER-11')
             ->assertDontSee('AGD-OTHER-DIVISION')
-            ->assertSee('status=diteruskan_ke_divisi', false)
+            ->assertSee('status=selesai', false)
             ->assertSee('destination_division_id='.$targetDivision->id, false)
             ->assertSee('page=2', false);
     }

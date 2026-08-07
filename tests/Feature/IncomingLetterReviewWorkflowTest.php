@@ -68,12 +68,12 @@ class IncomingLetterReviewWorkflowTest extends TestCase
 
         $letter->refresh();
 
-        $this->assertSame(IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI, $letter->status);
+        $this->assertSame(IncomingLetter::STATUS_SELESAI, $letter->status);
         $this->assertSame($activeDivision->id, $letter->destination_division_id);
         $this->assertDatabaseHas('incoming_letter_status_histories', [
             'incoming_letter_id' => $letter->id,
             'previous_status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
-            'new_status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+            'new_status' => IncomingLetter::STATUS_SELESAI,
             'activity' => 'Surat diperiksa dan diteruskan ke Divisi Redaksi',
             'notes' => 'Mohon segera ditindaklanjuti.',
             'changed_by' => $pimpinan->id,
@@ -335,7 +335,7 @@ class IncomingLetterReviewWorkflowTest extends TestCase
         $this->assertNotNull($review->reviewed_at);
         $this->assertNull($review->review_note);
         $this->assertSame($destinationDivision->id, $letter->destination_division_id);
-        $this->assertSame(IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI, $letter->status);
+        $this->assertSame(IncomingLetter::STATUS_SELESAI, $letter->status);
         $this->assertSame(3, $letter->statusHistories()->count());
 
         $this->actingAs($pimpinan)
@@ -353,17 +353,17 @@ class IncomingLetterReviewWorkflowTest extends TestCase
             ->assertSee('Hasil Pemeriksaan')
             ->assertSee('Tidak ada catatan.')
             ->assertSee('Surat diperiksa dan diteruskan ke Divisi Pemasaran')
-            ->assertSee('Diteruskan ke Divisi')
+            ->assertSee('Selesai')
             ->assertSee($destinationDivision->name);
 
         $this->actingAs($pimpinan)
             ->get(route('incoming-letters.index', [
-                'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                'status' => IncomingLetter::STATUS_SELESAI,
                 'destination_division_id' => $destinationDivision->id,
             ]))
             ->assertOk()
             ->assertSee($letter->agenda_number)
-            ->assertSee('Diteruskan ke Divisi')
+            ->assertSee('Selesai')
             ->assertSee($destinationDivision->name);
     }
 

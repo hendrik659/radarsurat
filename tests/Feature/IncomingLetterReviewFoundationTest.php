@@ -19,6 +19,11 @@ class IncomingLetterReviewFoundationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_obsolete_assignment_table_is_removed(): void
+    {
+        $this->assertFalse(Schema::hasTable('incoming_letter_assignments'));
+    }
+
     public function test_review_and_status_history_tables_have_the_required_columns_and_indexes(): void
     {
         $this->assertTrue(Schema::hasColumns('incoming_letter_reviews', [
