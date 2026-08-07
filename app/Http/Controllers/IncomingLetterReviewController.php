@@ -74,12 +74,12 @@ class IncomingLetterReviewController extends Controller
 
             $lockedLetter->update([
                 'destination_division_id' => $destinationDivision->id,
-                'status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                'status' => IncomingLetter::STATUS_SELESAI,
             ]);
 
             $lockedLetter->statusHistories()->create([
                 'previous_status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
-                'new_status' => IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI,
+                'new_status' => IncomingLetter::STATUS_SELESAI,
                 'activity' => "Surat diperiksa dan diteruskan ke Divisi {$destinationDivision->name}",
                 'notes' => $reviewNote,
                 'changed_by' => $reviewerId,

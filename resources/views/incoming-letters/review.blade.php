@@ -7,7 +7,7 @@
         $statusLabels = [
             'baru_diterima' => 'Baru Diterima',
             'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-            'diteruskan_ke_divisi' => 'Diteruskan ke Divisi',
+            'selesai' => 'Selesai',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',

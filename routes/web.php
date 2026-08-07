@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisionController;
-use App\Http\Controllers\IncomingLetterAssignmentController;
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\IncomingLetterReviewController;
 use App\Http\Controllers\UserController;
@@ -36,11 +35,6 @@ Route::middleware(['auth', 'active'])
             ->name('incoming-letters.review.create');
         Route::post('/incoming-letters/{incomingLetter}/review', [IncomingLetterReviewController::class, 'store'])
             ->name('incoming-letters.review.store');
-        Route::get('/incoming-letters/{incomingLetter}/assignment', [IncomingLetterAssignmentController::class, 'create'])
-            ->name('incoming-letters.assignment.create');
-        Route::post('/incoming-letters/{incomingLetter}/assignment', [IncomingLetterAssignmentController::class, 'store'])
-            ->name('incoming-letters.assignment.store');
-
         Route::middleware('role:admin_surat')->group(function () {
             Route::get('/incoming-letters/create', [IncomingLetterController::class, 'create'])
                 ->name('incoming-letters.create');

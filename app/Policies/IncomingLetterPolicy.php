@@ -28,34 +28,4 @@ class IncomingLetterPolicy
 
         return Response::allow();
     }
-
-    public function assign(User $user, IncomingLetter $incomingLetter): Response
-    {
-        if (! $user->is_active) {
-            return Response::deny('Akun Anda tidak aktif.');
-        }
-
-        if ($user->role?->slug !== 'ketua_divisi') {
-            return Response::deny('Anda tidak berhak menugaskan surat masuk.');
-        }
-
-        if ($user->division_id === null
-            || $user->division_id !== $incomingLetter->destination_division_id) {
-            return Response::deny('Surat masuk hanya dapat ditugaskan oleh Ketua Divisi tujuan.');
-        }
-
-        if ($incomingLetter->status !== IncomingLetter::STATUS_DITERUSKAN_KE_DIVISI) {
-            return Response::deny('Surat masuk tidak berada pada status diteruskan ke divisi.');
-        }
-
-        if (! $incomingLetter->review()->exists()) {
-            return Response::deny('Surat masuk belum memiliki hasil pemeriksaan.');
-        }
-
-        if ($incomingLetter->assignment()->exists()) {
-            return Response::deny('Surat masuk sudah memiliki penugasan.');
-        }
-
-        return Response::allow();
-    }
 }
