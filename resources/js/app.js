@@ -1,7 +1,9 @@
 import './bootstrap';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap';
+import './dashboard-layout';
 import './incoming-letter-preview';
 import './outgoing-letter-preview';
+import './dashboard-admin';
 
 document.querySelectorAll('[data-password-toggle]').forEach((button) => {
     button.addEventListener('click', () => {
