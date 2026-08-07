@@ -9,7 +9,14 @@
         @stack('styles')
     </head>
     <body class="rs-body">
-        @php($currentUser = auth()->user())
+        @php
+            $currentUser = auth()->user();
+            $reportRoles = ['admin_surat', 'pimpinan', 'ketua_divisi', 'anggota_divisi'];
+            $canViewReports = $currentUser?->is_active
+                && in_array($currentUser?->role?->slug, $reportRoles, true)
+                && (! in_array($currentUser?->role?->slug, ['ketua_divisi', 'anggota_divisi'], true) || $currentUser?->division_id !== null);
+            $reportsActive = request()->routeIs('reports.*');
+        @endphp
 
         <nav class="navbar navbar-dark sticky-top rs-navbar" aria-label="Navigasi utama">
             <div class="container-fluid flex-nowrap gap-3">
@@ -73,6 +80,51 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a
+                                class="nav-link rs-nav-link {{ request()->routeIs('outgoing-letters.*') ? 'active' : '' }}"
+                                href="{{ route('outgoing-letters.index') }}"
+                                data-testid="outgoing-letter-menu-mobile"
+                                @if (request()->routeIs('outgoing-letters.*')) aria-current="page" @endif
+                            >
+                                <i class="fa-solid fa-paper-plane rs-nav-icon" aria-hidden="true"></i>
+                                <span>Surat Keluar</span>
+                            </a>
+                        </li>
+
+                        @if ($canViewReports)
+                            <li class="nav-item" data-testid="reports-menu-mobile">
+                                <button
+                                    class="nav-link rs-nav-link rs-nav-collapse-button {{ $reportsActive ? 'active' : '' }}"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#rsMobileReportsMenu"
+                                    aria-expanded="{{ $reportsActive ? 'true' : 'false' }}"
+                                    aria-controls="rsMobileReportsMenu"
+                                >
+                                    <i class="fa-solid fa-chart-column rs-nav-icon" aria-hidden="true"></i>
+                                    <span>Laporan</span>
+                                    <i class="fa-solid fa-chevron-down rs-nav-collapse-icon" aria-hidden="true"></i>
+                                </button>
+                                <div class="collapse {{ $reportsActive ? 'show' : '' }}" id="rsMobileReportsMenu">
+                                    <ul class="nav flex-column rs-nav-submenu">
+                                        <li class="nav-item">
+                                            <a class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.incoming-letters.*') ? 'active' : '' }}" href="{{ route('reports.incoming-letters.index') }}" data-testid="incoming-report-menu-mobile" @if (request()->routeIs('reports.incoming-letters.*')) aria-current="page" @endif>
+                                                <i class="fa-solid fa-envelope-open-text rs-nav-icon" aria-hidden="true"></i>
+                                                <span>Surat Masuk</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.outgoing-letters.*') ? 'active' : '' }}" href="{{ route('reports.outgoing-letters.index') }}" data-testid="outgoing-report-menu-mobile" @if (request()->routeIs('reports.outgoing-letters.*')) aria-current="page" @endif>
+                                                <i class="fa-solid fa-paper-plane rs-nav-icon" aria-hidden="true"></i>
+                                                <span>Surat Keluar</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        @endif
+
                         @if ($currentUser?->role?->slug === 'admin_surat')
                             <li class="nav-item">
                                 <a
@@ -127,6 +179,51 @@
                                 <span>Surat Masuk</span>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a
+                                class="nav-link rs-nav-link {{ request()->routeIs('outgoing-letters.*') ? 'active' : '' }}"
+                                href="{{ route('outgoing-letters.index') }}"
+                                data-testid="outgoing-letter-menu-desktop"
+                                @if (request()->routeIs('outgoing-letters.*')) aria-current="page" @endif
+                            >
+                                <i class="fa-solid fa-paper-plane rs-nav-icon" aria-hidden="true"></i>
+                                <span>Surat Keluar</span>
+                            </a>
+                        </li>
+
+                        @if ($canViewReports)
+                            <li class="nav-item" data-testid="reports-menu-desktop">
+                                <button
+                                    class="nav-link rs-nav-link rs-nav-collapse-button {{ $reportsActive ? 'active' : '' }}"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#rsDesktopReportsMenu"
+                                    aria-expanded="{{ $reportsActive ? 'true' : 'false' }}"
+                                    aria-controls="rsDesktopReportsMenu"
+                                >
+                                    <i class="fa-solid fa-chart-column rs-nav-icon" aria-hidden="true"></i>
+                                    <span>Laporan</span>
+                                    <i class="fa-solid fa-chevron-down rs-nav-collapse-icon" aria-hidden="true"></i>
+                                </button>
+                                <div class="collapse {{ $reportsActive ? 'show' : '' }}" id="rsDesktopReportsMenu">
+                                    <ul class="nav flex-column rs-nav-submenu">
+                                        <li class="nav-item">
+                                            <a class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.incoming-letters.*') ? 'active' : '' }}" href="{{ route('reports.incoming-letters.index') }}" data-testid="incoming-report-menu-desktop" @if (request()->routeIs('reports.incoming-letters.*')) aria-current="page" @endif>
+                                                <i class="fa-solid fa-envelope-open-text rs-nav-icon" aria-hidden="true"></i>
+                                                <span>Surat Masuk</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.outgoing-letters.*') ? 'active' : '' }}" href="{{ route('reports.outgoing-letters.index') }}" data-testid="outgoing-report-menu-desktop" @if (request()->routeIs('reports.outgoing-letters.*')) aria-current="page" @endif>
+                                                <i class="fa-solid fa-paper-plane rs-nav-icon" aria-hidden="true"></i>
+                                                <span>Surat Keluar</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        @endif
 
                         @if ($currentUser?->role?->slug === 'admin_surat')
                             <li class="nav-item">
