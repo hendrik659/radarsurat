@@ -175,6 +175,33 @@ body {
     text-align: center;
 }
 
+.rs-nav-collapse-button {
+    width: 100%;
+    border: 0;
+    text-align: left;
+}
+
+.rs-nav-collapse-icon {
+    margin-left: auto;
+    font-size: 0.75rem;
+    transition: transform 160ms ease;
+}
+
+.rs-nav-collapse-button[aria-expanded="true"] .rs-nav-collapse-icon {
+    transform: rotate(180deg);
+}
+
+.rs-nav-submenu {
+    gap: 0.25rem;
+    padding-top: 0.25rem;
+    padding-left: 1.25rem;
+}
+
+.rs-sidebar-nav .rs-nav-sublink {
+    min-height: 2.35rem;
+    font-size: 0.84rem;
+}
+
 .rs-offcanvas {
     --bs-offcanvas-width: min(82vw, 280px);
     --bs-offcanvas-bg: var(--rs-primary);
@@ -307,6 +334,22 @@ body {
 
 .rs-incoming-actions form {
     margin: 0;
+}
+
+.rs-outgoing-table {
+    min-width: 1100px;
+}
+
+.rs-report-incoming-table {
+    min-width: 1260px;
+}
+
+.rs-report-outgoing-table {
+    min-width: 1160px;
+}
+
+.rs-outgoing-actions {
+    min-width: 18rem;
 }
 
 .rs-document-preview {

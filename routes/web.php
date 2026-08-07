@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\IncomingLetterReviewController;
+use App\Http\Controllers\OutgoingLetterController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +26,28 @@ Route::middleware(['auth', 'active'])
     ->prefix('dashboard')
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        Route::get('/reports/incoming-letters/export', [ReportController::class, 'exportIncomingLetters'])
+            ->name('reports.incoming-letters.export');
+        Route::get('/reports/incoming-letters', [ReportController::class, 'incomingLetters'])
+            ->name('reports.incoming-letters.index');
+        Route::get('/reports/outgoing-letters/export', [ReportController::class, 'exportOutgoingLetters'])
+            ->name('reports.outgoing-letters.export');
+        Route::get('/reports/outgoing-letters', [ReportController::class, 'outgoingLetters'])
+            ->name('reports.outgoing-letters.index');
+
+        Route::get('/outgoing-letters', [OutgoingLetterController::class, 'index'])
+            ->name('outgoing-letters.index');
+        Route::get('/outgoing-letters/create', [OutgoingLetterController::class, 'create'])
+            ->name('outgoing-letters.create');
+        Route::post('/outgoing-letters', [OutgoingLetterController::class, 'store'])
+            ->name('outgoing-letters.store');
+        Route::get('/outgoing-letters/{outgoingLetter}/preview', [OutgoingLetterController::class, 'preview'])
+            ->name('outgoing-letters.preview');
+        Route::get('/outgoing-letters/{outgoingLetter}/download', [OutgoingLetterController::class, 'download'])
+            ->name('outgoing-letters.download');
+        Route::get('/outgoing-letters/{outgoingLetter}', [OutgoingLetterController::class, 'show'])
+            ->name('outgoing-letters.show');
 
         Route::get('/incoming-letters', [IncomingLetterController::class, 'index'])
             ->name('incoming-letters.index');
