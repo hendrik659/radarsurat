@@ -1,6 +1,8 @@
 @extends('layouts.dashboard')
 
 @section('title', $isAdminDashboard ? 'Dashboard Admin Surat' : 'Dashboard')
+@section('header-title', $isAdminDashboard ? 'Dashboard Admin Surat' : 'Dashboard')
+@section('header-subtitle', $isAdminDashboard ? 'Ringkasan administrasi dan aktivitas Radarsurat' : '')
 
 @section('content')
     @if (! $isAdminDashboard)
@@ -23,53 +25,41 @@
             $quickAccessItems = [
                 [
                     'label' => 'Tambah Surat Masuk',
-                    'subtitle' => 'Catat surat masuk baru',
                     'icon' => 'fa-square-plus',
                     'route' => route('incoming-letters.create'),
                 ],
                 [
                     'label' => 'Surat Masuk',
-                    'subtitle' => 'Lihat semua surat masuk',
                     'icon' => 'fa-envelope-open-text',
                     'route' => route('incoming-letters.index'),
                 ],
                 [
                     'label' => 'Surat Keluar',
-                    'subtitle' => 'Lihat semua surat keluar',
                     'icon' => 'fa-paper-plane',
                     'route' => route('outgoing-letters.index'),
                 ],
                 [
                     'label' => 'Laporan Surat Masuk',
-                    'subtitle' => 'Lihat laporan surat masuk',
                     'icon' => 'fa-chart-line',
                     'route' => route('reports.incoming-letters.index'),
                 ],
                 [
                     'label' => 'Laporan Surat Keluar',
-                    'subtitle' => 'Lihat laporan surat keluar',
                     'icon' => 'fa-chart-column',
                     'route' => route('reports.outgoing-letters.index'),
                 ],
                 [
                     'label' => 'Users',
-                    'subtitle' => 'Kelola data pengguna',
                     'icon' => 'fa-users',
                     'route' => route('users.index'),
                 ],
                 [
                     'label' => 'Divisions',
-                    'subtitle' => 'Kelola data divisi',
                     'icon' => 'fa-building',
                     'route' => route('divisions.index'),
                 ],
             ];
         @endphp
-
-        <header class="rs-page-header mb-4">
-            <h1 class="rs-page-title h2 mb-1">Dashboard Admin Surat</h1>
-            <p class="rs-page-description mb-0">Ringkasan administrasi dan aktivitas Radarsurat</p>
-        </header>
 
         <section class="rs-dashboard-banner d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4" aria-labelledby="dashboardBannerTitle" data-testid="dashboard-admin-banner">
             <div class="d-flex align-items-center gap-3">
@@ -97,14 +87,14 @@
                 ] as [$label, $value, $icon, $accent])
                     <div class="col-12 col-sm-6 col-xl-3">
                         <article class="card rs-dashboard-stat h-100 shadow-sm" data-testid="dashboard-kpi">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <span class="rs-dashboard-stat-icon rs-dashboard-stat-icon-{{ $accent }} d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                                    <i class="fa-solid {{ $icon }}"></i>
-                                </span>
+                            <div class="card-body d-flex align-items-center justify-content-between gap-3">
                                 <div>
                                     <div class="rs-dashboard-stat-label">{{ $label }}</div>
                                     <strong class="rs-dashboard-stat-value" data-kpi-label="{{ $label }}">{{ $value }}</strong>
                                 </div>
+                                <span class="rs-dashboard-stat-icon rs-dashboard-stat-icon-{{ $accent }} d-inline-flex align-items-center justify-content-center" aria-hidden="true">
+                                    <i class="fa-solid {{ $icon }}"></i>
+                                </span>
                             </div>
                         </article>
                     </div>
@@ -116,16 +106,15 @@
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h2 class="h5 mb-0" id="quickAccessTitle">Akses Cepat</h2>
             </div>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+            <div class="rs-quick-access-grid">
                 @foreach ($quickAccessItems as $item)
-                    <div class="col">
-                        <a class="rs-quick-card d-flex h-100 align-items-start gap-3 text-decoration-none" href="{{ $item['route'] }}" data-testid="dashboard-quick-access">
+                    <div>
+                        <a class="rs-quick-card d-flex h-100 align-items-center gap-3 text-decoration-none" href="{{ $item['route'] }}" data-testid="dashboard-quick-access">
                             <span class="rs-quick-card-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
                                 <i class="fa-solid {{ $item['icon'] }}"></i>
                             </span>
                             <span>
                                 <strong class="d-block">{{ $item['label'] }}</strong>
-                                <small class="d-block mt-1">{{ $item['subtitle'] }}</small>
                             </span>
                         </a>
                     </div>
@@ -204,22 +193,23 @@
                         <table class="table align-middle mb-0 rs-dashboard-table">
                             <thead class="table-light">
                                 <tr>
-                                    <th scope="col">Kode Sistem</th>
                                     <th scope="col">Perihal</th>
                                     <th scope="col">Tujuan</th>
-                                    <th scope="col">Tanggal Surat</th>
+                                    <th scope="col">Tanggal</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($recentOutgoingLetters as $letter)
                                     <tr data-testid="dashboard-recent-outgoing-row">
-                                        <td class="text-nowrap fw-semibold text-body-emphasis">{{ $letter->reference_code }}</td>
-                                        <td>{{ $letter->subject }}</td>
+                                        <td>
+                                            <span class="fw-semibold text-body-emphasis d-block">{{ $letter->subject }}</span>
+                                            <small class="text-body-secondary">{{ $letter->reference_code }}</small>
+                                        </td>
                                         <td>{{ $letter->recipient_name }}</td>
                                         <td class="text-nowrap">{{ $letter->letter_date?->format('d-m-Y') ?? '-' }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td class="rs-dashboard-empty text-center text-body-secondary py-4" colspan="4">Belum ada Surat Keluar.</td></tr>
+                                    <tr><td class="rs-dashboard-empty text-center text-body-secondary py-4" colspan="3">Belum ada Surat Keluar.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

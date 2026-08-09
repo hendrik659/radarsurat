@@ -79,7 +79,7 @@
         </div>
 
         <div class="rs-main-wrapper" data-testid="dashboard-main-wrapper">
-            <header class="navbar navbar-dark rs-navbar" data-testid="dashboard-global-header">
+            <header class="navbar navbar-light rs-navbar" data-testid="dashboard-global-header">
                 <div class="container-fluid flex-nowrap gap-3">
                     <div class="d-flex align-items-center gap-2 gap-sm-3 rs-navbar-start">
                         <button
@@ -107,19 +107,12 @@
                             <i class="fa-solid fa-bars" aria-hidden="true"></i>
                         </button>
 
-                        <a class="navbar-brand rs-brand d-lg-none mb-0" href="{{ route('dashboard') }}">Radarsurat</a>
-                    </div>
-
-                    <div class="d-flex align-items-center justify-content-end gap-2 gap-sm-3 rs-navbar-end">
-                        <span class="rs-user-name" title="{{ $currentUser?->name }}">{{ $currentUser?->name }}</span>
-
-                        <form class="rs-logout-form" method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button class="btn btn-outline-light rs-logout-button d-inline-flex align-items-center gap-2" type="submit">
-                                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-                                <span>Keluar</span>
-                            </button>
-                        </form>
+                        <div class="rs-global-heading">
+                            <div class="rs-global-title">@yield('header-title', 'Radarsurat')</div>
+                            @hasSection('header-subtitle')
+                                <div class="rs-global-subtitle">@yield('header-subtitle')</div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </header>

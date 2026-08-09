@@ -40,6 +40,32 @@
             </a>
         </li>
 
+        @if ($currentUser?->role?->slug === 'admin_surat')
+            <li class="nav-item">
+                <a
+                    class="nav-link rs-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
+                    href="{{ route('users.index') }}"
+                    @if ($isDesktopSidebar) data-sidebar-tooltip="Users" aria-label="Users" @endif
+                    @if (request()->routeIs('users.*')) aria-current="page" @endif
+                >
+                    <i class="fa-solid fa-users rs-nav-icon" aria-hidden="true"></i>
+                    <span class="rs-sidebar-label">Users</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a
+                    class="nav-link rs-nav-link {{ request()->routeIs('divisions.*') ? 'active' : '' }}"
+                    href="{{ route('divisions.index') }}"
+                    data-testid="division-menu-{{ $mode }}"
+                    @if ($isDesktopSidebar) data-sidebar-tooltip="Divisions" aria-label="Divisions" @endif
+                    @if (request()->routeIs('divisions.*')) aria-current="page" @endif
+                >
+                    <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
+                    <span class="rs-sidebar-label">Divisions</span>
+                </a>
+            </li>
+        @endif
+
         @if ($canViewReports)
             <li class="nav-item" data-testid="reports-menu-{{ $mode }}">
                 <button
@@ -78,32 +104,6 @@
                         </li>
                     </ul>
                 </div>
-            </li>
-        @endif
-
-        @if ($currentUser?->role?->slug === 'admin_surat')
-            <li class="nav-item">
-                <a
-                    class="nav-link rs-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
-                    href="{{ route('users.index') }}"
-                    @if ($isDesktopSidebar) data-sidebar-tooltip="Users" aria-label="Users" @endif
-                    @if (request()->routeIs('users.*')) aria-current="page" @endif
-                >
-                    <i class="fa-solid fa-users rs-nav-icon" aria-hidden="true"></i>
-                    <span class="rs-sidebar-label">Users</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a
-                    class="nav-link rs-nav-link {{ request()->routeIs('divisions.*') ? 'active' : '' }}"
-                    href="{{ route('divisions.index') }}"
-                    data-testid="division-menu-{{ $mode }}"
-                    @if ($isDesktopSidebar) data-sidebar-tooltip="Divisions" aria-label="Divisions" @endif
-                    @if (request()->routeIs('divisions.*')) aria-current="page" @endif
-                >
-                    <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
-                    <span class="rs-sidebar-label">Divisions</span>
-                </a>
             </li>
         @endif
     </ul>

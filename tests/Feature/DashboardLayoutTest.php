@@ -69,7 +69,7 @@ class DashboardLayoutTest extends TestCase
             ->assertSee("classList.add('rs-sidebar-collapsed')", false);
 
         $this->assertSame(2, substr_count($content, 'data-bs-toggle="collapse"'));
-        $this->assertSame(3, substr_count($content, 'action="'.route('logout').'"'));
+        $this->assertSame(2, substr_count($content, 'action="'.route('logout').'"'));
     }
 
     public function test_representative_internal_pages_all_render_the_global_dashboard_layout(): void

@@ -35,9 +35,9 @@ document.querySelectorAll('[data-dashboard-trend-chart]').forEach((canvas) => {
                 {
                     label: 'Surat Keluar',
                     data: chartData.outgoing,
-                    borderColor: '#dd6b20',
-                    backgroundColor: 'rgba(221, 107, 32, 0.05)',
-                    pointBackgroundColor: '#dd6b20',
+                    borderColor: '#6d28d9',
+                    backgroundColor: 'rgba(109, 40, 217, 0.05)',
+                    pointBackgroundColor: '#6d28d9',
                     pointRadius: 3,
                     pointHoverRadius: 5,
                     borderWidth: 2.5,
@@ -56,7 +56,7 @@ document.querySelectorAll('[data-dashboard-trend-chart]').forEach((canvas) => {
             },
             plugins: {
                 legend: {
-                    position: 'bottom',
+                    position: 'top',
                     labels: {
                         usePointStyle: true,
                         padding: 20,

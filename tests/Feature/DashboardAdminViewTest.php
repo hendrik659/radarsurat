@@ -65,13 +65,13 @@ class DashboardAdminViewTest extends TestCase
             $response->assertSee('href="'.route($routeName).'"', false);
         }
 
-        $response->assertSee('Catat surat masuk baru')
-            ->assertSee('Lihat semua surat masuk')
-            ->assertSee('Lihat semua surat keluar')
-            ->assertSee('Lihat laporan surat masuk')
-            ->assertSee('Lihat laporan surat keluar')
-            ->assertSee('Kelola data pengguna')
-            ->assertSee('Kelola data divisi');
+        $response->assertDontSee('Catat surat masuk baru')
+            ->assertDontSee('Lihat semua surat masuk')
+            ->assertDontSee('Lihat semua surat keluar')
+            ->assertDontSee('Lihat laporan surat masuk')
+            ->assertDontSee('Lihat laporan surat keluar')
+            ->assertDontSee('Kelola data pengguna')
+            ->assertDontSee('Kelola data divisi');
     }
 
     public function test_chart_recent_panels_activity_master_and_empty_states_render_accessibly(): void
@@ -93,7 +93,7 @@ class DashboardAdminViewTest extends TestCase
             ->assertSee('Divisi Aktif')
             ->assertSee('Total Users')
             ->assertSee('<th scope="col">Perihal</th>', false)
-            ->assertSee('<th scope="col">Kode Sistem</th>', false);
+            ->assertDontSee('<th scope="col">Kode Sistem</th>', false);
     }
 
     public function test_sidebar_has_only_report_collapses_and_dynamic_profile_logout_on_desktop_and_mobile(): void
@@ -114,7 +114,19 @@ class DashboardAdminViewTest extends TestCase
 
         $this->assertSame(2, substr_count($content, 'data-bs-toggle="collapse"'));
         $this->assertSame(2, substr_count($content, '>Log Out<'));
-        $this->assertSame(3, substr_count($content, 'action="'.route('logout').'"'));
+        $this->assertSame(2, substr_count($content, 'action="'.route('logout').'"'));
+
+        $desktopMenuPositions = collect([
+            'Dashboard',
+            'Surat Masuk',
+            'Surat Keluar',
+            'Users',
+            'Divisions',
+            'Laporan',
+        ])->map(fn (string $label): int|false => strpos($content, 'data-sidebar-tooltip="'.$label.'"'));
+
+        $this->assertNotContains(false, $desktopMenuPositions->all());
+        $this->assertSame($desktopMenuPositions->sort()->values()->all(), $desktopMenuPositions->values()->all());
     }
 
     public function test_dashboard_omits_prohibited_sections_fake_features_and_outgoing_status(): void
