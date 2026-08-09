@@ -66,8 +66,9 @@ body {
 .rs-navbar {
     min-height: var(--rs-navbar-height);
     padding: 0.625rem 1.75rem;
-    background: var(--rs-navbar);
-    box-shadow: 0 2px 12px rgba(31, 41, 55, 0.12);
+    border-bottom: 1px solid var(--rs-line);
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(31, 41, 55, 0.06);
 }
 
 .rs-navbar .container-fluid,
@@ -77,7 +78,7 @@ body {
 }
 
 .rs-navbar-start {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
 }
 
 .rs-navbar-end {
@@ -100,15 +101,39 @@ body {
     width: 2.5rem;
     height: 2.5rem;
     padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    color: #fff;
+    border: 1px solid transparent;
+    color: var(--rs-primary-dark);
 }
 
 .rs-menu-toggle:hover,
 .rs-menu-toggle:focus-visible {
-    border-color: #fff;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.14);
+    border-color: #bfdbfe;
+    color: var(--rs-primary-dark);
+    background: #eff6ff;
+}
+
+.rs-global-heading {
+    min-width: 0;
+}
+
+.rs-global-title {
+    overflow: hidden;
+    color: #172554;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 800;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rs-global-subtitle {
+    overflow: hidden;
+    margin-top: 0.15rem;
+    color: var(--rs-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .rs-user-name {
@@ -595,7 +620,7 @@ body {
 }
 
 .rs-quick-card {
-    min-height: 7rem;
+    min-height: 5.25rem;
     padding: 1.15rem;
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 0.85rem;
@@ -605,9 +630,32 @@ body {
     transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
 
-.rs-quick-card small {
-    color: rgba(255, 255, 255, 0.78);
-    line-height: 1.35;
+.rs-quick-access-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+
+@media (min-width: 576px) {
+    .rs-quick-access-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 992px) {
+    .rs-quick-access-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .rs-quick-access-grid {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .rs-quick-card {
+        padding: 0.9rem;
+    }
 }
 
 .rs-quick-card:hover {
@@ -774,7 +822,7 @@ body {
     }
 
     .rs-quick-card {
-        min-height: 6.25rem;
+        min-height: 5rem;
     }
 }
 
