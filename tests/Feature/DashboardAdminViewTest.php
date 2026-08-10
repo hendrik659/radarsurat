@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 class DashboardAdminViewTest extends TestCase
@@ -72,6 +73,28 @@ class DashboardAdminViewTest extends TestCase
             ->assertDontSee('Lihat laporan surat keluar')
             ->assertDontSee('Kelola data pengguna')
             ->assertDontSee('Kelola data divisi');
+    }
+
+    public function test_quick_access_uses_a_container_responsive_grid_without_forcing_seven_narrow_columns(): void
+    {
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)->get(route('dashboard'))->assertOk();
+        $content = $response->getContent();
+        $css = File::get(resource_path('css/app.css'));
+
+        $response
+            ->assertSee('data-testid="dashboard-quick-access-grid"', false)
+            ->assertSee('class="rs-quick-access-item"', false)
+            ->assertSee('class="rs-quick-card-copy"', false)
+            ->assertSee('class="rs-quick-card-label d-block">Divisions</strong>', false);
+
+        $this->assertSame(7, substr_count($content, 'class="rs-quick-access-item"'));
+        $this->assertStringContainsString(
+            'grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));',
+            $css,
+        );
+        $this->assertStringContainsString('overflow-wrap: anywhere;', $css);
+        $this->assertStringNotContainsString('grid-template-columns: repeat(7,', $css);
     }
 
     public function test_chart_recent_panels_activity_master_and_empty_states_render_accessibly(): void

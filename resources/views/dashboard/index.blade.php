@@ -106,15 +106,15 @@
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h2 class="h5 mb-0" id="quickAccessTitle">Akses Cepat</h2>
             </div>
-            <div class="rs-quick-access-grid">
+            <div class="rs-quick-access-grid" data-testid="dashboard-quick-access-grid">
                 @foreach ($quickAccessItems as $item)
-                    <div>
+                    <div class="rs-quick-access-item">
                         <a class="rs-quick-card d-flex h-100 align-items-center gap-3 text-decoration-none" href="{{ $item['route'] }}" data-testid="dashboard-quick-access">
                             <span class="rs-quick-card-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
                                 <i class="fa-solid {{ $item['icon'] }}"></i>
                             </span>
-                            <span>
-                                <strong class="d-block">{{ $item['label'] }}</strong>
+                            <span class="rs-quick-card-copy">
+                                <strong class="rs-quick-card-label d-block">{{ $item['label'] }}</strong>
                             </span>
                         </a>
                     </div>
