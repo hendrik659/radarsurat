@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\IncomingLetterReviewController;
+use App\Http\Controllers\InternshipCertificateController;
 use App\Http\Controllers\OutgoingLetterController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -35,6 +36,10 @@ Route::middleware(['auth', 'active'])
             ->name('reports.outgoing-letters.export');
         Route::get('/reports/outgoing-letters', [ReportController::class, 'outgoingLetters'])
             ->name('reports.outgoing-letters.index');
+        Route::get('/reports/certificates/export', [ReportController::class, 'exportCertificates'])
+            ->name('reports.certificates.export');
+        Route::get('/reports/certificates', [ReportController::class, 'certificates'])
+            ->name('reports.certificates.index');
 
         Route::get('/outgoing-letters', [OutgoingLetterController::class, 'index'])
             ->name('outgoing-letters.index');
@@ -48,6 +53,23 @@ Route::middleware(['auth', 'active'])
             ->name('outgoing-letters.download');
         Route::get('/outgoing-letters/{outgoingLetter}', [OutgoingLetterController::class, 'show'])
             ->name('outgoing-letters.show');
+
+        Route::get('/certificates', [InternshipCertificateController::class, 'index'])
+            ->name('dashboard.certificates.index');
+        Route::get('/certificates/create', [InternshipCertificateController::class, 'create'])
+            ->name('dashboard.certificates.create');
+        Route::post('/certificates', [InternshipCertificateController::class, 'store'])
+            ->name('dashboard.certificates.store');
+        Route::get('/certificates/{certificate}/preview', [InternshipCertificateController::class, 'preview'])
+            ->name('dashboard.certificates.preview');
+        Route::get('/certificates/{certificate}/download', [InternshipCertificateController::class, 'download'])
+            ->name('dashboard.certificates.download');
+        Route::get('/certificates/{certificate}/edit', [InternshipCertificateController::class, 'edit'])
+            ->name('dashboard.certificates.edit');
+        Route::match(['put', 'patch'], '/certificates/{certificate}', [InternshipCertificateController::class, 'update'])
+            ->name('dashboard.certificates.update');
+        Route::get('/certificates/{certificate}', [InternshipCertificateController::class, 'show'])
+            ->name('dashboard.certificates.show');
 
         Route::get('/incoming-letters', [IncomingLetterController::class, 'index'])
             ->name('incoming-letters.index');

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Division;
 use App\Models\IncomingLetter;
+use App\Models\InternshipCertificate;
 use App\Models\OutgoingLetter;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -118,6 +119,26 @@ class ReportQueryService
     }
 
     /**
+     * @param  array<string, mixed>  $filters
+     * @return Builder<InternshipCertificate>
+     */
+    public function certificateQuery(array $filters): Builder
+    {
+        return InternshipCertificate::query()
+            ->when($filters['search'] ?? null, function (Builder $query, string $search) {
+                $query->where(function (Builder $query) use ($search) {
+                    $query->where('internship_certificates.participant_name', 'like', "%{$search}%")
+                        ->orWhere('internship_certificates.institution_name', 'like', "%{$search}%")
+                        ->orWhere('internship_certificates.major_name', 'like', "%{$search}%");
+                });
+            })
+            ->when(
+                $filters['year'] ?? null,
+                fn (Builder $query, int $year) => $query->whereYear('internship_certificates.end_date', $year),
+            );
+    }
+
+    /**
      * @param  Builder<IncomingLetter>  $query
      * @return array{total: int, baru_diterima: int, menunggu_pemeriksaan: int, selesai: int}
      */
@@ -164,6 +185,33 @@ class ReportQueryService
             'total' => (int) ($summary->total ?? 0),
             'division_count' => (int) ($summary->division_count ?? 0),
         ];
+    }
+
+    /**
+     * @param  Builder<InternshipCertificate>  $query
+     * @return array{total: int}
+     */
+    public function certificateSummary(Builder $query): array
+    {
+        return ['total' => (clone $query)->count()];
+    }
+
+    /** @return Collection<int, int> */
+    public function certificateYears(): Collection
+    {
+        $driver = InternshipCertificate::query()->getConnection()->getDriverName();
+        $yearExpression = match ($driver) {
+            'sqlite' => "CAST(strftime('%Y', end_date) AS INTEGER)",
+            'pgsql' => 'EXTRACT(YEAR FROM end_date)',
+            default => 'YEAR(end_date)',
+        };
+
+        return InternshipCertificate::query()
+            ->selectRaw("{$yearExpression} AS certificate_year")
+            ->distinct()
+            ->orderByDesc('certificate_year')
+            ->pluck('certificate_year')
+            ->map(fn ($year): int => (int) $year);
     }
 
     /**

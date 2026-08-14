@@ -1,16 +1,128 @@
 @extends('layouts.dashboard')
 
 @section('title', $isAdminDashboard ? 'Dashboard Admin Surat' : 'Dashboard')
-@section('header-title', $isAdminDashboard ? 'Dashboard Admin Surat' : 'Dashboard')
-@section('header-subtitle', $isAdminDashboard ? 'Ringkasan administrasi dan aktivitas Radarsurat' : '')
 
 @section('content')
-    @if (! $isAdminDashboard)
-        <header class="rs-page-header mb-4">
-            <h1 class="rs-page-title h2 mb-1">Dashboard</h1>
-            <p class="rs-page-description mb-0">Dashboard untuk peran Anda akan tersedia pada fase berikutnya.</p>
-        </header>
-    @else
+    @php
+        $dashboardUser = auth()->user();
+        $dashboardUser?->loadMissing(['role', 'division']);
+        $dashboardRole = $dashboardUser?->role?->slug;
+        $isSdmLeader = $dashboardRole === 'ketua_divisi' && $dashboardUser?->division?->code === 'SDM';
+        $canAccessCertificates = $dashboardUser?->can('viewAny', \App\Models\InternshipCertificate::class) ?? false;
+        $canAccessReports = in_array($dashboardRole, ['admin_surat', 'pimpinan'], true)
+            || (in_array($dashboardRole, ['ketua_divisi', 'anggota_divisi'], true) && $dashboardUser?->division_id !== null);
+        $dashboardProfile = match (true) {
+            $dashboardRole === 'admin_surat' => [
+                'title' => 'Dashboard Admin Surat',
+                'description' => 'Ringkasan administrasi surat internal.',
+            ],
+            $dashboardRole === 'pimpinan' => [
+                'title' => 'Dashboard Pimpinan',
+                'description' => 'Ringkasan monitoring arsip dan administrasi.',
+            ],
+            $isSdmLeader => [
+                'title' => 'Dashboard Ketua Divisi SDM',
+                'description' => 'Ringkasan administrasi dan arsip SDM.',
+            ],
+            $dashboardRole === 'ketua_divisi' => [
+                'title' => 'Dashboard Ketua Divisi',
+                'description' => 'Ringkasan aktivitas divisi Anda.',
+            ],
+            $dashboardRole === 'anggota_divisi' => [
+                'title' => 'Dashboard Anggota Divisi',
+                'description' => 'Ringkasan aktivitas divisi Anda.',
+            ],
+            default => [
+                'title' => 'Dashboard',
+                'description' => 'Akses cepat ke administrasi dan arsip internal.',
+            ],
+        };
+        $dashboardDate = $todayLabel ?? now()->locale('id')->translatedFormat('l, j F Y');
+        $quickAccessItems = [];
+
+        if ($dashboardRole === 'admin_surat') {
+            $quickAccessItems[] = [
+                'label' => 'Tambah Surat Masuk',
+                'icon' => 'fa-square-plus',
+                'route' => route('incoming-letters.create'),
+            ];
+        }
+
+        $quickAccessItems[] = [
+            'label' => 'Surat Masuk',
+            'icon' => 'fa-envelope-open-text',
+            'route' => route('incoming-letters.index'),
+        ];
+        $quickAccessItems[] = [
+            'label' => 'Surat Keluar',
+            'icon' => 'fa-paper-plane',
+            'route' => route('outgoing-letters.index'),
+        ];
+
+        if ($canAccessCertificates) {
+            $quickAccessItems[] = [
+                'label' => 'Sertifikat',
+                'icon' => 'fa-award',
+                'route' => route('dashboard.certificates.index'),
+            ];
+        }
+
+        if ($canAccessReports) {
+            $quickAccessItems[] = [
+                'label' => 'Laporan Surat Masuk',
+                'icon' => 'fa-chart-line',
+                'route' => route('reports.incoming-letters.index'),
+            ];
+            $quickAccessItems[] = [
+                'label' => 'Laporan Surat Keluar',
+                'icon' => 'fa-chart-column',
+                'route' => route('reports.outgoing-letters.index'),
+            ];
+
+            if ($canAccessCertificates) {
+                $quickAccessItems[] = [
+                    'label' => 'Laporan Sertifikat',
+                    'icon' => 'fa-file-contract',
+                    'route' => route('reports.certificates.index'),
+                ];
+            }
+        }
+
+        if ($dashboardRole === 'admin_surat') {
+            $quickAccessItems[] = [
+                'label' => 'Users',
+                'icon' => 'fa-users',
+                'route' => route('users.index'),
+            ];
+            $quickAccessItems[] = [
+                'label' => 'Divisions',
+                'icon' => 'fa-building',
+                'route' => route('divisions.index'),
+            ];
+        }
+    @endphp
+
+    <section
+        class="rs-dashboard-banner d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4"
+        style="--rs-dashboard-building: url('{{ asset('images/auth/radar-kediri-building.png') }}')"
+        aria-labelledby="dashboardBannerTitle"
+        data-testid="{{ $isAdminDashboard ? 'dashboard-admin-banner' : 'dashboard-role-banner' }}"
+    >
+        <div class="rs-dashboard-banner-content d-flex align-items-center gap-3">
+            <span class="rs-dashboard-banner-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
+                <i class="fa-solid fa-table-cells-large"></i>
+            </span>
+            <div>
+                <h1 class="h4 mb-1" id="dashboardBannerTitle">{{ $dashboardProfile['title'] }}</h1>
+                <p class="mb-0">{{ $dashboardProfile['description'] }}</p>
+            </div>
+        </div>
+        <time class="rs-dashboard-date" datetime="{{ now()->toDateString() }}">
+            <i class="fa-regular fa-calendar me-2" aria-hidden="true"></i>{{ $dashboardDate }}
+        </time>
+    </section>
+
+    @if ($isAdminDashboard)
         @php
             $statusLabels = [
                 'baru_diterima' => 'Baru Diterima',
@@ -22,59 +134,7 @@
                 'menunggu_pemeriksaan' => 'text-bg-warning',
                 'selesai' => 'text-bg-success',
             ];
-            $quickAccessItems = [
-                [
-                    'label' => 'Tambah Surat Masuk',
-                    'icon' => 'fa-square-plus',
-                    'route' => route('incoming-letters.create'),
-                ],
-                [
-                    'label' => 'Surat Masuk',
-                    'icon' => 'fa-envelope-open-text',
-                    'route' => route('incoming-letters.index'),
-                ],
-                [
-                    'label' => 'Surat Keluar',
-                    'icon' => 'fa-paper-plane',
-                    'route' => route('outgoing-letters.index'),
-                ],
-                [
-                    'label' => 'Laporan Surat Masuk',
-                    'icon' => 'fa-chart-line',
-                    'route' => route('reports.incoming-letters.index'),
-                ],
-                [
-                    'label' => 'Laporan Surat Keluar',
-                    'icon' => 'fa-chart-column',
-                    'route' => route('reports.outgoing-letters.index'),
-                ],
-                [
-                    'label' => 'Users',
-                    'icon' => 'fa-users',
-                    'route' => route('users.index'),
-                ],
-                [
-                    'label' => 'Divisions',
-                    'icon' => 'fa-building',
-                    'route' => route('divisions.index'),
-                ],
-            ];
         @endphp
-
-        <section class="rs-dashboard-banner d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4" aria-labelledby="dashboardBannerTitle" data-testid="dashboard-admin-banner">
-            <div class="d-flex align-items-center gap-3">
-                <span class="rs-dashboard-banner-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                    <i class="fa-solid fa-table-cells-large"></i>
-                </span>
-                <div>
-                    <h2 class="h4 mb-1" id="dashboardBannerTitle">Dashboard Admin Surat</h2>
-                    <p class="mb-0">Ringkasan administrasi surat internal.</p>
-                </div>
-            </div>
-            <time class="rs-dashboard-date" datetime="{{ now()->toDateString() }}">
-                <i class="fa-regular fa-calendar me-2" aria-hidden="true"></i>{{ $todayLabel }}
-            </time>
-        </section>
 
         <section class="mb-4" aria-labelledby="dashboardStatisticsTitle">
             <h2 class="visually-hidden" id="dashboardStatisticsTitle">Statistik utama surat</h2>
@@ -101,27 +161,25 @@
                 @endforeach
             </div>
         </section>
+    @endif
 
-        <section class="mb-4" aria-labelledby="quickAccessTitle">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h2 class="h5 mb-0" id="quickAccessTitle">Akses Cepat</h2>
-            </div>
-            <div class="rs-quick-access-grid">
-                @foreach ($quickAccessItems as $item)
-                    <div>
-                        <a class="rs-quick-card d-flex h-100 align-items-center gap-3 text-decoration-none" href="{{ $item['route'] }}" data-testid="dashboard-quick-access">
-                            <span class="rs-quick-card-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                                <i class="fa-solid {{ $item['icon'] }}"></i>
-                            </span>
-                            <span>
-                                <strong class="d-block">{{ $item['label'] }}</strong>
-                            </span>
-                        </a>
-                    </div>
-                @endforeach
-            </div>
-        </section>
+    <section class="mb-4" aria-labelledby="quickAccessTitle">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="rs-section-title h5 mb-0" id="quickAccessTitle">Akses Cepat</h2>
+        </div>
+        <div class="rs-quick-access-grid">
+            @foreach ($quickAccessItems as $item)
+                <a class="rs-quick-card d-flex h-100 flex-column align-items-center justify-content-center gap-2 text-center text-decoration-none" href="{{ $item['route'] }}" data-testid="dashboard-quick-access">
+                    <span class="rs-quick-card-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
+                        <i class="fa-solid {{ $item['icon'] }}"></i>
+                    </span>
+                    <strong>{{ $item['label'] }}</strong>
+                </a>
+            @endforeach
+        </div>
+    </section>
 
+    @if ($isAdminDashboard)
         <section class="card rs-dashboard-panel rs-dashboard-chart-panel shadow-sm mb-4" aria-labelledby="letterTrendTitle" data-testid="dashboard-trend-section">
             <div class="card-body p-3 p-md-4">
                 <div class="mb-3">
@@ -148,13 +206,13 @@
         <div class="row g-4 mb-4">
             <div class="col-12 col-xl-6">
                 <section class="card rs-dashboard-panel h-100 shadow-sm" aria-labelledby="recentIncomingTitle">
-                    <div class="card-header bg-body d-flex align-items-center justify-content-between gap-3 py-3">
+                    <div class="card-header d-flex align-items-center justify-content-between gap-3 py-3">
                         <h2 class="h5 mb-0" id="recentIncomingTitle">Surat Masuk Terbaru</h2>
                         <a class="small fw-semibold text-decoration-none" href="{{ route('incoming-letters.index') }}">Lihat Semua <span aria-hidden="true">→</span></a>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle mb-0 rs-dashboard-table">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th scope="col">Perihal</th>
                                     <th scope="col">Pengirim</th>
@@ -185,13 +243,13 @@
 
             <div class="col-12 col-xl-6">
                 <section class="card rs-dashboard-panel h-100 shadow-sm" aria-labelledby="recentOutgoingTitle">
-                    <div class="card-header bg-body d-flex align-items-center justify-content-between gap-3 py-3">
+                    <div class="card-header d-flex align-items-center justify-content-between gap-3 py-3">
                         <h2 class="h5 mb-0" id="recentOutgoingTitle">Surat Keluar Terbaru</h2>
                         <a class="small fw-semibold text-decoration-none" href="{{ route('outgoing-letters.index') }}">Lihat Semua <span aria-hidden="true">→</span></a>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle mb-0 rs-dashboard-table">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th scope="col">Perihal</th>
                                     <th scope="col">Tujuan</th>
@@ -221,7 +279,7 @@
         <div class="row g-4">
             <div class="col-12 col-xl-6">
                 <section class="card rs-dashboard-panel h-100 shadow-sm" aria-labelledby="recentActivitiesTitle">
-                    <div class="card-header bg-body py-3">
+                    <div class="card-header py-3">
                         <h2 class="h5 mb-0" id="recentActivitiesTitle">Aktivitas Terbaru</h2>
                     </div>
                     <div class="card-body p-3 p-md-4">
@@ -250,7 +308,7 @@
 
             <div class="col-12 col-xl-6">
                 <section class="card rs-dashboard-panel h-100 shadow-sm" aria-labelledby="masterDataTitle">
-                    <div class="card-header bg-body py-3">
+                    <div class="card-header py-3">
                         <h2 class="h5 mb-0" id="masterDataTitle">Data Master</h2>
                     </div>
                     <div class="card-body p-3 p-md-4">

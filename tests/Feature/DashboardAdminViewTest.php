@@ -45,7 +45,7 @@ class DashboardAdminViewTest extends TestCase
             ]);
 
         $this->assertSame(4, substr_count($response->getContent(), 'data-testid="dashboard-kpi"'));
-        $this->assertSame(7, substr_count($response->getContent(), 'data-testid="dashboard-quick-access"'));
+        $this->assertSame(9, substr_count($response->getContent(), 'data-testid="dashboard-quick-access"'));
     }
 
     public function test_all_quick_access_cards_use_existing_routes(): void
@@ -57,8 +57,10 @@ class DashboardAdminViewTest extends TestCase
             'incoming-letters.create',
             'incoming-letters.index',
             'outgoing-letters.index',
+            'dashboard.certificates.index',
             'reports.incoming-letters.index',
             'reports.outgoing-letters.index',
+            'reports.certificates.index',
             'users.index',
             'divisions.index',
         ] as $routeName) {
@@ -109,6 +111,7 @@ class DashboardAdminViewTest extends TestCase
             ->assertSee('Ulyatul Ula Kilmi')
             ->assertSee('Admin Surat')
             ->assertSee('Log Out')
+            ->assertSee('Sertifikat')
             ->assertSee('Users')
             ->assertSee('Divisions');
 
@@ -120,6 +123,7 @@ class DashboardAdminViewTest extends TestCase
             'Dashboard',
             'Surat Masuk',
             'Surat Keluar',
+            'Sertifikat',
             'Users',
             'Divisions',
             'Laporan',
@@ -141,7 +145,7 @@ class DashboardAdminViewTest extends TestCase
             ->assertDontSee('Activity Logs')
             ->assertDontSee('Pengaturan')
             ->assertDontSee('Pusat Bantuan')
-            ->assertDontSee('Arsip')
+            ->assertDontSee('Arsipkan')
             ->assertDontSee('Tugas Saya')
             ->assertDontSee('Sembunyikan')
             ->assertDontSee('notification')
@@ -156,7 +160,7 @@ class DashboardAdminViewTest extends TestCase
         $this->actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('© 2026 Radarsurat - Radar Kediri.')
+            ->assertSee('© 2026 SIRAPI - Jawa Pos Radar Kediri.')
             ->assertDontSee('Versi');
     }
 

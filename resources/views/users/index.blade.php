@@ -6,7 +6,7 @@
     <header class="rs-page-header d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
         <div>
             <h1 class="rs-page-title h3 mb-1">Data Pengguna</h1>
-            <p class="rs-page-description text-body-secondary mb-0">Daftar akun pengguna Radarsurat.</p>
+            <p class="rs-page-description text-body-secondary mb-0">Daftar akun pengguna internal SIRAPI.</p>
         </div>
         <a class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('users.create') }}">
             <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
@@ -106,7 +106,7 @@
                                         <span>Detail</span>
                                     </a>
                                     <a
-                                        class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1"
+                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
                                         href="{{ route('users.edit', $user) }}"
                                         aria-label="Edit {{ $user->name }}"
                                     >

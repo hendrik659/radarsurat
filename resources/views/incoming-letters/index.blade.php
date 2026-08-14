@@ -25,7 +25,7 @@
     <header class="rs-page-header d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
         <div>
             <h1 class="rs-page-title h3 mb-1">Surat Masuk</h1>
-            <p class="rs-page-description text-body-secondary mb-0">Kelola surat masuk yang diterima oleh Radarsurat.</p>
+            <p class="rs-page-description text-body-secondary mb-0">Kelola surat masuk yang diterima melalui SIRAPI.</p>
         </div>
         @if ($isAdminSurat)
             <a
@@ -173,7 +173,7 @@
                                     </a>
                                     @if ($isAdminSurat && $incomingLetter->status === 'baru_diterima')
                                         <a
-                                            class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1"
+                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
                                             href="{{ route('incoming-letters.edit', $incomingLetter) }}"
                                             data-testid="incoming-letter-edit-link"
                                         >

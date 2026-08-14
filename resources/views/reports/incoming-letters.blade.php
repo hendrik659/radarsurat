@@ -24,7 +24,7 @@
             <p class="rs-page-description text-body-secondary mb-0">Laporan read-only berdasarkan tanggal surat diterima.</p>
         </div>
         <a
-            class="btn btn-success d-inline-flex align-items-center justify-content-center gap-2"
+            class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2"
             href="{{ route('reports.incoming-letters.export', $filters) }}"
             data-testid="incoming-report-export"
         >

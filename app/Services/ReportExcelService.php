@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\IncomingLetter;
+use App\Models\InternshipCertificate;
 use App\Models\OutgoingLetter;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -155,6 +156,82 @@ class ReportExcelService
 
             throw $exception;
         }
+    }
+
+    /**
+     * @param  iterable<int, InternshipCertificate>  $certificates
+     * @param  array{total: int}  $summary
+     * @param  array{year: string, search: string, exported_by: string, exported_at: string}  $metadata
+     */
+    public function writeCertificates(iterable $certificates, array $summary, array $metadata): string
+    {
+        $headerRow = 12;
+        $firstDataRow = $headerRow + 1;
+        $options = $this->options([7, 28, 32, 32, 18, 18]);
+        $writer = new Writer($options);
+        $path = $this->temporaryPath();
+
+        try {
+            $writer->openToFile($path);
+            $sheet = $writer->getCurrentSheet();
+            $sheet->setName('Sertifikat');
+            $sheet->setSheetView((new SheetView)->setFreezeRow($firstDataRow));
+            $sheet->setAutoFilter(new AutoFilter(0, $headerRow, 5, max($headerRow, $headerRow + $summary['total'])));
+
+            $this->writeCertificateHeading($writer, $summary, $metadata);
+            $writer->addRow(Row::fromValues([]));
+            $writer->addRow(Row::fromValues([
+                'No',
+                'Nama Peserta',
+                'Asal Institusi',
+                'Program Studi / Jurusan',
+                'Tanggal Mulai',
+                'Tanggal Selesai',
+            ], $this->tableHeaderStyle()));
+
+            foreach ($certificates as $index => $certificate) {
+                $writer->addRow(Row::fromValues([
+                    $index + 1,
+                    $certificate->participant_name,
+                    $certificate->institution_name,
+                    $certificate->major_name,
+                    $certificate->start_date?->format('d/m/Y') ?? '-',
+                    $certificate->end_date?->format('d/m/Y') ?? '-',
+                ], $this->tableBodyStyle()));
+            }
+
+            $writer->close();
+
+            return $path;
+        } catch (Throwable $exception) {
+            $this->closeQuietly($writer);
+            (new Filesystem)->delete($path);
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param  array{total: int}  $summary
+     * @param  array{year: string, search: string, exported_by: string, exported_at: string}  $metadata
+     */
+    private function writeCertificateHeading(Writer $writer, array $summary, array $metadata): void
+    {
+        $writer->addRow(Row::fromValues(['SIRAPI'], $this->brandStyle()));
+        $writer->addRow(Row::fromValues(['Sistem Arsip Jawa Pos Radar Kediri'], $this->informationStyle()));
+        $writer->addRow(Row::fromValues([]));
+        $writer->addRow(Row::fromValues(['LAPORAN ARSIP SERTIFIKAT'], $this->titleStyle()));
+        $writer->addRow(Row::fromValues([]));
+        $writer->addRow(Row::fromValues(['Tahun', $metadata['year']], $this->informationStyle()));
+        $writer->addRow(Row::fromValues(['Pencarian', $metadata['search']], $this->informationStyle()));
+        $writer->addRow(Row::fromValues(['Total Data', $summary['total']], $this->informationStyle()));
+        $writer->addRow(Row::fromValues(['Diekspor Oleh', $metadata['exported_by']], $this->informationStyle()));
+        $writer->addRow(Row::fromValues(['Tanggal Export', $metadata['exported_at']], $this->informationStyle()));
+
+        $options = $writer->getOptions();
+        $options->mergeCells(0, 1, 5, 1);
+        $options->mergeCells(0, 2, 5, 2);
+        $options->mergeCells(0, 4, 5, 4);
     }
 
     /**

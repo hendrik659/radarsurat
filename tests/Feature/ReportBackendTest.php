@@ -387,13 +387,17 @@ class ReportBackendTest extends TestCase
         });
     }
 
-    public function test_feature_registers_exactly_four_read_only_get_routes(): void
+    public function test_feature_registers_exactly_six_read_only_get_routes(): void
     {
         $routes = collect(Route::getRoutes()->getRoutes())
             ->filter(fn ($route): bool => str_starts_with($route->getName() ?? '', 'reports.'));
 
-        $this->assertEqualsCanonicalizing($this->reportRoutes(), $routes->pluck('action.as')->all());
-        $this->assertCount(4, $routes);
+        $this->assertEqualsCanonicalizing([
+            ...$this->reportRoutes(),
+            'reports.certificates.index',
+            'reports.certificates.export',
+        ], $routes->pluck('action.as')->all());
+        $this->assertCount(6, $routes);
         $this->assertTrue($routes->every(fn ($route): bool => $route->methods() === ['GET', 'HEAD']));
     }
 

@@ -215,7 +215,7 @@
         @endif
         @if ($canManage)
             <a
-                class="btn btn-outline-warning d-inline-flex align-items-center justify-content-center gap-2"
+                class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2"
                 href="{{ route('incoming-letters.edit', $incomingLetter) }}"
                 data-testid="incoming-letter-edit-link"
             >

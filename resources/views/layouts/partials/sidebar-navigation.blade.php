@@ -1,70 +1,74 @@
-@php($isDesktopSidebar = $mode === 'desktop')
+@php
+    $isDesktopSidebar = $mode === 'desktop';
+    $primaryNavigation = [
+        [
+            'label' => 'Dashboard',
+            'route' => 'dashboard',
+            'pattern' => 'dashboard',
+            'icon' => 'fa-house',
+            'testId' => null,
+        ],
+        [
+            'label' => 'Surat Masuk',
+            'route' => 'incoming-letters.index',
+            'pattern' => 'incoming-letters.*',
+            'icon' => 'fa-envelope-open-text',
+            'testId' => 'incoming-letter-menu',
+        ],
+        [
+            'label' => 'Surat Keluar',
+            'route' => 'outgoing-letters.index',
+            'pattern' => 'outgoing-letters.*',
+            'icon' => 'fa-paper-plane',
+            'testId' => 'outgoing-letter-menu',
+        ],
+    ];
+
+    if ($canViewCertificates) {
+        $primaryNavigation[] = [
+            'label' => 'Sertifikat',
+            'route' => 'dashboard.certificates.index',
+            'pattern' => 'dashboard.certificates.*',
+            'icon' => 'fa-award',
+            'testId' => 'certificate-menu',
+        ];
+    }
+
+    if ($currentUser?->role?->slug === 'admin_surat') {
+        $primaryNavigation[] = [
+            'label' => 'Users',
+            'route' => 'users.index',
+            'pattern' => 'users.*',
+            'icon' => 'fa-users',
+            'testId' => null,
+        ];
+        $primaryNavigation[] = [
+            'label' => 'Divisions',
+            'route' => 'divisions.index',
+            'pattern' => 'divisions.*',
+            'icon' => 'fa-building',
+            'testId' => 'division-menu',
+        ];
+    }
+@endphp
 
 <nav class="rs-sidebar-navigation flex-grow-1 {{ $isDesktopSidebar ? 'p-3' : 'p-0' }}" aria-label="{{ $isDesktopSidebar ? 'Navigasi dashboard' : 'Navigasi dashboard mobile' }}">
     <ul class="nav nav-pills flex-column gap-1 rs-sidebar-nav">
-        <li class="nav-item">
-            <a
-                class="nav-link rs-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
-                href="{{ route('dashboard') }}"
-                @if ($isDesktopSidebar) data-sidebar-tooltip="Dashboard" aria-label="Dashboard" @endif
-                @if (request()->routeIs('dashboard')) aria-current="page" @endif
-            >
-                <i class="fa-solid fa-house rs-nav-icon" aria-hidden="true"></i>
-                <span class="rs-sidebar-label">Dashboard</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a
-                class="nav-link rs-nav-link {{ request()->routeIs('incoming-letters.*') ? 'active' : '' }}"
-                href="{{ route('incoming-letters.index') }}"
-                data-testid="incoming-letter-menu-{{ $mode }}"
-                @if ($isDesktopSidebar) data-sidebar-tooltip="Surat Masuk" aria-label="Surat Masuk" @endif
-                @if (request()->routeIs('incoming-letters.*')) aria-current="page" @endif
-            >
-                <i class="fa-solid fa-envelope-open-text rs-nav-icon" aria-hidden="true"></i>
-                <span class="rs-sidebar-label">Surat Masuk</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a
-                class="nav-link rs-nav-link {{ request()->routeIs('outgoing-letters.*') ? 'active' : '' }}"
-                href="{{ route('outgoing-letters.index') }}"
-                data-testid="outgoing-letter-menu-{{ $mode }}"
-                @if ($isDesktopSidebar) data-sidebar-tooltip="Surat Keluar" aria-label="Surat Keluar" @endif
-                @if (request()->routeIs('outgoing-letters.*')) aria-current="page" @endif
-            >
-                <i class="fa-solid fa-paper-plane rs-nav-icon" aria-hidden="true"></i>
-                <span class="rs-sidebar-label">Surat Keluar</span>
-            </a>
-        </li>
-
-        @if ($currentUser?->role?->slug === 'admin_surat')
+        @foreach ($primaryNavigation as $item)
+            @php($itemActive = request()->routeIs($item['pattern']))
             <li class="nav-item">
                 <a
-                    class="nav-link rs-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
-                    href="{{ route('users.index') }}"
-                    @if ($isDesktopSidebar) data-sidebar-tooltip="Users" aria-label="Users" @endif
-                    @if (request()->routeIs('users.*')) aria-current="page" @endif
+                    class="nav-link rs-nav-link {{ $itemActive ? 'active' : '' }}"
+                    href="{{ route($item['route']) }}"
+                    @if ($item['testId']) data-testid="{{ $item['testId'] }}-{{ $mode }}" @endif
+                    @if ($isDesktopSidebar) data-sidebar-tooltip="{{ $item['label'] }}" aria-label="{{ $item['label'] }}" @endif
+                    @if ($itemActive) aria-current="page" @endif
                 >
-                    <i class="fa-solid fa-users rs-nav-icon" aria-hidden="true"></i>
-                    <span class="rs-sidebar-label">Users</span>
+                    <i class="fa-solid {{ $item['icon'] }} rs-nav-icon" aria-hidden="true"></i>
+                    <span class="rs-sidebar-label">{{ $item['label'] }}</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a
-                    class="nav-link rs-nav-link {{ request()->routeIs('divisions.*') ? 'active' : '' }}"
-                    href="{{ route('divisions.index') }}"
-                    data-testid="division-menu-{{ $mode }}"
-                    @if ($isDesktopSidebar) data-sidebar-tooltip="Divisions" aria-label="Divisions" @endif
-                    @if (request()->routeIs('divisions.*')) aria-current="page" @endif
-                >
-                    <i class="fa-solid fa-building rs-nav-icon" aria-hidden="true"></i>
-                    <span class="rs-sidebar-label">Divisions</span>
-                </a>
-            </li>
-        @endif
+        @endforeach
 
         @if ($canViewReports)
             <li class="nav-item" data-testid="reports-menu-{{ $mode }}">
@@ -85,7 +89,9 @@
                 <div class="collapse {{ $reportsActive ? 'show' : '' }}" id="{{ $reportMenuId }}">
                     <ul class="nav flex-column rs-nav-submenu">
                         <li class="nav-item">
-                            <a class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.incoming-letters.*') ? 'active' : '' }}" href="{{ route('reports.incoming-letters.index') }}"
+                            <a
+                                class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.incoming-letters.*') ? 'active' : '' }}"
+                                href="{{ route('reports.incoming-letters.index') }}"
                                 data-testid="incoming-report-menu-{{ $mode }}"
                                 @if (request()->routeIs('reports.incoming-letters.*')) aria-current="page" @endif
                             >
@@ -94,7 +100,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.outgoing-letters.*') ? 'active' : '' }}" href="{{ route('reports.outgoing-letters.index') }}"
+                            <a
+                                class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.outgoing-letters.*') ? 'active' : '' }}"
+                                href="{{ route('reports.outgoing-letters.index') }}"
                                 data-testid="outgoing-report-menu-{{ $mode }}"
                                 @if (request()->routeIs('reports.outgoing-letters.*')) aria-current="page" @endif
                             >
@@ -102,6 +110,19 @@
                                 <span>Surat Keluar</span>
                             </a>
                         </li>
+                        @if ($canViewCertificates)
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link rs-nav-link rs-nav-sublink {{ request()->routeIs('reports.certificates.*') ? 'active' : '' }}"
+                                    href="{{ route('reports.certificates.index') }}"
+                                    data-testid="certificate-report-menu-{{ $mode }}"
+                                    @if (request()->routeIs('reports.certificates.*')) aria-current="page" @endif
+                                >
+                                    <i class="fa-solid fa-award rs-nav-icon" aria-hidden="true"></i>
+                                    <span>Sertifikat</span>
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </div>
             </li>
