@@ -43,7 +43,7 @@
                                         <span>Detail</span>
                                     </a>
                                     <a
-                                        class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1"
+                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
                                         href="{{ route('divisions.edit', $division) }}"
                                         data-testid="division-edit-link"
                                         aria-label="Edit {{ $division->name }}"

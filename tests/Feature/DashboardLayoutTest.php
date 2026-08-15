@@ -19,6 +19,9 @@ class DashboardLayoutTest extends TestCase
         $content = $response->getContent();
 
         $response
+            ->assertSee('SIRAPI')
+            ->assertSee('Sistem Arsip Jawa Pos Radar Kediri')
+            ->assertSee(asset('images/auth/radar-kediri-logo-white.png'))
             ->assertSee('data-testid="desktop-sidebar"', false)
             ->assertSee('id="rsDesktopSidebar"', false)
             ->assertSee('data-testid="dashboard-main-wrapper"', false)
@@ -103,8 +106,9 @@ class DashboardLayoutTest extends TestCase
         $css = File::get(resource_path('css/app.css'));
         $javascript = File::get(resource_path('js/dashboard-layout.js'));
 
-        $this->assertStringContainsString('--rs-sidebar-width: 260px;', $css);
-        $this->assertStringContainsString('--rs-sidebar-collapsed-width: 78px;', $css);
+        $this->assertStringContainsString('--rs-sidebar-width: 272px;', $css);
+        $this->assertStringContainsString('--rs-sidebar-collapsed-width: 82px;', $css);
+        $this->assertStringContainsString('--rs-content-max: 1720px;', $css);
         $this->assertMatchesRegularExpression('/\.rs-sidebar\s*\{[^}]*position:\s*fixed;[^}]*height:\s*100vh;/s', $css);
         $this->assertMatchesRegularExpression('/\.rs-main-wrapper\s*\{[^}]*margin-left:\s*var\(--rs-sidebar-width\);/s', $css);
         $this->assertMatchesRegularExpression('/\.rs-sidebar-collapsed \.rs-main-wrapper\s*\{[^}]*margin-left:\s*var\(--rs-sidebar-collapsed-width\);/s', $css);

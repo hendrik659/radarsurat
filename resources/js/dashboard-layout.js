@@ -98,3 +98,16 @@ if (desktopSidebar && desktopToggle) {
     updateToggleAccessibility();
     initializeTooltips();
 }
+
+const mobileSidebar = document.querySelector('#rsMobileSidebar');
+const mobileToggle = document.querySelector('[data-testid="mobile-sidebar-toggle"]');
+
+if (mobileSidebar && mobileToggle) {
+    const setMobileToggleState = (expanded) => {
+        mobileToggle.setAttribute('aria-expanded', String(expanded));
+        mobileToggle.setAttribute('aria-label', expanded ? 'Tutup menu navigasi' : 'Buka menu navigasi');
+    };
+
+    mobileSidebar.addEventListener('show.bs.offcanvas', () => setMobileToggleState(true));
+    mobileSidebar.addEventListener('hidden.bs.offcanvas', () => setMobileToggleState(false));
+}

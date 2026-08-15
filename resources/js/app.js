@@ -3,6 +3,7 @@ import 'bootstrap';
 import './dashboard-layout';
 import './incoming-letter-preview';
 import './outgoing-letter-preview';
+import './certificate-preview';
 import './dashboard-admin';
 
 document.querySelectorAll('[data-password-toggle]').forEach((button) => {
@@ -19,6 +20,7 @@ document.querySelectorAll('[data-password-toggle]').forEach((button) => {
 
         input.type = isHidden ? 'text' : 'password';
         button.setAttribute('aria-label', isHidden ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+        button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
         icon?.classList.toggle('fa-eye', !isHidden);
         icon?.classList.toggle('fa-eye-slash', isHidden);
     });

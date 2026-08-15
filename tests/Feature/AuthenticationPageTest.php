@@ -16,8 +16,25 @@ class AuthenticationPageTest extends TestCase
     {
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('Portal internal')
-            ->assertSee('type="password"', false);
+            ->assertSee('Login SIRAPI')
+            ->assertSee('Sistem Arsip Jawa Pos Radar Kediri')
+            ->assertSee('action="'.route('login.store').'"', false)
+            ->assertSee('name="_token"', false)
+            ->assertSee('name="email"', false)
+            ->assertSee('name="password"', false)
+            ->assertSee('name="remember"', false)
+            ->assertSee('type="password"', false)
+            ->assertSee('data-password-toggle', false)
+            ->assertSee('aria-pressed="false"', false)
+            ->assertSee(asset('images/auth/radar-kediri-building.png'))
+            ->assertSee(asset('images/auth/radar-kediri-logo-white.png'))
+            ->assertDontSee('Radarsurat');
+    }
+
+    public function test_login_brand_assets_exist_in_public_storage(): void
+    {
+        $this->assertFileExists(public_path('images/auth/radar-kediri-building.png'));
+        $this->assertFileExists(public_path('images/auth/radar-kediri-logo-white.png'));
     }
 
     public function test_the_dashboard_requires_authentication(): void

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CertificateReportRequest;
 use App\Http\Requests\IncomingLetterReportRequest;
 use App\Http\Requests\OutgoingLetterReportRequest;
+use App\Models\InternshipCertificate;
 use App\Models\User;
 use App\Services\ReportExcelService;
 use App\Services\ReportQueryService;
@@ -110,6 +112,70 @@ class ReportController extends Controller
             ->download(
                 $path,
                 $this->exportFileName('laporan-surat-keluar', $user, $filters),
+                ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+            )
+            ->deleteFileAfterSend(true);
+    }
+
+    public function certificates(CertificateReportRequest $request): View
+    {
+        $filters = $request->validated();
+        $query = $this->queries->certificateQuery($filters);
+
+        return view('reports.certificates.index', [
+            'certificates' => (clone $query)
+                ->select([
+                    'id',
+                    'participant_name',
+                    'institution_name',
+                    'major_name',
+                    'start_date',
+                    'end_date',
+                ])
+                ->orderByDesc('end_date')
+                ->latest('id')
+                ->paginate(15)
+                ->withQueryString(),
+            'summary' => $this->queries->certificateSummary($query),
+            'years' => $this->queries->certificateYears(),
+            'filters' => $filters,
+            'hasAnyCertificates' => InternshipCertificate::query()->exists(),
+        ]);
+    }
+
+    public function exportCertificates(CertificateReportRequest $request): BinaryFileResponse
+    {
+        $filters = $request->validated();
+        $query = $this->queries->certificateQuery($filters);
+        $summary = $this->queries->certificateSummary($query);
+        $path = $this->excel->writeCertificates(
+            (clone $query)
+                ->select([
+                    'id',
+                    'participant_name',
+                    'institution_name',
+                    'major_name',
+                    'start_date',
+                    'end_date',
+                ])
+                ->orderByDesc('end_date')
+                ->latest('id')
+                ->lazy(500),
+            $summary,
+            [
+                'year' => filled($filters['year'] ?? null) ? (string) $filters['year'] : 'Semua Tahun',
+                'search' => filled($filters['search'] ?? null) ? (string) $filters['search'] : '-',
+                'exported_by' => $request->user()->name,
+                'exported_at' => now()->locale('id')->translatedFormat('d F Y H:i'),
+            ],
+        );
+
+        $year = filled($filters['year'] ?? null) ? (string) $filters['year'] : 'semua-tahun';
+
+        return response()
+            ->download(
+                $path,
+                "laporan-sertifikat-{$year}.xlsx",
                 ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
             )
             ->deleteFileAfterSend(true);

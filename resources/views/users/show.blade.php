@@ -50,7 +50,7 @@
             </dl>
 
             <div class="d-flex flex-wrap gap-2 mt-4">
-                <a class="btn btn-outline-warning d-inline-flex align-items-center gap-2" href="{{ route('users.edit', $user) }}">
+                <a class="btn btn-outline-primary d-inline-flex align-items-center gap-2" href="{{ route('users.edit', $user) }}">
                     <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                     <span>Edit</span>
                 </a>

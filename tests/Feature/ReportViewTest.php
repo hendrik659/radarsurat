@@ -39,17 +39,18 @@ class ReportViewTest extends TestCase
     {
         $admin = $this->makeUser('admin_surat');
 
-        $this->actingAs($admin)
+        $response = $this->actingAs($admin)
             ->get(route('reports.outgoing-letters.index'))
-            ->assertOk()
-            ->assertSee(
-                'rs-nav-sublink active" href="'.route('reports.outgoing-letters.index').'"',
-                false,
-            )
-            ->assertDontSee(
-                'rs-nav-sublink active" href="'.route('reports.incoming-letters.index').'"',
-                false,
-            );
+            ->assertOk();
+
+        $this->assertMatchesRegularExpression(
+            '/rs-nav-sublink active"\s+href="'.preg_quote(route('reports.outgoing-letters.index'), '/').'"/',
+            $response->getContent(),
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/rs-nav-sublink active"\s+href="'.preg_quote(route('reports.incoming-letters.index'), '/').'"/',
+            $response->getContent(),
+        );
     }
 
     public function test_global_roles_see_division_filters_recap_and_export_buttons(): void
@@ -117,7 +118,7 @@ class ReportViewTest extends TestCase
             ->assertSee('Belum ada data surat masuk.')
             ->assertDontSee('Edit')
             ->assertDontSee('Hapus')
-            ->assertDontSee('Arsip');
+            ->assertDontSee('Arsipkan');
 
         $this->actingAs($admin)
             ->get(route('reports.outgoing-letters.index'))
@@ -126,7 +127,7 @@ class ReportViewTest extends TestCase
             ->assertSee('Belum ada data surat keluar.')
             ->assertDontSee('Edit')
             ->assertDontSee('Hapus')
-            ->assertDontSee('Arsip')
+            ->assertDontSee('Arsipkan')
             ->assertDontSee('Status');
     }
 

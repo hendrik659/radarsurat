@@ -14,7 +14,7 @@
                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                 <span>Kembali</span>
             </a>
-            <a class="btn btn-outline-warning d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('divisions.edit', $division) }}">
+            <a class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('divisions.edit', $division) }}">
                 <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                 <span>Edit Divisi</span>
             </a>
