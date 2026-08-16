@@ -81,6 +81,12 @@ class OutgoingLetterViewTest extends TestCase
             ->get(route('outgoing-letters.create'))
             ->assertOk()
             ->assertSee('data-outgoing-letter-document', false)
+            ->assertSee('class="rs-document-form-layout"', false)
+            ->assertSee('class="col-12 col-lg-7"', false)
+            ->assertSee('class="col-12 col-lg-5"', false)
+            ->assertSee('class="rs-document-preview-sticky"', false)
+            ->assertSee('data-outgoing-document-preview-area', false)
+            ->assertSee('Belum ada dokumen dipilih. Pilih file untuk melihat preview.')
             ->assertSee('Simpan Surat Keluar')
             ->assertSee('langsung menjadi data hanya-baca');
 

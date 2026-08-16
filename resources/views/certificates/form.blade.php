@@ -13,7 +13,7 @@
     </header>
 
     <form
-        class="card rs-card rs-form-card shadow-sm"
+        class="rs-document-form-layout"
         method="POST"
         action="{{ $isEdit ? route('dashboard.certificates.update', $certificate) : route('dashboard.certificates.store') }}"
         enctype="multipart/form-data"
@@ -24,7 +24,10 @@
             @method('PUT')
         @endif
 
-        <div class="card-body p-3 p-md-4">
+        <div class="row g-4 align-items-start">
+            <div class="col-12 col-lg-7">
+                <section class="card rs-card rs-document-form-card shadow-sm">
+                    <div class="card-body p-3 p-md-4">
             <div class="row g-3">
                 <div class="col-12">
                     <label class="form-label" for="participant_name">Nama Peserta <span class="text-danger">*</span></label>
@@ -94,20 +97,6 @@
                     @error('end_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
-                @if ($isEdit)
-                    <div class="col-12">
-                        <div class="card border bg-body-tertiary">
-                            <div class="card-body">
-                                <h2 class="h6">Dokumen Saat Ini</h2>
-                                <p class="text-break mb-2">{{ $certificate->original_document_name }}</p>
-                                <a class="btn btn-sm btn-outline-primary" href="{{ route('dashboard.certificates.preview', $certificate) }}" target="_blank" rel="noopener">
-                                    Preview Dokumen Saat Ini
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 <div class="col-12">
                     <label class="form-label" for="document">Dokumen Sertifikat @unless ($isEdit)<span class="text-danger">*</span>@endunless</label>
                     <input
@@ -127,37 +116,74 @@
                 </div>
             </div>
 
-            <div class="alert alert-danger d-none mt-3 mb-0" role="alert" data-certificate-document-error></div>
+                        <div class="alert alert-danger d-none mt-3 mb-0" role="alert" data-certificate-document-error></div>
 
-            <section class="card border mt-4 d-none" aria-label="Preview dokumen baru" data-certificate-document-preview-area>
-                <div class="card-header bg-body d-flex flex-column flex-sm-row justify-content-between gap-2">
-                    <strong>Preview Dokumen Baru</strong>
-                    <span class="small text-body-secondary text-break" data-certificate-document-name>-</span>
+                        <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
+                            <a class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.index') }}">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                                <span>Batal</span>
+                            </a>
+                            <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
+                                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                                <span>{{ $isEdit ? 'Simpan Perubahan' : 'Simpan Sertifikat' }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <aside class="rs-document-preview-sticky" aria-label="Panel preview dokumen">
+
+            <section class="card rs-card rs-document-preview-card shadow-sm" aria-labelledby="certificateDocumentPreviewTitle" data-certificate-document-preview-area>
+                <div class="card-header bg-body py-3">
+                    <h2 class="h5 mb-0" id="certificateDocumentPreviewTitle">Preview Dokumen</h2>
                 </div>
                 <div class="card-body p-3">
-                    <dl class="row g-2 small mb-3">
-                        <div class="col-12 col-sm-6">
-                            <dt class="text-body-secondary">Tipe file</dt>
-                            <dd class="mb-0" data-certificate-document-type>-</dd>
+                    <dl class="row g-2 small rs-document-meta mb-3">
+                        <div class="col-12">
+                            <dt class="text-body-secondary">Nama File</dt>
+                            <dd class="text-break mb-0" data-certificate-document-name>{{ $isEdit ? $certificate->original_document_name : '-' }}</dd>
                         </div>
                         <div class="col-12 col-sm-6">
-                            <dt class="text-body-secondary">Ukuran file</dt>
-                            <dd class="mb-0" data-certificate-document-size>-</dd>
+                            <dt class="text-body-secondary">Tipe</dt>
+                            <dd class="mb-0" data-certificate-document-type>{{ $isEdit ? $certificate->document_mime_type : '-' }}</dd>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <dt class="text-body-secondary">Ukuran</dt>
+                            <dd class="mb-0" data-certificate-document-size>
+                                {{ $isEdit ? number_format($certificate->document_size / 1024, 1, ',', '.').' KB' : '-' }}
+                            </dd>
                         </div>
                     </dl>
-                    <div class="rs-document-preview" data-certificate-document-preview-content></div>
+                    <div class="rs-document-preview" data-certificate-document-preview-content>
+                        @if ($isEdit && $certificate->document_mime_type === 'application/pdf')
+                            <object
+                                class="rs-document-frame"
+                                data="{{ route('dashboard.certificates.preview', $certificate) }}"
+                                type="application/pdf"
+                                title="Preview {{ $certificate->original_document_name }}"
+                            >
+                                <p class="mb-0">Dokumen tidak dapat ditampilkan pada browser ini. Silakan buka dokumen melalui preview.</p>
+                            </object>
+                        @elseif ($isEdit && str_starts_with($certificate->document_mime_type, 'image/'))
+                            <img
+                                class="rs-document-image"
+                                src="{{ route('dashboard.certificates.preview', $certificate) }}"
+                                alt="Preview {{ $certificate->original_document_name }}"
+                            >
+                        @elseif ($isEdit)
+                            <p class="mb-0">Dokumen tidak dapat ditampilkan pada browser ini.</p>
+                        @else
+                            <div class="rs-document-preview-empty d-flex flex-column align-items-center justify-content-center gap-2 p-4 text-body-secondary">
+                                <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+                                <p class="mb-0">Belum ada dokumen dipilih. Pilih file untuk melihat preview.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </section>
-
-            <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
-                <a class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.index') }}">
-                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                    <span>Batal</span>
-                </a>
-                <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
-                    <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                    <span>{{ $isEdit ? 'Simpan Perubahan' : 'Simpan Sertifikat' }}</span>
-                </button>
+                </aside>
             </div>
         </div>
     </form>

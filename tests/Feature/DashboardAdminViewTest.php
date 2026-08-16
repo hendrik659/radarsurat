@@ -31,7 +31,7 @@ class DashboardAdminViewTest extends TestCase
             ->assertSee('data-testid="dashboard-admin-banner"', false)
             ->assertSee('Sabtu, 8 Agustus 2026')
             ->assertSeeInOrder([
-                'Dashboard Admin Surat',
+                'Dashboard Admin Sirapi',
                 'Ringkasan administrasi surat internal.',
                 'Total Surat Masuk',
                 'Baru Diterima',
@@ -47,6 +47,11 @@ class DashboardAdminViewTest extends TestCase
 
         $this->assertSame(4, substr_count($response->getContent(), 'data-testid="dashboard-kpi"'));
         $this->assertSame(9, substr_count($response->getContent(), 'data-testid="dashboard-quick-access"'));
+
+        $css = File::get(resource_path('css/app.css'));
+
+        $this->assertStringContainsString('min-height: 8.5rem;', $css);
+        $this->assertStringContainsString('background-position: center, right 22%;', $css);
     }
 
     public function test_all_quick_access_cards_use_existing_routes(): void

@@ -10,6 +10,13 @@ if (documentInput) {
     const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
     const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
     const maximumSize = 5 * 1024 * 1024;
+    const initialState = {
+        hidden: previewArea?.classList.contains('d-none') ?? true,
+        content: previewContent?.innerHTML ?? '',
+        name: fileName?.textContent ?? '-',
+        type: fileType?.textContent ?? '-',
+        size: fileSize?.textContent ?? '-',
+    };
     let objectUrl = null;
 
     const revokeObjectUrl = () => {
@@ -19,17 +26,21 @@ if (documentInput) {
         }
     };
 
-    const clearPreview = () => {
+    const restoreInitialPreview = () => {
         revokeObjectUrl();
-        previewContent?.replaceChildren();
-        if (fileName) fileName.textContent = '-';
-        if (fileType) fileType.textContent = '-';
-        if (fileSize) fileSize.textContent = '-';
-        previewArea?.classList.add('d-none');
+
+        if (previewContent) {
+            previewContent.innerHTML = initialState.content;
+        }
+
+        if (fileName) fileName.textContent = initialState.name;
+        if (fileType) fileType.textContent = initialState.type;
+        if (fileSize) fileSize.textContent = initialState.size;
+        previewArea?.classList.toggle('d-none', initialState.hidden);
     };
 
     const showError = (message) => {
-        clearPreview();
+        restoreInitialPreview();
 
         if (errorMessage) {
             errorMessage.textContent = message;
@@ -53,7 +64,7 @@ if (documentInput) {
         const file = documentInput.files?.[0];
 
         if (!file) {
-            clearPreview();
+            restoreInitialPreview();
             return;
         }
 

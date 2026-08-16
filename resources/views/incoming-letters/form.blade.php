@@ -25,7 +25,7 @@
     </header>
 
     <form
-        class="card rs-card rs-form-card shadow-sm"
+        class="rs-document-form-layout"
         method="POST"
         action="{{ $editing ? route('incoming-letters.update', $incomingLetter) : route('incoming-letters.store') }}"
         enctype="multipart/form-data"
@@ -35,7 +35,10 @@
             @method('PUT')
         @endif
 
-        <div class="card-body p-3 p-md-4">
+        <div class="row g-4 align-items-start">
+            <div class="col-12 col-lg-7">
+                <section class="card rs-card rs-document-form-card shadow-sm">
+                    <div class="card-body p-3 p-md-4">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <label class="form-label" for="agenda_number">Nomor Agenda</label>
@@ -193,27 +196,48 @@
                 </div>
             </div>
 
-            <div class="alert alert-danger d-none mt-3 mb-0" role="alert" data-document-error></div>
+                        <div class="alert alert-danger d-none mt-3 mb-0" role="alert" data-document-error></div>
+
+                        <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
+                            <a
+                                class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
+                                href="{{ $editing ? route('incoming-letters.show', $incomingLetter) : route('incoming-letters.index') }}"
+                            >
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                                <span>Batal</span>
+                            </a>
+                            <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
+                                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                                <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan Surat Masuk' }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <aside class="rs-document-preview-sticky" aria-label="Panel preview dokumen">
 
             <section
-                class="card border mt-4 {{ $editing ? '' : 'd-none' }}"
-                aria-label="Preview dokumen"
+                class="card rs-card rs-document-preview-card shadow-sm"
+                aria-labelledby="incomingDocumentPreviewTitle"
                 data-document-preview-area
             >
-                <div class="card-header bg-body d-flex flex-column flex-sm-row justify-content-between gap-2">
-                    <strong>Preview Dokumen</strong>
-                    <span class="small text-body-secondary" data-document-name>
-                        {{ $editing ? $incomingLetter->original_document_name : '-' }}
-                    </span>
+                <div class="card-header bg-body py-3">
+                    <h2 class="h5 mb-0" id="incomingDocumentPreviewTitle">Preview Dokumen</h2>
                 </div>
                 <div class="card-body p-3">
-                    <dl class="row g-2 small mb-3">
+                    <dl class="row g-2 small rs-document-meta mb-3">
+                        <div class="col-12">
+                            <dt class="text-body-secondary">Nama File</dt>
+                            <dd class="text-break mb-0" data-document-name>{{ $editing ? $incomingLetter->original_document_name : '-' }}</dd>
+                        </div>
                         <div class="col-12 col-sm-6">
-                            <dt class="text-body-secondary">Tipe file</dt>
+                            <dt class="text-body-secondary">Tipe</dt>
                             <dd class="mb-0" data-document-type>{{ $editing ? $incomingLetter->document_mime_type : '-' }}</dd>
                         </div>
                         <div class="col-12 col-sm-6">
-                            <dt class="text-body-secondary">Ukuran file</dt>
+                            <dt class="text-body-secondary">Ukuran</dt>
                             <dd class="mb-0" data-document-size>
                                 {{ $editing ? number_format($incomingLetter->document_size / 1024, 1, ',', '.').' KB' : '-' }}
                             </dd>
@@ -225,6 +249,7 @@
                                 class="rs-document-frame"
                                 data="{{ route('incoming-letters.preview', $incomingLetter) }}"
                                 type="application/pdf"
+                                title="Preview {{ $incomingLetter->original_document_name }}"
                             >
                                 <p class="mb-0">Dokumen tidak dapat ditampilkan pada browser ini. Silakan unduh dokumen untuk melihatnya.</p>
                             </object>
@@ -236,23 +261,16 @@
                             >
                         @elseif ($editing)
                             <p class="mb-0">Dokumen tidak dapat ditampilkan pada browser ini. Silakan unduh dokumen untuk melihatnya.</p>
+                        @else
+                            <div class="rs-document-preview-empty d-flex flex-column align-items-center justify-content-center gap-2 p-4 text-body-secondary">
+                                <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+                                <p class="mb-0">Belum ada dokumen dipilih. Pilih file untuk melihat preview.</p>
+                            </div>
                         @endif
                     </div>
                 </div>
             </section>
-
-            <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
-                <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
-                    <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                    <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan Surat Masuk' }}</span>
-                </button>
-                <a
-                    class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
-                    href="{{ $editing ? route('incoming-letters.show', $incomingLetter) : route('incoming-letters.index') }}"
-                >
-                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                    <span>Batal</span>
-                </a>
+                </aside>
             </div>
         </div>
     </form>
