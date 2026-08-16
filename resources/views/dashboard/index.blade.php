@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', $isAdminDashboard ? 'Dashboard Admin Surat' : 'Dashboard')
+@section('title', $isAdminDashboard ? 'Dashboard Admin Sirapi' : 'Dashboard')
 
 @section('content')
     @php
@@ -13,7 +13,7 @@
             || (in_array($dashboardRole, ['ketua_divisi', 'anggota_divisi'], true) && $dashboardUser?->division_id !== null);
         $dashboardProfile = match (true) {
             $dashboardRole === 'admin_surat' => [
-                'title' => 'Dashboard Admin Surat',
+                'title' => 'Dashboard Admin SIRAPI',
                 'description' => 'Ringkasan administrasi surat internal.',
             ],
             $dashboardRole === 'pimpinan' => [
@@ -21,8 +21,8 @@
                 'description' => 'Ringkasan monitoring arsip dan administrasi.',
             ],
             $isSdmLeader => [
-                'title' => 'Dashboard Ketua Divisi SDM',
-                'description' => 'Ringkasan administrasi dan arsip SDM.',
+                'title' => 'Dashboard Ketua Divisi',
+                'description' => 'Ringkasan administrasi dan arsip.',
             ],
             $dashboardRole === 'ketua_divisi' => [
                 'title' => 'Dashboard Ketua Divisi',

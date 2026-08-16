@@ -7,6 +7,7 @@ use App\Models\InternshipCertificate;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -68,6 +69,11 @@ class InternshipCertificateViewTest extends TestCase
             ->assertSee('Simpan Sertifikat')
             ->assertSee('data-certificate-document', false)
             ->assertSee('data-certificate-document-preview-area', false)
+            ->assertSee('class="rs-document-form-layout"', false)
+            ->assertSee('class="col-12 col-lg-7"', false)
+            ->assertSee('class="col-12 col-lg-5"', false)
+            ->assertSee('class="rs-document-preview-sticky"', false)
+            ->assertSee('Belum ada dokumen dipilih. Pilih file untuk melihat preview.')
             ->assertSee('PDF, JPG, JPEG, atau PNG. Maksimal 5 MB.')
             ->assertSee('action="'.route('dashboard.certificates.store').'"', false);
 
@@ -83,11 +89,40 @@ class InternshipCertificateViewTest extends TestCase
             ->assertViewIs('certificates.form')
             ->assertSee('Edit Sertifikat')
             ->assertSee('Simpan Perubahan')
-            ->assertSee('Dokumen Saat Ini')
+            ->assertSee('Preview Dokumen')
             ->assertSee($certificate->original_document_name)
             ->assertSee('Kosongkan dokumen jika tidak ingin mengganti file.')
-            ->assertSee(route('dashboard.certificates.preview', $certificate), false)
+            ->assertSee('data="'.route('dashboard.certificates.preview', $certificate).'"', false)
+            ->assertSee('title="Preview '.$certificate->original_document_name.'"', false)
             ->assertDontSee($certificate->document_path);
+    }
+
+    public function test_global_document_form_layout_and_preview_scripts_keep_responsive_sticky_and_blob_lifecycle(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.rs-document-preview-sticky\s*\{[^}]*position:\s*static;/s',
+            $css,
+        );
+        $this->assertMatchesRegularExpression(
+            '/@media \(min-width:\s*992px\)\s*\{.*?\.rs-document-preview-sticky\s*\{[^}]*position:\s*sticky;[^}]*top:\s*1\.25rem;/s',
+            $css,
+        );
+        $this->assertStringContainsString('height: clamp(32rem, 68vh, 42rem);', $css);
+
+        foreach ([
+            'incoming-letter-preview.js',
+            'outgoing-letter-preview.js',
+            'certificate-preview.js',
+        ] as $script) {
+            $javascript = File::get(resource_path('js/'.$script));
+
+            $this->assertStringContainsString('URL.createObjectURL', $javascript);
+            $this->assertStringContainsString('URL.revokeObjectURL', $javascript);
+            $this->assertStringContainsString("'application/pdf', 'image/jpeg', 'image/png'", $javascript);
+            $this->assertStringContainsString('initialState', $javascript);
+        }
     }
 
     public function test_detail_displays_internal_code_metadata_and_private_preview_without_path_leak(): void

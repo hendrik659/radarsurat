@@ -54,7 +54,13 @@ class IncomingLetterViewTest extends TestCase
             ->assertOk()
             ->assertViewIs('incoming-letters.form')
             ->assertSee('Tambah Surat Masuk')
-            ->assertSee('enctype="multipart/form-data"', false);
+            ->assertSee('enctype="multipart/form-data"', false)
+            ->assertSee('class="rs-document-form-layout"', false)
+            ->assertSee('class="col-12 col-lg-7"', false)
+            ->assertSee('class="col-12 col-lg-5"', false)
+            ->assertSee('class="rs-document-preview-sticky"', false)
+            ->assertSee('data-document-preview-area', false)
+            ->assertSee('Belum ada dokumen dipilih. Pilih file untuk melihat preview.');
 
         $this->actingAs($admin)
             ->get(route('incoming-letters.edit', $letter))
@@ -64,7 +70,10 @@ class IncomingLetterViewTest extends TestCase
             ->assertSee($letter->agenda_number)
             ->assertSee($letter->original_document_name)
             ->assertSee('data="'.route('incoming-letters.preview', $letter).'"', false)
-            ->assertSee('data-incoming-letter-document', false);
+            ->assertSee('data-incoming-letter-document', false)
+            ->assertSee('data-document-preview-area', false)
+            ->assertSee('title="Preview '.$letter->original_document_name.'"', false)
+            ->assertDontSee($letter->document_path);
     }
 
     public function test_non_admin_is_forbidden_from_create_and_edit(): void
