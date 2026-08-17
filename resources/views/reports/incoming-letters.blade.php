@@ -4,16 +4,7 @@
 
 @section('content')
     @php
-        $statusLabels = [
-            'baru_diterima' => 'Baru Diterima',
-            'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-            'selesai' => 'Selesai',
-        ];
-        $statusBadgeClasses = [
-            'baru_diterima' => 'rs-badge-soft-info',
-            'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
-            'selesai' => 'rs-badge-soft-success',
-        ];
+        $statusLabels = \App\Support\IncomingLetterStatusPresenter::labels();
         $priorityLabels = ['biasa' => 'Biasa', 'segera' => 'Segera'];
         $hasFilters = collect($filters)->contains(fn ($value) => filled($value));
     @endphp
@@ -214,7 +205,7 @@
                             <td>{{ $incomingLetter->subject }}</td>
                             <td>{{ $incomingLetter->destinationDivision?->name ?? 'Belum Ditentukan' }}</td>
                             <td><span class="badge {{ $incomingLetter->priority === 'segera' ? 'text-bg-danger' : 'text-bg-primary' }}">{{ $priorityLabels[$incomingLetter->priority] ?? $incomingLetter->priority }}</span></td>
-                            <td><span class="badge {{ $statusBadgeClasses[$incomingLetter->status] ?? 'text-bg-secondary' }}">{{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}</span></td>
+                            <td><x-incoming-letter-status-badge :status="$incomingLetter->status" /></td>
                         </tr>
                     @empty
                         <tr>

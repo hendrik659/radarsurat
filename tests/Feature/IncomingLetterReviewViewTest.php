@@ -214,7 +214,7 @@ class IncomingLetterReviewViewTest extends TestCase
             ->assertSee('value="selesai"', false)
             ->assertDontSee('value="diteruskan_ke_divisi"', false)
             ->assertDontSee('value="ditugaskan_ke_anggota"', false)
-            ->assertSee('class="badge rs-badge-soft-success"', false)
+            ->assertSee('class="badge rs-status-badge rs-status-done"', false)
             ->assertSee('Selesai')
             ->assertSee($division->name)
             ->assertDontSee('Penanggung Jawab')

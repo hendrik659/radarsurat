@@ -4,11 +4,6 @@
 
 @section('content')
     @php
-        $statusLabels = [
-            'baru_diterima' => 'Baru Diterima',
-            'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-            'selesai' => 'Selesai',
-        ];
         $priorityLabels = [
             'biasa' => 'Biasa',
             'segera' => 'Segera',
@@ -24,9 +19,7 @@
     <header class="rs-page-header mb-4">
         <h1 class="rs-page-title h3 mb-1">Periksa dan Teruskan Surat</h1>
         <p class="rs-page-description text-body-secondary mb-2">Nomor agenda {{ $incomingLetter->agenda_number }}</p>
-        <span class="badge rs-badge-soft-warning">
-            {{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}
-        </span>
+        <x-incoming-letter-status-badge :status="$incomingLetter->status" />
     </header>
 
     <div class="row g-4 align-items-start">
