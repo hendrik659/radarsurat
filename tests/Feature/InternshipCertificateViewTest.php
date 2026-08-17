@@ -48,6 +48,7 @@ class InternshipCertificateViewTest extends TestCase
             ->assertSee('31 Juli 2026')
             ->assertSee(route('dashboard.certificates.show', $certificate), false)
             ->assertSee('data-testid="certificate-edit-link"', false)
+            ->assertSee('class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"', false)
             ->assertDontSee('Kode Sistem')
             ->assertDontSee('SERT-2026-014')
             ->assertDontSee($certificate->document_path)
@@ -66,7 +67,7 @@ class InternshipCertificateViewTest extends TestCase
             ->assertOk()
             ->assertViewIs('certificates.form')
             ->assertSee('Tambah Sertifikat')
-            ->assertSee('Simpan Sertifikat')
+            ->assertSee('Simpan')
             ->assertSee('data-certificate-document', false)
             ->assertSee('data-certificate-document-preview-area', false)
             ->assertSee('class="rs-document-form-layout"', false)
@@ -182,12 +183,14 @@ class InternshipCertificateViewTest extends TestCase
         $this->actingAs($manager)
             ->get(route('dashboard.certificates.index'))
             ->assertOk()
-            ->assertSee('Belum ada sertifikat yang diarsipkan.')
+            ->assertSee('Belum ada Sertifikat')
+            ->assertSee('Arsip sertifikat peserta akan tampil di sini.')
             ->assertSee('Tambah Sertifikat');
         $this->actingAs($admin)
             ->get(route('dashboard.certificates.index'))
             ->assertOk()
-            ->assertSee('Belum ada sertifikat yang diarsipkan.')
+            ->assertSee('Belum ada Sertifikat')
+            ->assertSee('Arsip sertifikat peserta akan tampil di sini.')
             ->assertDontSee('Tambah Sertifikat');
     }
 

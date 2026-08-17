@@ -38,6 +38,8 @@ class DivisionViewTest extends TestCase
             ->assertSee($division->code)
             ->assertSee('data-testid="division-detail-link"', false)
             ->assertSee('data-testid="division-edit-link"', false)
+            ->assertSee('class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"', false)
+            ->assertSee('class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"', false)
             ->assertSee('href="'.route('divisions.show', $division).'"', false)
             ->assertSee('href="'.route('divisions.edit', $division).'"', false)
             ->assertViewHas('divisions', function (Collection $divisions) use ($division) {
@@ -88,8 +90,8 @@ class DivisionViewTest extends TestCase
         $this->actingAs($this->makeAdmin())
             ->get(route('divisions.index'))
             ->assertOk()
-            ->assertSee('Belum ada data divisi.')
-            ->assertSee('Silakan tambahkan divisi baru.')
+            ->assertSee('Belum ada Divisi')
+            ->assertSee('Data divisi yang dibuat akan tampil di sini.')
             ->assertSee('colspan="4"', false);
     }
 

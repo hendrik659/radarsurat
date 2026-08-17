@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,7 +28,7 @@
             $canViewCertificates = $currentUser?->is_active
                 && $currentUser?->can('viewAny', \App\Models\InternshipCertificate::class);
             $reportsActive = request()->routeIs('reports.*');
-            $currentUserRoleLabel = $currentUser?->role?->name
+            $currentUserRoleLabel = $currentUser?->role?->display_name
                 ?? \Illuminate\Support\Str::headline($currentUser?->role?->slug ?? 'Pengguna');
             $currentUserInitials = \Illuminate\Support\Str::of($currentUser?->name ?? 'Pengguna')
                 ->trim()
@@ -61,7 +61,7 @@
                         height="724"
                     >
                     <span class="rs-sidebar-brand-mark d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                        <i class="fa-solid fa-box-archive"></i>
+                        <i class="fa-solid fa-box-archive" aria-hidden="true"></i>
                     </span>
                 </a>
 

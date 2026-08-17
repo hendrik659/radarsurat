@@ -31,7 +31,12 @@
                     ['position', 'Jabatan', 'text'],
                 ] as [$name, $label, $type])
                     <div class="col-12 col-md-6">
-                        <label class="form-label" for="{{ $name }}">{{ $label }}</label>
+                        <label class="form-label" for="{{ $name }}">
+                            {{ $label }}
+                            @if (in_array($name, ['name', 'email']))
+                                <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span>
+                            @endif
+                        </label>
                         <input
                             class="form-control @error($name) is-invalid @enderror"
                             id="{{ $name }}"
@@ -47,7 +52,7 @@
                 @endforeach
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="role_id">Role</label>
+                    <label class="form-label" for="role_id">Peran <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <select class="form-select @error('role_id') is-invalid @enderror" id="role_id" name="role_id" required>
                         @foreach ($roles as $role)
                             <option
@@ -55,7 +60,7 @@
                                 data-role-slug="{{ $role->slug }}"
                                 @selected(old('role_id', $user->role_id ?? null) == $role->id)
                             >
-                                {{ $role->name }}
+                                {{ $role->display_name }}
                             </option>
                         @endforeach
                     </select>
@@ -86,15 +91,16 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="is_active">Status</label>
+                    <label class="form-label" for="is_active">Status <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <select
                         class="form-select @error('is_active') is-invalid @enderror"
                         id="is_active"
                         name="is_active"
+                        required
                         @disabled($editing && auth()->user()->is($user))
                     >
                         <option value="1" @selected((string) old('is_active', $user->is_active ?? 1) === '1')>Aktif</option>
-                        <option value="0" @selected((string) old('is_active', $user->is_active ?? 1) === '0')>Tidak aktif</option>
+                        <option value="0" @selected((string) old('is_active', $user->is_active ?? 1) === '0')>Nonaktif</option>
                     </select>
                     @if ($editing && auth()->user()->is($user))
                         <input type="hidden" name="is_active" value="1">
@@ -106,7 +112,10 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="password">Kata sandi{{ $editing ? ' baru (opsional)' : '' }}</label>
+                    <label class="form-label" for="password">
+                        Kata sandi{{ $editing ? ' baru (opsional)' : '' }}
+                        @unless ($editing)<span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span>@endunless
+                    </label>
                     <input
                         class="form-control @error('password') is-invalid @enderror"
                         id="password"
@@ -121,7 +130,10 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="password_confirmation">Konfirmasi kata sandi</label>
+                    <label class="form-label" for="password_confirmation">
+                        Konfirmasi kata sandi
+                        @unless ($editing)<span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span>@endunless
+                    </label>
                     <input
                         class="form-control"
                         id="password_confirmation"
@@ -133,14 +145,14 @@
                 </div>
             </div>
 
-            <div class="d-flex flex-wrap gap-2 mt-4">
-                <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="submit">
+            <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
+                <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                     <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                    <span>Simpan</span>
+                    <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan' }}</span>
                 </button>
-                <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" href="{{ route('users.index') }}">
+                <a class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('users.index') }}">
                     <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                    <span>Batal</span>
+                    <span>Kembali</span>
                 </a>
             </div>
         </div>

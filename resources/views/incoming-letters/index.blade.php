@@ -11,9 +11,9 @@
             'selesai' => 'Selesai',
         ];
         $statusBadgeClasses = [
-            'baru_diterima' => 'text-bg-info',
-            'menunggu_pemeriksaan' => 'text-bg-warning',
-            'selesai' => 'text-bg-success',
+            'baru_diterima' => 'rs-badge-soft-info',
+            'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
+            'selesai' => 'rs-badge-soft-success',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',
@@ -44,14 +44,19 @@
             <form method="GET" action="{{ route('incoming-letters.index') }}" class="row g-3 align-items-end">
                 <div class="col-12 col-xl-4">
                     <label class="form-label" for="search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="search"
-                        name="search"
-                        type="search"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Nomor agenda, nomor surat, pengirim, atau perihal"
-                    >
+                    <div class="input-group">
+                        <span class="input-group-text bg-body" aria-hidden="true">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            class="form-control"
+                            id="search"
+                            name="search"
+                            type="search"
+                            value="{{ $filters['search'] ?? '' }}"
+                            placeholder="Nomor agenda, nomor surat, pengirim, atau perihal"
+                        >
+                    </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
                     <label class="form-label" for="status">Status</label>
@@ -96,7 +101,7 @@
                     <div class="d-grid d-sm-flex gap-2">
                         <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                             <i class="fa-solid fa-filter" aria-hidden="true"></i>
-                            <span>Terapkan</span>
+                            <span>Terapkan Filter</span>
                         </button>
                         <a
                             class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
@@ -147,7 +152,7 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <div class="rs-incoming-actions d-flex flex-wrap justify-content-center align-items-center gap-2">
+                                <div class="rs-incoming-actions d-flex flex-nowrap justify-content-center align-items-center gap-2">
                                     <a
                                         class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
                                         href="{{ route('incoming-letters.show', $incomingLetter) }}"
@@ -155,31 +160,7 @@
                                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         <span>Detail</span>
                                     </a>
-                                    <a
-                                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-                                        href="{{ route('incoming-letters.preview', $incomingLetter) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                    >
-                                        <i class="fa-solid fa-file" aria-hidden="true"></i>
-                                        <span>Preview</span>
-                                    </a>
-                                    <a
-                                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-                                        href="{{ route('incoming-letters.download', $incomingLetter) }}"
-                                    >
-                                        <i class="fa-solid fa-download" aria-hidden="true"></i>
-                                        <span>Download</span>
-                                    </a>
                                     @if ($isAdminSurat && $incomingLetter->status === 'baru_diterima')
-                                        <a
-                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
-                                            href="{{ route('incoming-letters.edit', $incomingLetter) }}"
-                                            data-testid="incoming-letter-edit-link"
-                                        >
-                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                            <span>Edit</span>
-                                        </a>
                                         <form
                                             method="POST"
                                             action="{{ route('incoming-letters.submit-for-review', $incomingLetter) }}"
@@ -193,26 +174,87 @@
                                         >
                                             @csrf
                                             @method('PATCH')
-                                            <button class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1" type="submit">
+                                            <button
+                                                class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                                                type="submit"
+                                                data-testid="incoming-letter-submit-button"
+                                            >
                                                 <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
                                                 <span>Kirim untuk Pemeriksaan</span>
                                             </button>
                                         </form>
                                     @endif
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-sm btn-link rs-overflow-toggle d-inline-flex align-items-center justify-content-center"
+                                            id="incomingLetterActions{{ $incomingLetter->id }}"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            data-bs-boundary="viewport"
+                                            data-rs-table-dropdown
+                                            aria-expanded="false"
+                                            aria-label="Aksi lainnya untuk surat {{ $incomingLetter->agenda_number }}"
+                                            data-testid="incoming-letter-utility-menu"
+                                        >
+                                            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end rs-table-dropdown-menu" aria-labelledby="incomingLetterActions{{ $incomingLetter->id }}">
+                                            <li>
+                                                <a
+                                                    class="dropdown-item d-flex align-items-center gap-2"
+                                                    href="{{ route('incoming-letters.preview', $incomingLetter) }}"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                >
+                                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                                                    <span>Preview Dokumen</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('incoming-letters.download', $incomingLetter) }}">
+                                                    <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                                    <span>Download Dokumen</span>
+                                                </a>
+                                            </li>
+                                            @if ($isAdminSurat && $incomingLetter->status === 'baru_diterima')
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a
+                                                        class="dropdown-item d-flex align-items-center gap-2"
+                                                        href="{{ route('incoming-letters.edit', $incomingLetter) }}"
+                                                        data-testid="incoming-letter-edit-link"
+                                                    >
+                                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                                        <span>Edit Data</span>
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="9">
-                                <i class="fa-solid fa-envelope-open d-block fs-3 mb-2" aria-hidden="true"></i>
                                 @if ($hasFilters)
-                                    Surat Masuk yang dicari tidak ditemukan.
+                                    <x-empty-state
+                                        icon="fa-solid fa-magnifying-glass"
+                                        title="Data tidak ditemukan"
+                                        description="Tidak ada data yang sesuai dengan pencarian atau filter."
+                                        :action-url="route('incoming-letters.index')"
+                                        action-label="Reset"
+                                    />
                                 @else
-                                    <span class="d-block mb-3">Belum ada Surat Masuk.</span>
-                                    @if ($isAdminSurat)
-                                        <a class="btn btn-sm btn-primary" href="{{ route('incoming-letters.create') }}">Tambah Surat Masuk</a>
-                                    @endif
+                                    <x-empty-state
+                                        icon="fa-solid fa-envelope-open"
+                                        title="Belum ada Surat Masuk"
+                                        description="Surat masuk yang dicatat akan tampil di sini."
+                                        :action-url="$isAdminSurat ? route('incoming-letters.create') : null"
+                                        :action-label="$isAdminSurat ? 'Tambah Surat Masuk' : null"
+                                        action-icon="fa-plus"
+                                        action-variant="primary"
+                                    />
                                 @endif
                             </td>
                         </tr>

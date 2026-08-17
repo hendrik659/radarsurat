@@ -94,6 +94,36 @@ class UserIndexTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_user_actions_keep_status_visible_and_move_edit_to_the_overflow_menu(): void
+    {
+        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
+        $memberRole = Role::query()->create(['name' => 'Anggota Divisi', 'slug' => 'anggota_divisi']);
+        $manager = $this->makeUser($managerRole, 'Pengelola Akun');
+        $member = $this->makeUser($memberRole, 'Target Hierarki', ['is_active' => true]);
+
+        $this->actingAs($manager)
+            ->get(route('users.index', ['search' => $member->name]))
+            ->assertOk()
+            ->assertSee('aria-label="Lihat detail '.$member->name.'"', false)
+            ->assertSee('data-testid="user-status-form"', false)
+            ->assertSee('btn-outline-danger', false)
+            ->assertSee('data-testid="user-utility-menu"', false)
+            ->assertSee('data-rs-table-dropdown', false)
+            ->assertSee('data-testid="user-edit-link"', false)
+            ->assertSee('fa-ellipsis-vertical', false)
+            ->assertSee('Edit Data')
+            ->assertDontSee('<span>Edit</span>', false);
+
+        $this->actingAs($manager)
+            ->get(route('users.index', ['search' => $manager->name]))
+            ->assertOk()
+            ->assertSee('data-testid="user-edit-link"', false)
+            ->assertSee('btn-outline-secondary', false)
+            ->assertSee('Akun Anda')
+            ->assertDontSee('data-testid="user-status-form"', false)
+            ->assertDontSee('data-testid="user-utility-menu"', false);
+    }
+
     public function test_admin_can_manage_users_without_permanent_delete_routes(): void
     {
         $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);

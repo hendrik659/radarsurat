@@ -1,11 +1,23 @@
 import './bootstrap';
-import 'bootstrap';
+import * as bootstrap from 'bootstrap';
 import './dashboard-layout';
 import './incoming-letter-preview';
 import './outgoing-letter-preview';
 import './certificate-preview';
 import './dashboard-admin';
 import './global-alerts';
+
+document.querySelectorAll('[data-rs-table-dropdown]').forEach((toggle) => {
+    bootstrap.Dropdown.getOrCreateInstance(toggle, {
+        boundary: 'viewport',
+        popperConfig(defaultConfig) {
+            return {
+                ...defaultConfig,
+                strategy: 'fixed',
+            };
+        },
+    });
+});
 
 document.querySelectorAll('[data-password-toggle]').forEach((button) => {
     button.addEventListener('click', () => {

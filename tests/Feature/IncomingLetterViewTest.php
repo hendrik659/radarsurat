@@ -168,6 +168,18 @@ class IncomingLetterViewTest extends TestCase
         $letter = $this->makeLetter($admin);
 
         $this->actingAs($admin)
+            ->get(route('incoming-letters.index'))
+            ->assertOk()
+            ->assertSee('data-testid="incoming-letter-submit-button"', false)
+            ->assertSee('class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"', false)
+            ->assertSee('data-testid="incoming-letter-utility-menu"', false)
+            ->assertSee('data-rs-table-dropdown', false)
+            ->assertSee('Preview Dokumen')
+            ->assertSee('Download Dokumen')
+            ->assertSee('Edit Data')
+            ->assertSee('data-testid="incoming-letter-edit-link"', false);
+
+        $this->actingAs($admin)
             ->get(route('incoming-letters.show', $letter))
             ->assertOk()
             ->assertSee('data-testid="incoming-letter-edit-link"', false)
@@ -187,6 +199,16 @@ class IncomingLetterViewTest extends TestCase
             ->get(route('incoming-letters.show', $letter))
             ->assertOk()
             ->assertDontSee('data-testid="incoming-letter-edit-link"', false)
+            ->assertDontSee('data-testid="incoming-letter-submit-form"', false);
+
+        $this->actingAs($reader)
+            ->get(route('incoming-letters.index'))
+            ->assertOk()
+            ->assertSee('data-testid="incoming-letter-utility-menu"', false)
+            ->assertSee('data-rs-table-dropdown', false)
+            ->assertSee('Preview Dokumen')
+            ->assertSee('Download Dokumen')
+            ->assertDontSee('Edit Data')
             ->assertDontSee('data-testid="incoming-letter-submit-form"', false);
     }
 
@@ -272,12 +294,15 @@ class IncomingLetterViewTest extends TestCase
         $this->actingAs($user)
             ->get(route('incoming-letters.index'))
             ->assertOk()
-            ->assertSee('Belum ada Surat Masuk.');
+            ->assertSee('Belum ada Surat Masuk')
+            ->assertSee('Surat masuk yang dicatat akan tampil di sini.');
 
         $this->actingAs($user)
             ->get(route('incoming-letters.index', ['search' => 'tidak-ada']))
             ->assertOk()
-            ->assertSee('Surat Masuk yang dicari tidak ditemukan.');
+            ->assertSee('Data tidak ditemukan')
+            ->assertSee('Tidak ada data yang sesuai dengan pencarian atau filter.')
+            ->assertSee('Reset');
     }
 
     private function makeDivision(): Division

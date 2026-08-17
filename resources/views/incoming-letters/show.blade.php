@@ -19,9 +19,9 @@
             'selesai' => 'Selesai',
         ];
         $statusBadgeClasses = [
-            'baru_diterima' => 'text-bg-info',
-            'menunggu_pemeriksaan' => 'text-bg-warning',
-            'selesai' => 'text-bg-success',
+            'baru_diterima' => 'rs-badge-soft-info',
+            'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
+            'selesai' => 'rs-badge-soft-success',
         ];
         $priorityLabels = [
             'biasa' => 'Biasa',
@@ -63,7 +63,7 @@
         <div class="card-header bg-body d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 py-3">
             <h2 class="h5 mb-0">Preview Dokumen</h2>
             <a
-                class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2"
+                class="btn btn-sm btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2"
                 href="{{ route('incoming-letters.download', $incomingLetter) }}"
                 data-testid="incoming-letter-download-link"
             >
@@ -117,7 +117,7 @@
                     ['Divisi Tujuan', $incomingLetter->destinationDivision?->name ?? 'Belum ditentukan'],
                     ['Status', $statusLabels[$incomingLetter->status] ?? $incomingLetter->status],
                     ['Dibuat oleh', $incomingLetter->creator?->name ?? '-'],
-                    ['Tanggal Dicatat', $incomingLetter->created_at?->format('d-m-Y H:i') ?? '-'],
+                    ['Tanggal Dicatat', \App\Support\DateTimeFormatter::human($incomingLetter->created_at)],
                     ['Nama File', $incomingLetter->original_document_name ?: '-'],
                     ['Ukuran File', $formatFileSize($incomingLetter->document_size)],
                 ] as [$label, $value])
@@ -139,7 +139,7 @@
                 <dl class="row g-3 mb-0 rs-detail-list">
                     @foreach ([
                         ['Diperiksa oleh', $incomingLetter->review->reviewer?->name ?? '-'],
-                        ['Tanggal Pemeriksaan', $incomingLetter->review->reviewed_at?->format('d-m-Y H:i') ?? '-'],
+                        ['Tanggal Pemeriksaan', \App\Support\DateTimeFormatter::human($incomingLetter->review->reviewed_at)],
                         ['Divisi Tujuan', $incomingLetter->review->destinationDivision?->name ?? 'Belum ditentukan'],
                     ] as [$label, $value])
                         <div class="col-12 col-md-4 rs-detail-item border-bottom pb-3">
@@ -172,7 +172,7 @@
                     <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-1 mb-2">
                         <h3 class="h6 text-body-emphasis text-break mb-0">{{ $history->activity ?: '-' }}</h3>
                         <time class="small text-body-secondary flex-shrink-0">
-                            {{ $history->created_at?->format('d-m-Y H:i') ?? '-' }}
+                            {{ \App\Support\DateTimeFormatter::human($history->created_at) }}
                         </time>
                     </div>
                     <p class="small mb-2">
@@ -189,7 +189,12 @@
                     </p>
                 </article>
             @empty
-                <p class="text-body-secondary mb-0">Belum ada riwayat status.</p>
+                <x-empty-state
+                    icon="fa-solid fa-clock-rotate-left"
+                    title="Belum ada Riwayat Status"
+                    description="Perubahan status surat akan tampil di sini."
+                    compact
+                />
             @endforelse
         </div>
     </section>
@@ -199,13 +204,9 @@
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
             <span>Kembali</span>
         </a>
-        <a class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('incoming-letters.download', $incomingLetter) }}">
-            <i class="fa-solid fa-download" aria-hidden="true"></i>
-            <span>Download</span>
-        </a>
         @if ($canReview)
             <a
-                class="btn btn-success d-inline-flex align-items-center justify-content-center gap-2"
+                class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2"
                 href="{{ route('incoming-letters.review.create', $incomingLetter) }}"
                 data-testid="incoming-letter-review-link"
             >
@@ -235,11 +236,15 @@
             >
                 @csrf
                 @method('PATCH')
-                <button class="btn btn-outline-success d-inline-flex align-items-center justify-content-center gap-2 w-100" type="submit">
+                <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100" type="submit">
                     <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
                     <span>Kirim untuk Pemeriksaan</span>
                 </button>
             </form>
         @endif
+        <a class="btn btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('incoming-letters.download', $incomingLetter) }}">
+            <i class="fa-solid fa-download" aria-hidden="true"></i>
+            <span>Download</span>
+        </a>
     </div>
 @endsection

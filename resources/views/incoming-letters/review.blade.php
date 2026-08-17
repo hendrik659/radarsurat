@@ -24,7 +24,7 @@
     <header class="rs-page-header mb-4">
         <h1 class="rs-page-title h3 mb-1">Periksa dan Teruskan Surat</h1>
         <p class="rs-page-description text-body-secondary mb-2">Nomor agenda {{ $incomingLetter->agenda_number }}</p>
-        <span class="badge text-bg-warning">
+        <span class="badge rs-badge-soft-warning">
             {{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}
         </span>
     </header>
@@ -107,7 +107,7 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label class="form-label" for="destination_division_id">Divisi Tujuan</label>
+                            <label class="form-label" for="destination_division_id">Divisi Tujuan <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                             <select
                                 class="form-select @error('destination_division_id') is-invalid @enderror"
                                 id="destination_division_id"
@@ -149,7 +149,7 @@
                                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                                 <span>Kembali</span>
                             </a>
-                            <button class="btn btn-success d-inline-flex align-items-center justify-content-center gap-2" type="submit">
+                            <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                                 <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
                                 <span>Teruskan Surat</span>
                             </button>

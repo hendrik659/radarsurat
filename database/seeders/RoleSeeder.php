@@ -15,7 +15,7 @@ class RoleSeeder extends Seeder
                 'slug' => 'pimpinan',
             ],
             [
-                'name' => 'Admin Surat',
+                'name' => 'Admin',
                 'slug' => 'admin_surat',
             ],
             [

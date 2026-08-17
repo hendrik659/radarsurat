@@ -25,7 +25,7 @@
                     <div class="card-body p-3 p-md-4">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="letter_number">Nomor Surat</label>
+                    <label class="form-label" for="letter_number">Nomor Surat <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('letter_number') is-invalid @enderror"
                         id="letter_number"
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="letter_date">Tanggal Surat</label>
+                    <label class="form-label" for="letter_date">Tanggal Surat <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('letter_date') is-invalid @enderror"
                         id="letter_date"
@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label" for="recipient_name">Tujuan</label>
+                    <label class="form-label" for="recipient_name">Tujuan <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('recipient_name') is-invalid @enderror"
                         id="recipient_name"
@@ -86,7 +86,7 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label" for="subject">Perihal</label>
+                    <label class="form-label" for="subject">Perihal <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('subject') is-invalid @enderror"
                         id="subject"
@@ -102,7 +102,7 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label" for="document">Dokumen</label>
+                    <label class="form-label" for="document">Dokumen <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('document') is-invalid @enderror"
                         id="document"
@@ -126,11 +126,11 @@
                                 href="{{ route('outgoing-letters.index') }}"
                             >
                                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                                <span>Batal</span>
+                                <span>Kembali</span>
                             </a>
                             <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                                 <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                                <span>Simpan Surat Keluar</span>
+                                <span>Simpan</span>
                             </button>
                         </div>
                     </div>
