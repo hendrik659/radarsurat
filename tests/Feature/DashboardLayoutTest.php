@@ -56,15 +56,16 @@ class DashboardLayoutTest extends TestCase
         $response = $this->actingAs($admin)->get(route('dashboard'))->assertOk();
         $content = $response->getContent();
 
-        foreach (['Dashboard', 'Surat Masuk', 'Surat Keluar', 'Laporan', 'Users', 'Divisions', 'Log Out'] as $label) {
+        foreach (['Dashboard', 'Surat Masuk', 'Surat Keluar', 'Laporan', 'Pengguna', 'Divisi', 'Keluar'] as $label) {
             $response
                 ->assertSee('data-sidebar-tooltip="'.$label.'"', false)
                 ->assertSee('aria-label="'.$label.'"', false);
         }
 
         $response
-            ->assertSee('data-sidebar-tooltip="Ulyatul Ula Kilmi — Admin Surat"', false)
-            ->assertSee('aria-label="Ulyatul Ula Kilmi — Admin Surat"', false)
+            ->assertSee('data-sidebar-tooltip="Ulyatul Ula Kilmi — Admin"', false)
+            ->assertSee('aria-label="Ulyatul Ula Kilmi — Admin"', false)
+            ->assertDontSee('Admin Surat')
             ->assertSee('tabindex="0"', false)
             ->assertSee('<form method="POST" action="'.route('logout').'">', false)
             ->assertSee('type="submit"', false)

@@ -30,7 +30,7 @@
                     <div class="card-body p-3 p-md-4">
             <div class="row g-3">
                 <div class="col-12">
-                    <label class="form-label" for="participant_name">Nama Peserta <span class="text-danger">*</span></label>
+                    <label class="form-label" for="participant_name">Nama Peserta <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('participant_name') is-invalid @enderror"
                         id="participant_name"
@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="institution_name">Asal Institusi <span class="text-danger">*</span></label>
+                    <label class="form-label" for="institution_name">Asal Institusi <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('institution_name') is-invalid @enderror"
                         id="institution_name"
@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="major_name">Program Studi / Jurusan <span class="text-danger">*</span></label>
+                    <label class="form-label" for="major_name">Program Studi / Jurusan <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('major_name') is-invalid @enderror"
                         id="major_name"
@@ -72,7 +72,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="start_date">Tanggal Mulai <span class="text-danger">*</span></label>
+                    <label class="form-label" for="start_date">Tanggal Mulai <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('start_date') is-invalid @enderror"
                         id="start_date"
@@ -85,7 +85,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="end_date">Tanggal Selesai <span class="text-danger">*</span></label>
+                    <label class="form-label" for="end_date">Tanggal Selesai <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('end_date') is-invalid @enderror"
                         id="end_date"
@@ -98,7 +98,10 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label" for="document">Dokumen Sertifikat @unless ($isEdit)<span class="text-danger">*</span>@endunless</label>
+                    <label class="form-label" for="document">
+                        Dokumen Sertifikat
+                        @unless ($isEdit)<span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span>@endunless
+                    </label>
                     <input
                         class="form-control @error('document') is-invalid @enderror"
                         id="document"
@@ -121,11 +124,11 @@
                         <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
                             <a class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.index') }}">
                                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                                <span>Batal</span>
+                                <span>Kembali</span>
                             </a>
                             <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                                 <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                                <span>{{ $isEdit ? 'Simpan Perubahan' : 'Simpan Sertifikat' }}</span>
+                                <span>{{ $isEdit ? 'Simpan Perubahan' : 'Simpan' }}</span>
                             </button>
                         </div>
                     </div>

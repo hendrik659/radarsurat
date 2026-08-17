@@ -27,7 +27,7 @@ class DivisionFormIntegrationTest extends TestCase
             ->assertSee('action="'.route('divisions.store').'"', false)
             ->assertSee('name="name"', false)
             ->assertSee('name="code"', false)
-            ->assertSee('Simpan Divisi')
+            ->assertSee('Simpan')
             ->assertDontSee('name="is_active"', false);
     }
 

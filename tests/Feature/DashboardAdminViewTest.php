@@ -31,7 +31,7 @@ class DashboardAdminViewTest extends TestCase
             ->assertSee('data-testid="dashboard-admin-banner"', false)
             ->assertSee('Sabtu, 8 Agustus 2026')
             ->assertSeeInOrder([
-                'Dashboard Admin Sirapi',
+                'Dashboard Admin SIRAPI',
                 'Ringkasan administrasi surat internal.',
                 'Total Surat Masuk',
                 'Baru Diterima',
@@ -90,17 +90,17 @@ class DashboardAdminViewTest extends TestCase
         $css = File::get(resource_path('css/app.css'));
 
         $response
-            ->assertSee('data-testid="dashboard-quick-access-grid"', false)
-            ->assertSee('class="rs-quick-access-item"', false)
-            ->assertSee('class="rs-quick-card-copy"', false)
-            ->assertSee('class="rs-quick-card-label d-block">Divisions</strong>', false);
+            ->assertSee('class="rs-quick-access-grid"', false)
+            ->assertSee('data-testid="dashboard-quick-access"', false)
+            ->assertSee('<strong>Divisi</strong>', false);
 
-        $this->assertSame(7, substr_count($content, 'class="rs-quick-access-item"'));
+        $this->assertSame(9, substr_count($content, 'data-testid="dashboard-quick-access"'));
         $this->assertStringContainsString(
-            'grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));',
+            'grid-template-columns: repeat(2, minmax(0, 1fr));',
             $css,
         );
-        $this->assertStringContainsString('overflow-wrap: anywhere;', $css);
+        $this->assertStringContainsString('grid-template-columns: repeat(4, minmax(0, 1fr));', $css);
+        $this->assertStringContainsString('grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));', $css);
         $this->assertStringNotContainsString('grid-template-columns: repeat(7,', $css);
     }
 
@@ -115,15 +115,33 @@ class DashboardAdminViewTest extends TestCase
             ->assertSee('data-dashboard-trend-chart', false)
             ->assertSee('role="img"', false)
             ->assertSee('aria-label="Diagram garis tren Surat Masuk dan Surat Keluar selama enam bulan terakhir"', false)
-            ->assertSee('Belum ada Surat Masuk.')
-            ->assertSee('Belum ada Surat Keluar.')
-            ->assertSee('Belum ada aktivitas surat.')
-            ->assertSee('Users Aktif')
-            ->assertSee('Users Nonaktif')
+            ->assertSee('Belum ada Surat Masuk')
+            ->assertSee('Belum ada Surat Keluar')
+            ->assertSee('Belum ada Aktivitas')
+            ->assertSee('Pengguna Aktif')
+            ->assertSee('Pengguna Nonaktif')
             ->assertSee('Divisi Aktif')
-            ->assertSee('Total Users')
+            ->assertSee('Total Pengguna')
             ->assertSee('<th scope="col">Perihal</th>', false)
             ->assertDontSee('<th scope="col">Kode Sistem</th>', false);
+    }
+
+    public function test_recent_tables_do_not_force_overflow_and_master_actions_stay_secondary(): void
+    {
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)->get(route('dashboard'))->assertOk();
+        $content = $response->getContent();
+        $css = File::get(resource_path('css/app.css'));
+
+        $this->assertSame(2, substr_count($content, 'data-testid="dashboard-recent-table"'));
+        $this->assertSame(2, substr_count($content, 'class="small fw-semibold text-decoration-none"'));
+        $this->assertSame(2, substr_count($content, 'rs-dashboard-master-action'));
+        $this->assertMatchesRegularExpression('/\.rs-dashboard-table\s*\{[^}]*min-width:\s*0;/s', $css);
+        $this->assertStringNotContainsString('min-width: 620px;', $css);
+
+        $response
+            ->assertSee('btn btn-sm btn-outline-secondary rs-dashboard-master-action', false)
+            ->assertDontSee('btn btn-primary rs-dashboard-master-action', false);
     }
 
     public function test_sidebar_has_only_report_collapses_and_dynamic_profile_logout_on_desktop_and_mobile(): void
@@ -137,14 +155,15 @@ class DashboardAdminViewTest extends TestCase
             ->assertSee('data-testid="sidebar-profile-desktop"', false)
             ->assertSee('data-testid="sidebar-profile-mobile"', false)
             ->assertSee('Ulyatul Ula Kilmi')
-            ->assertSee('Admin Surat')
-            ->assertSee('Log Out')
+            ->assertSee('Admin')
+            ->assertDontSee('Admin Surat')
+            ->assertSee('Keluar')
             ->assertSee('Sertifikat')
-            ->assertSee('Users')
-            ->assertSee('Divisions');
+            ->assertSee('Pengguna')
+            ->assertSee('Divisi');
 
         $this->assertSame(2, substr_count($content, 'data-bs-toggle="collapse"'));
-        $this->assertSame(2, substr_count($content, '>Log Out<'));
+        $this->assertSame(2, substr_count($content, '>Keluar<'));
         $this->assertSame(2, substr_count($content, 'action="'.route('logout').'"'));
 
         $desktopMenuPositions = collect([
@@ -152,8 +171,8 @@ class DashboardAdminViewTest extends TestCase
             'Surat Masuk',
             'Surat Keluar',
             'Sertifikat',
-            'Users',
-            'Divisions',
+            'Pengguna',
+            'Divisi',
             'Laporan',
         ])->map(fn (string $label): int|false => strpos($content, 'data-sidebar-tooltip="'.$label.'"'));
 

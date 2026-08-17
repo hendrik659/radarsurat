@@ -37,7 +37,7 @@
                             ['Program Studi / Jurusan', $certificate->major_name],
                             ['Periode', $formatDate($certificate->start_date).' – '.$formatDate($certificate->end_date)],
                             ['Dicatat Oleh', $certificate->creator?->name ?? '-'],
-                            ['Tanggal Dicatat', $formatDate($certificate->created_at)],
+                            ['Tanggal Dicatat', \App\Support\DateTimeFormatter::human($certificate->created_at)],
                         ] as [$label, $value])
                             <div class="col-12 rs-detail-item border-bottom pb-3">
                                 <dt class="rs-detail-label small text-body-secondary">{{ $label }}</dt>
@@ -89,11 +89,11 @@
                     <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                     <span>Kembali</span>
                 </a>
-                <a class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.preview', $certificate) }}" target="_blank" rel="noopener" data-testid="certificate-preview-link">
-                    <i class="fa-solid fa-file" aria-hidden="true"></i>
+                <a class="btn btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.preview', $certificate) }}" target="_blank" rel="noopener" data-testid="certificate-preview-link">
+                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
                     <span>Preview</span>
                 </a>
-                <a class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.download', $certificate) }}" data-testid="certificate-download-link">
+                <a class="btn btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.download', $certificate) }}" data-testid="certificate-download-link">
                     <i class="fa-solid fa-download" aria-hidden="true"></i>
                     <span>Download</span>
                 </a>

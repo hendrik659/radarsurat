@@ -36,14 +36,14 @@
 
     if ($currentUser?->role?->slug === 'admin_surat') {
         $primaryNavigation[] = [
-            'label' => 'Users',
+            'label' => 'Pengguna',
             'route' => 'users.index',
             'pattern' => 'users.*',
             'icon' => 'fa-users',
             'testId' => null,
         ];
         $primaryNavigation[] = [
-            'label' => 'Divisions',
+            'label' => 'Divisi',
             'route' => 'divisions.index',
             'pattern' => 'divisions.*',
             'icon' => 'fa-building',

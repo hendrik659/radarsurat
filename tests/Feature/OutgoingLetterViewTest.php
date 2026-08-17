@@ -87,7 +87,7 @@ class OutgoingLetterViewTest extends TestCase
             ->assertSee('class="rs-document-preview-sticky"', false)
             ->assertSee('data-outgoing-document-preview-area', false)
             ->assertSee('Belum ada dokumen dipilih. Pilih file untuk melihat preview.')
-            ->assertSee('Simpan Surat Keluar')
+            ->assertSee('Simpan')
             ->assertSee('langsung menjadi data hanya-baca');
 
         foreach (['letter_number', 'letter_date', 'recipient_name', 'recipient_address', 'subject', 'document'] as $field) {
@@ -132,6 +132,13 @@ class OutgoingLetterViewTest extends TestCase
             ->assertSee(route('outgoing-letters.show', $letter), false)
             ->assertSee(route('outgoing-letters.preview', $letter), false)
             ->assertSee(route('outgoing-letters.download', $letter), false)
+            ->assertSee('data-testid="outgoing-letter-utility-menu"', false)
+            ->assertSee('data-rs-table-dropdown', false)
+            ->assertSee('data-testid="outgoing-letter-preview-link"', false)
+            ->assertSee('data-testid="outgoing-letter-download-link"', false)
+            ->assertSee('fa-ellipsis-vertical', false)
+            ->assertSee('Preview Dokumen')
+            ->assertSee('Download Dokumen')
             ->assertSee('name="division_id"', false)
             ->assertSee('name="letter_date"', false)
             ->assertDontSee('name="archive_state"', false)
@@ -204,11 +211,14 @@ class OutgoingLetterViewTest extends TestCase
         $this->actingAs($user)
             ->get(route('outgoing-letters.index'))
             ->assertOk()
-            ->assertSee('Belum ada surat keluar yang dicatat.');
+            ->assertSee('Belum ada Surat Keluar')
+            ->assertSee('Surat keluar yang dicatat akan tampil di sini.');
         $this->actingAs($user)
             ->get(route('outgoing-letters.index', ['search' => 'tidak-ada']))
             ->assertOk()
-            ->assertSee('Tidak ada surat keluar yang sesuai pencarian atau filter.');
+            ->assertSee('Data tidak ditemukan')
+            ->assertSee('Tidak ada data yang sesuai dengan pencarian atau filter.')
+            ->assertSee('Reset');
     }
 
     private function makeDivision(string $name = 'Redaksi', string $code = 'RED'): Division

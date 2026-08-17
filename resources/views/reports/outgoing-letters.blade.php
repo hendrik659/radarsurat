@@ -8,7 +8,7 @@
     <header class="rs-page-header d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
         <div>
             <h1 class="rs-page-title h3 mb-1">Laporan Surat Keluar</h1>
-            <p class="rs-page-description text-body-secondary mb-0">Laporan read-only berdasarkan tanggal surat keluar.</p>
+            <p class="rs-page-description text-body-secondary mb-0">Laporan hanya-baca berdasarkan tanggal surat keluar.</p>
         </div>
         <a
             class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2"
@@ -16,18 +16,21 @@
             data-testid="outgoing-report-export"
         >
             <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
-            <span>Export Excel</span>
+            <span>Ekspor Excel</span>
         </a>
     </header>
 
     @if ($errors->any())
-        <div class="alert alert-danger" role="alert">
-            <div class="fw-semibold mb-1">Filter belum dapat diterapkan.</div>
-            <ul class="mb-0 ps-3">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+            <i class="fa-solid fa-circle-exclamation mt-1" aria-hidden="true"></i>
+            <div>
+                <div class="fw-semibold mb-1">Filter belum dapat diterapkan.</div>
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
     @endif
 
@@ -36,14 +39,19 @@
             <form method="GET" action="{{ route('reports.outgoing-letters.index') }}" class="row g-3 align-items-end">
                 <div class="col-12 col-lg-6 col-xl-4">
                     <label class="form-label" for="outgoing-report-search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="outgoing-report-search"
-                        name="search"
-                        type="search"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Kode sistem, nomor surat, tujuan, atau perihal"
-                    >
+                    <div class="input-group">
+                        <span class="input-group-text bg-body" aria-hidden="true">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            class="form-control"
+                            id="outgoing-report-search"
+                            name="search"
+                            type="search"
+                            value="{{ $filters['search'] ?? '' }}"
+                            placeholder="Kode sistem, nomor surat, tujuan, atau perihal"
+                        >
+                    </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
                     <label class="form-label" for="outgoing-report-start-date">Tanggal Awal</label>
@@ -113,13 +121,21 @@
             <div class="card-header bg-body fw-semibold">Rekap per Divisi</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
+                    <table class="table table-sm table-hover align-middle mb-0 rs-table rs-report-recap-table">
                         <thead class="table-light"><tr><th scope="col">Divisi</th><th class="text-end" scope="col">Jumlah Surat</th></tr></thead>
                         <tbody>
                             @forelse ($recap as $item)
                                 <tr><td>{{ $item->division_name ?? '-' }}</td><td class="text-end fw-semibold">{{ $item->total }}</td></tr>
                             @empty
-                                <tr><td class="text-center text-body-secondary py-3" colspan="2">Belum ada data untuk direkap.</td></tr>
+                                <tr>
+                                    <td class="rs-empty-state text-center text-body-secondary py-3" colspan="2">
+                                        <x-empty-state
+                                            title="Belum ada data rekap"
+                                            description="Rekap divisi akan tampil setelah data surat tersedia."
+                                            compact
+                                        />
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -163,8 +179,20 @@
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="8" data-testid="outgoing-report-empty-state">
-                                <i class="fa-regular fa-folder-open d-block fs-2 mb-2" aria-hidden="true"></i>
-                                {{ $hasFilters ? 'Tidak ada surat keluar yang sesuai filter.' : 'Belum ada data surat keluar.' }}
+                                @if ($hasFilters)
+                                    <x-empty-state
+                                        icon="fa-solid fa-magnifying-glass"
+                                        title="Data tidak ditemukan"
+                                        description="Tidak ada data yang sesuai dengan pencarian atau filter."
+                                        :action-url="route('reports.outgoing-letters.index')"
+                                        action-label="Reset"
+                                    />
+                                @else
+                                    <x-empty-state
+                                        title="Belum ada Surat Keluar"
+                                        description="Data laporan surat keluar akan tampil di sini."
+                                    />
+                                @endif
                             </td>
                         </tr>
                     @endforelse

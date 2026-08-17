@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', $isAdminDashboard ? 'Dashboard Admin Sirapi' : 'Dashboard')
+@section('title', $isAdminDashboard ? 'Dashboard Admin SIRAPI' : 'Dashboard')
 
 @section('content')
     @php
@@ -90,12 +90,12 @@
 
         if ($dashboardRole === 'admin_surat') {
             $quickAccessItems[] = [
-                'label' => 'Users',
+                'label' => 'Pengguna',
                 'icon' => 'fa-users',
                 'route' => route('users.index'),
             ];
             $quickAccessItems[] = [
-                'label' => 'Divisions',
+                'label' => 'Divisi',
                 'icon' => 'fa-building',
                 'route' => route('divisions.index'),
             ];
@@ -110,7 +110,7 @@
     >
         <div class="rs-dashboard-banner-content d-flex align-items-center gap-3">
             <span class="rs-dashboard-banner-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                <i class="fa-solid fa-table-cells-large"></i>
+                <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
             </span>
             <div>
                 <h1 class="h4 mb-1" id="dashboardBannerTitle">{{ $dashboardProfile['title'] }}</h1>
@@ -130,9 +130,9 @@
                 'selesai' => 'Selesai',
             ];
             $statusBadgeClasses = [
-                'baru_diterima' => 'text-bg-info',
-                'menunggu_pemeriksaan' => 'text-bg-warning',
-                'selesai' => 'text-bg-success',
+                'baru_diterima' => 'rs-badge-soft-info',
+                'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
+                'selesai' => 'rs-badge-soft-success',
             ];
         @endphp
 
@@ -153,7 +153,7 @@
                                     <strong class="rs-dashboard-stat-value" data-kpi-label="{{ $label }}">{{ $value }}</strong>
                                 </div>
                                 <span class="rs-dashboard-stat-icon rs-dashboard-stat-icon-{{ $accent }} d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                                    <i class="fa-solid {{ $icon }}"></i>
+                                    <i class="fa-solid {{ $icon }}" aria-hidden="true"></i>
                                 </span>
                             </div>
                         </article>
@@ -171,7 +171,7 @@
             @foreach ($quickAccessItems as $item)
                 <a class="rs-quick-card d-flex h-100 flex-column align-items-center justify-content-center gap-2 text-center text-decoration-none" href="{{ $item['route'] }}" data-testid="dashboard-quick-access">
                     <span class="rs-quick-card-icon d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                        <i class="fa-solid {{ $item['icon'] }}"></i>
+                        <i class="fa-solid {{ $item['icon'] }}" aria-hidden="true"></i>
                     </span>
                     <strong>{{ $item['label'] }}</strong>
                 </a>
@@ -211,7 +211,7 @@
                         <a class="small fw-semibold text-decoration-none" href="{{ route('incoming-letters.index') }}">Lihat Semua <span aria-hidden="true">→</span></a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0 rs-dashboard-table">
+                        <table class="table align-middle mb-0 rs-dashboard-table" data-testid="dashboard-recent-table">
                             <thead>
                                 <tr>
                                     <th scope="col">Perihal</th>
@@ -223,9 +223,9 @@
                             <tbody>
                                 @forelse ($recentIncomingLetters as $letter)
                                     <tr data-testid="dashboard-recent-incoming-row">
-                                        <td class="fw-semibold text-body-emphasis">{{ $letter->subject }}</td>
+                                        <td class="fw-semibold text-body-emphasis rs-dashboard-cell-main">{{ $letter->subject }}</td>
                                         <td>{{ $letter->sender_name }}</td>
-                                        <td class="text-nowrap">{{ $letter->received_date?->format('d-m-Y') ?? '-' }}</td>
+                                        <td class="text-nowrap rs-dashboard-cell-date">{{ $letter->received_date?->format('d-m-Y') ?? '-' }}</td>
                                         <td>
                                             <span class="badge {{ $statusBadgeClasses[$letter->status] ?? 'text-bg-secondary' }}">
                                                 {{ $statusLabels[$letter->status] ?? $letter->status }}
@@ -233,7 +233,16 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td class="rs-dashboard-empty text-center text-body-secondary py-4" colspan="4">Belum ada Surat Masuk.</td></tr>
+                                    <tr>
+                                        <td class="rs-dashboard-empty rs-empty-state text-center text-body-secondary py-4" colspan="4">
+                                            <x-empty-state
+                                                icon="fa-solid fa-envelope-open"
+                                                title="Belum ada Surat Masuk"
+                                                description="Surat masuk terbaru akan tampil di sini."
+                                                compact
+                                            />
+                                        </td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -248,7 +257,7 @@
                         <a class="small fw-semibold text-decoration-none" href="{{ route('outgoing-letters.index') }}">Lihat Semua <span aria-hidden="true">→</span></a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0 rs-dashboard-table">
+                        <table class="table align-middle mb-0 rs-dashboard-table" data-testid="dashboard-recent-table">
                             <thead>
                                 <tr>
                                     <th scope="col">Perihal</th>
@@ -259,15 +268,23 @@
                             <tbody>
                                 @forelse ($recentOutgoingLetters as $letter)
                                     <tr data-testid="dashboard-recent-outgoing-row">
-                                        <td>
+                                        <td class="rs-dashboard-cell-main">
                                             <span class="fw-semibold text-body-emphasis d-block">{{ $letter->subject }}</span>
                                             <small class="text-body-secondary">{{ $letter->reference_code }}</small>
                                         </td>
                                         <td>{{ $letter->recipient_name }}</td>
-                                        <td class="text-nowrap">{{ $letter->letter_date?->format('d-m-Y') ?? '-' }}</td>
+                                        <td class="text-nowrap rs-dashboard-cell-date">{{ $letter->letter_date?->format('d-m-Y') ?? '-' }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td class="rs-dashboard-empty text-center text-body-secondary py-4" colspan="3">Belum ada Surat Keluar.</td></tr>
+                                    <tr>
+                                        <td class="rs-dashboard-empty rs-empty-state text-center text-body-secondary py-4" colspan="3">
+                                            <x-empty-state
+                                                title="Belum ada Surat Keluar"
+                                                description="Surat keluar terbaru akan tampil di sini."
+                                                compact
+                                            />
+                                        </td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -290,7 +307,7 @@
                                     <div class="d-flex flex-column flex-sm-row justify-content-between gap-1 mb-1">
                                         <strong>{{ $activity['activity'] }}</strong>
                                         <time class="small text-body-secondary text-nowrap" datetime="{{ $activity['created_at']->toIso8601String() }}">
-                                            {{ $activity['created_at']->locale('id')->diffForHumans() }}
+                                            {{ \App\Support\DateTimeFormatter::human($activity['created_at']) }}
                                         </time>
                                     </div>
                                     <div class="small text-body-secondary">
@@ -299,7 +316,14 @@
                                     <div class="small mt-1">Oleh {{ $activity['actor'] }}</div>
                                 </article>
                             @empty
-                                <div class="rs-dashboard-empty text-center text-body-secondary py-4">Belum ada aktivitas surat.</div>
+                                <div class="rs-dashboard-empty text-center text-body-secondary py-4">
+                                    <x-empty-state
+                                        icon="fa-solid fa-clock-rotate-left"
+                                        title="Belum ada Aktivitas"
+                                        description="Aktivitas surat terbaru akan tampil di sini."
+                                        compact
+                                    />
+                                </div>
                             @endforelse
                         </div>
                     </div>
@@ -314,10 +338,10 @@
                     <div class="card-body p-3 p-md-4">
                         <div class="row g-3">
                             @foreach ([
-                                ['Users Aktif', $activeUsers, 'fa-user-check'],
-                                ['Users Nonaktif', $inactiveUsers, 'fa-user-slash'],
+                                ['Pengguna Aktif', $activeUsers, 'fa-user-check'],
+                                ['Pengguna Nonaktif', $inactiveUsers, 'fa-user-slash'],
                                 ['Divisi Aktif', $activeDivisions, 'fa-building-circle-check'],
-                                ['Total Users', $totalUsers, 'fa-users'],
+                                ['Total Pengguna', $totalUsers, 'fa-users'],
                             ] as [$label, $value, $icon])
                                 <div class="col-12 col-sm-6">
                                     <article class="rs-master-stat h-100 d-flex align-items-center gap-3">
@@ -328,8 +352,14 @@
                             @endforeach
                         </div>
                         <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
-                            <a class="btn btn-outline-primary" href="{{ route('users.index') }}">Kelola Pengguna</a>
-                            <a class="btn btn-outline-primary" href="{{ route('divisions.index') }}">Kelola Divisi</a>
+                            <a class="btn btn-sm btn-outline-secondary rs-dashboard-master-action d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('users.index') }}">
+                                <i class="fa-solid fa-users" aria-hidden="true"></i>
+                                <span>Kelola Pengguna</span>
+                            </a>
+                            <a class="btn btn-sm btn-outline-secondary rs-dashboard-master-action d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('divisions.index') }}">
+                                <i class="fa-solid fa-building" aria-hidden="true"></i>
+                                <span>Kelola Divisi</span>
+                            </a>
                         </div>
                     </div>
                 </section>

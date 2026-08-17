@@ -32,8 +32,8 @@
                     <dd>{{ $user->position ?: '-' }}</dd>
                 </div>
                 <div class="col-12 col-md-6 rs-detail-item border-bottom pb-3">
-                    <dt class="rs-detail-label small text-body-secondary">Role</dt>
-                    <dd>{{ $user->role?->name ?? '-' }}</dd>
+                    <dt class="rs-detail-label small text-body-secondary">Peran</dt>
+                    <dd>{{ $user->role?->display_name ?? '-' }}</dd>
                 </div>
                 <div class="col-12 col-md-6 rs-detail-item border-bottom pb-3">
                     <dt class="rs-detail-label small text-body-secondary">Divisi</dt>
@@ -43,7 +43,7 @@
                     <dt class="rs-detail-label small text-body-secondary">Status</dt>
                     <dd>
                         <span class="badge {{ $user->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">
-                            {{ $user->is_active ? 'Aktif' : 'Tidak aktif' }}
+                            {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
                         </span>
                     </dd>
                 </div>
@@ -56,7 +56,7 @@
                 </a>
                 <a class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" href="{{ route('users.index') }}">
                     <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                    <span>Kembali ke daftar</span>
+                    <span>Kembali</span>
                 </a>
             </div>
         </div>

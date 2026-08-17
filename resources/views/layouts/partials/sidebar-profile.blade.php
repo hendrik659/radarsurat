@@ -23,10 +23,10 @@
         <button
             class="btn rs-sidebar-logout d-flex w-100 align-items-center justify-content-center gap-2"
             type="submit"
-            @if ($isDesktopProfile) data-sidebar-tooltip="Log Out" aria-label="Log Out" @endif
+            @if ($isDesktopProfile) data-sidebar-tooltip="Keluar" aria-label="Keluar" @endif
         >
             <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-            <span class="rs-sidebar-label">Log Out</span>
+            <span class="rs-sidebar-label">Keluar</span>
         </button>
     </form>
 </div>
