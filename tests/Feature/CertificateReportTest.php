@@ -141,7 +141,8 @@ class CertificateReportTest extends TestCase
         $this->actingAs($admin)
             ->get(route('reports.certificates.index'))
             ->assertOk()
-            ->assertSee('Belum ada data sertifikat untuk ditampilkan.');
+            ->assertSee('Belum ada Sertifikat')
+            ->assertSee('Data laporan sertifikat akan tampil di sini.');
 
         foreach (range(1, 16) as $number) {
             $this->makeCertificate($admin, [
@@ -177,8 +178,9 @@ class CertificateReportTest extends TestCase
         $this->actingAs($admin)
             ->get(route('reports.certificates.index', ['search' => 'Tidak Ada']))
             ->assertOk()
-            ->assertSee('Tidak ada sertifikat yang sesuai dengan filter.')
-            ->assertSee('Reset Filter');
+            ->assertSee('Data tidak ditemukan')
+            ->assertSee('Tidak ada data yang sesuai dengan pencarian atau filter.')
+            ->assertSee('Reset');
     }
 
     public function test_sidebar_visibility_and_active_state_follow_certificate_report_authorization(): void
@@ -259,6 +261,7 @@ class CertificateReportTest extends TestCase
             'Diekspor Oleh',
             $admin->name,
             'Tanggal Export',
+            '14 Agustus 2026, 20:47 WIB',
         ] as $expected) {
             $this->assertStringContainsString($expected, $text);
         }

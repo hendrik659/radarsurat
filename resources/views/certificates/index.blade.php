@@ -32,14 +32,19 @@
             <form class="row g-3 align-items-end" method="GET" action="{{ route('dashboard.certificates.index') }}">
                 <div class="col-12 col-lg-8">
                     <label class="form-label" for="search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="search"
-                        name="search"
-                        type="search"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Cari nama peserta, institusi, atau program studi/jurusan..."
-                    >
+                    <div class="input-group">
+                        <span class="input-group-text bg-body" aria-hidden="true">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            class="form-control"
+                            id="search"
+                            name="search"
+                            type="search"
+                            value="{{ $filters['search'] ?? '' }}"
+                            placeholder="Cari nama peserta, institusi, atau program studi/jurusan..."
+                        >
+                    </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-4">
                     <label class="form-label" for="year">Tahun Selesai</label>
@@ -53,8 +58,8 @@
                 <div class="col-12">
                     <div class="d-grid d-sm-flex gap-2">
                         <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
-                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                            <span>Terapkan</span>
+                            <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                            <span>Terapkan Filter</span>
                         </button>
                         <a class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.index') }}">
                             <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
@@ -95,7 +100,7 @@
                                     </a>
                                     @if ($canManageCertificates)
                                         <a
-                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                                            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
                                             href="{{ route('dashboard.certificates.edit', $certificate) }}"
                                             data-testid="certificate-edit-link"
                                         >
@@ -109,14 +114,24 @@
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="6">
-                                <i class="fa-solid fa-award d-block fs-3 mb-2" aria-hidden="true"></i>
                                 @if ($hasFilters)
-                                    Tidak ada sertifikat yang sesuai pencarian atau filter.
+                                    <x-empty-state
+                                        icon="fa-solid fa-magnifying-glass"
+                                        title="Data tidak ditemukan"
+                                        description="Tidak ada data yang sesuai dengan pencarian atau filter."
+                                        :action-url="route('dashboard.certificates.index')"
+                                        action-label="Reset"
+                                    />
                                 @else
-                                    <span class="d-block mb-3">Belum ada sertifikat yang diarsipkan.</span>
-                                    @if ($canManageCertificates)
-                                        <a class="btn btn-sm btn-primary" href="{{ route('dashboard.certificates.create') }}">Tambah Sertifikat</a>
-                                    @endif
+                                    <x-empty-state
+                                        icon="fa-solid fa-award"
+                                        title="Belum ada Sertifikat"
+                                        description="Arsip sertifikat peserta akan tampil di sini."
+                                        :action-url="$canManageCertificates ? route('dashboard.certificates.create') : null"
+                                        :action-label="$canManageCertificates ? 'Tambah Sertifikat' : null"
+                                        action-icon="fa-plus"
+                                        action-variant="primary"
+                                    />
                                 @endif
                             </td>
                         </tr>

@@ -9,6 +9,7 @@ use App\Models\InternshipCertificate;
 use App\Models\User;
 use App\Services\ReportExcelService;
 use App\Services\ReportQueryService;
+use App\Support\DateTimeFormatter;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -166,7 +167,7 @@ class ReportController extends Controller
                 'year' => filled($filters['year'] ?? null) ? (string) $filters['year'] : 'Semua Tahun',
                 'search' => filled($filters['search'] ?? null) ? (string) $filters['search'] : '-',
                 'exported_by' => $request->user()->name,
-                'exported_at' => now()->locale('id')->translatedFormat('d F Y H:i'),
+                'exported_at' => DateTimeFormatter::human(now()),
             ],
         );
 
@@ -191,7 +192,7 @@ class ReportController extends Controller
             'period' => $this->queries->periodLabel($filters),
             'division' => $this->queries->divisionLabel($user, $filters),
             'exported_by' => $user->name,
-            'exported_at' => now()->format('d-m-Y H:i:s'),
+            'exported_at' => DateTimeFormatter::human(now()),
         ];
     }
 

@@ -94,7 +94,7 @@
                         <th scope="col">Nama</th>
                         <th scope="col">Email</th>
                         <th scope="col">Jabatan</th>
-                        <th scope="col">Role</th>
+                        <th scope="col">Peran</th>
                         <th scope="col">Status Akun</th>
                     </tr>
                 </thead>
@@ -104,7 +104,7 @@
                             <td class="fw-semibold text-body-emphasis">{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->position ?: '-' }}</td>
-                            <td>{{ $user->role?->name ?? '-' }}</td>
+                            <td>{{ $user->role?->display_name ?? '-' }}</td>
                             <td>
                                 <span class="badge {{ $user->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">
                                     {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
@@ -114,8 +114,11 @@
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="5">
-                                <i class="fa-solid fa-user-group d-block fs-3 mb-2" aria-hidden="true"></i>
-                                Belum ada pengguna yang terdaftar pada divisi ini.
+                                <x-empty-state
+                                    icon="fa-solid fa-user-group"
+                                    title="Belum ada Pengguna"
+                                    description="Belum ada pengguna yang terdaftar pada divisi ini."
+                                />
                             </td>
                         </tr>
                     @endforelse

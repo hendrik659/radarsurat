@@ -43,7 +43,7 @@
                                         <span>Detail</span>
                                     </a>
                                     <a
-                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
                                         href="{{ route('divisions.edit', $division) }}"
                                         data-testid="division-edit-link"
                                         aria-label="Edit {{ $division->name }}"
@@ -57,9 +57,15 @@
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="4">
-                                <i class="fa-solid fa-building-circle-xmark d-block fs-3 mb-2" aria-hidden="true"></i>
-                                <span class="d-block">Belum ada data divisi.</span>
-                                <span class="d-block">Silakan tambahkan divisi baru.</span>
+                                <x-empty-state
+                                    icon="fa-solid fa-building-circle-xmark"
+                                    title="Belum ada Divisi"
+                                    description="Data divisi yang dibuat akan tampil di sini."
+                                    :action-url="route('divisions.create')"
+                                    action-label="Tambah Divisi"
+                                    action-icon="fa-plus"
+                                    action-variant="primary"
+                                />
                             </td>
                         </tr>
                     @endforelse

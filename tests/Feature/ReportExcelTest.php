@@ -68,6 +68,7 @@ class ReportExcelTest extends TestCase
         $this->assertStringContainsString('Redaksi', $text);
         $this->assertStringContainsString($admin->name, $text);
         $this->assertStringContainsString('Tanggal Export', $text);
+        $this->assertStringContainsString('7 Agustus 2026, 10:30 WIB', $text);
         $this->assertStringContainsString('RINGKASAN', $text);
         $this->assertStringContainsString('Total Surat', $text);
         $this->assertStringNotContainsString($excluded->agenda_number, $text);
@@ -119,6 +120,7 @@ class ReportExcelTest extends TestCase
         $this->assertStringContainsString('RADAR KEDIRI', $text);
         $this->assertStringContainsString('LAPORAN SURAT KELUAR', $text);
         $this->assertStringContainsString('Semua Divisi', $text);
+        $this->assertStringContainsString('7 Agustus 2026, 10:30 WIB', $text);
         $this->assertStringContainsString('RINGKASAN', $text);
         $this->assertStringNotContainsString($excluded->reference_code, $text);
         $this->assertStringNotContainsString($excluded->document_path, $text);

@@ -41,7 +41,7 @@
                     <div class="card-body p-3 p-md-4">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="agenda_number">Nomor Agenda</label>
+                    <label class="form-label" for="agenda_number">Nomor Agenda <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('agenda_number') is-invalid @enderror"
                         id="agenda_number"
@@ -72,7 +72,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="sender_name">Pengirim</label>
+                    <label class="form-label" for="sender_name">Pengirim <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('sender_name') is-invalid @enderror"
                         id="sender_name"
@@ -88,7 +88,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="addressed_to">Tujuan pada Surat</label>
+                    <label class="form-label" for="addressed_to">Tujuan pada Surat <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('addressed_to') is-invalid @enderror"
                         id="addressed_to"
@@ -118,7 +118,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="received_date">Tanggal Diterima</label>
+                    <label class="form-label" for="received_date">Tanggal Diterima <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('received_date') is-invalid @enderror"
                         id="received_date"
@@ -133,7 +133,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="received_via">Media Penerimaan</label>
+                    <label class="form-label" for="received_via">Media Penerimaan <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <select class="form-select @error('received_via') is-invalid @enderror" id="received_via" name="received_via" required>
                         <option value="">Pilih Media Penerimaan</option>
                         @foreach ($receivedViaOptions as $value => $label)
@@ -146,7 +146,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="priority">Prioritas</label>
+                    <label class="form-label" for="priority">Prioritas <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <select class="form-select @error('priority') is-invalid @enderror" id="priority" name="priority" required>
                         @foreach ($priorityOptions as $value => $label)
                             <option value="{{ $value }}" @selected(old('priority', $incomingLetter->priority ?? 'biasa') === $value)>{{ $label }}</option>
@@ -158,7 +158,7 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label" for="subject">Perihal</label>
+                    <label class="form-label" for="subject">Perihal <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('subject') is-invalid @enderror"
                         id="subject"
@@ -174,7 +174,10 @@
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label" for="document">Dokumen</label>
+                    <label class="form-label" for="document">
+                        Dokumen
+                        @unless ($editing)<span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span>@endunless
+                    </label>
                     <input
                         class="form-control @error('document') is-invalid @enderror"
                         id="document"
@@ -204,11 +207,11 @@
                                 href="{{ $editing ? route('incoming-letters.show', $incomingLetter) : route('incoming-letters.index') }}"
                             >
                                 <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                                <span>Batal</span>
+                                <span>Kembali</span>
                             </a>
                             <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                                 <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                                <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan Surat Masuk' }}</span>
+                                <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan' }}</span>
                             </button>
                         </div>
                     </div>

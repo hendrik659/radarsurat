@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,10 @@
                     </header>
 
                     @if (session('status'))
-                        <div class="alert alert-success" role="status">{{ session('status') }}</div>
+                        <div class="alert alert-success d-flex align-items-start gap-2" role="status">
+                            <i class="fa-solid fa-circle-check mt-1" aria-hidden="true"></i>
+                            <span>{{ session('status') }}</span>
+                        </div>
                     @endif
 
                     @if ($errors->any())
@@ -47,7 +50,7 @@
                             <label class="form-label" for="email">Email</label>
                             <div class="input-group rs-auth-input-group">
                                 <span class="input-group-text" aria-hidden="true">
-                                    <i class="fa-regular fa-envelope"></i>
+                                    <i class="fa-regular fa-envelope" aria-hidden="true"></i>
                                 </span>
                                 <input
                                     id="email"
@@ -73,7 +76,7 @@
                             <label class="form-label" for="password">Kata Sandi</label>
                             <div class="input-group rs-auth-input-group">
                                 <span class="input-group-text" aria-hidden="true">
-                                    <i class="fa-solid fa-lock"></i>
+                                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
                                 </span>
                                 <input
                                     id="password"
@@ -115,7 +118,10 @@
                             <label class="form-check-label" for="remember">Ingat saya</label>
                         </div>
 
-                        <button class="btn btn-primary rs-auth-submit" type="submit">Masuk</button>
+                        <button class="btn btn-primary rs-auth-submit d-inline-flex align-items-center justify-content-center gap-2" type="submit">
+                            <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                            <span>Masuk</span>
+                        </button>
                     </form>
                 </div>
             </section>

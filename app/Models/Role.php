@@ -10,10 +10,22 @@ class Role extends Model
 {
     use HasFactory;
 
+    private const DISPLAY_NAMES = [
+        'admin_surat' => 'Admin',
+        'pimpinan' => 'Pimpinan',
+        'ketua_divisi' => 'Ketua Divisi',
+        'anggota_divisi' => 'Anggota Divisi',
+    ];
+
     protected $fillable = [
         'name',
         'slug',
     ];
+
+    public function getDisplayNameAttribute(): string
+    {
+        return self::DISPLAY_NAMES[$this->slug] ?? $this->name;
+    }
 
     public function users(): HasMany
     {

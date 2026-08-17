@@ -24,7 +24,7 @@
         <div class="card-body p-3 p-md-4">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="name">Nama Divisi</label>
+                    <label class="form-label" for="name">Nama Divisi <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('name') is-invalid @enderror"
                         id="name"
@@ -40,7 +40,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="code">Kode Divisi</label>
+                    <label class="form-label" for="code">Kode Divisi <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
                     <input
                         class="form-control @error('code') is-invalid @enderror"
                         id="code"
@@ -61,14 +61,14 @@
             <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
                 <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                     <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                    <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan Divisi' }}</span>
+                    <span>{{ $editing ? 'Simpan Perubahan' : 'Simpan' }}</span>
                 </button>
                 <a
                     class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
                     href="{{ $editing ? route('divisions.show', $division) : route('divisions.index') }}"
                 >
                     <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                    <span>{{ $editing ? 'Kembali' : 'Batal' }}</span>
+                    <span>Kembali</span>
                 </a>
             </div>
         </div>

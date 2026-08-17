@@ -3,13 +3,15 @@
 @section('title', 'Data Pengguna')
 
 @section('content')
+    @php($hasFilters = collect($filters)->contains(fn ($value) => filled($value)))
+
     <header class="rs-page-header d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
         <div>
             <h1 class="rs-page-title h3 mb-1">Data Pengguna</h1>
             <p class="rs-page-description text-body-secondary mb-0">Daftar akun pengguna internal SIRAPI.</p>
         </div>
         <a class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('users.create') }}">
-            <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
             <span>Tambah Pengguna</span>
         </a>
     </header>
@@ -19,22 +21,27 @@
             <form method="GET" action="{{ route('users.index') }}" class="row g-3 align-items-end">
                 <div class="col-12 col-lg-6 col-xl-4">
                     <label class="form-label" for="search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="search"
-                        name="search"
-                        type="search"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Nama atau email"
-                    >
+                    <div class="input-group">
+                        <span class="input-group-text bg-body" aria-hidden="true">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            class="form-control"
+                            id="search"
+                            name="search"
+                            type="search"
+                            value="{{ $filters['search'] ?? '' }}"
+                            placeholder="Nama atau email"
+                        >
+                    </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
-                    <label class="form-label" for="role">Role</label>
+                    <label class="form-label" for="role">Peran</label>
                     <select class="form-select" id="role" name="role">
-                        <option value="">Semua role</option>
+                        <option value="">Semua peran</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->id }}" @selected(($filters['role'] ?? null) == $role->id)>
-                                {{ $role->name }}
+                                {{ $role->display_name }}
                             </option>
                         @endforeach
                     </select>
@@ -55,14 +62,14 @@
                     <select class="form-select" id="status" name="status">
                         <option value="">Semua status</option>
                         <option value="active" @selected(($filters['status'] ?? null) === 'active')>Aktif</option>
-                        <option value="inactive" @selected(($filters['status'] ?? null) === 'inactive')>Tidak aktif</option>
+                        <option value="inactive" @selected(($filters['status'] ?? null) === 'inactive')>Nonaktif</option>
                     </select>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
                     <div class="d-grid d-sm-flex gap-2">
                         <button class="btn btn-primary flex-sm-fill d-inline-flex align-items-center justify-content-center gap-2" type="submit">
-                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                            <span>Cari</span>
+                            <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                            <span>Terapkan Filter</span>
                         </button>
                         <a class="btn btn-outline-secondary flex-sm-fill d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('users.index') }}">
                             <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
@@ -89,6 +96,7 @@
                 </thead>
                 <tbody>
                     @forelse ($users as $user)
+                        @php($isOwnActiveAccount = auth()->user()->is($user) && $user->is_active)
                         <tr>
                             <td class="fw-semibold text-body-emphasis">{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
@@ -96,7 +104,7 @@
                             <td>{{ $user->position ?: '-' }}</td>
                             <td>{{ $user->division?->name ?: '-' }}</td>
                             <td class="text-center">
-                                <div class="rs-action-group d-flex flex-wrap justify-content-center align-items-center gap-2">
+                                <div class="rs-action-group d-flex flex-nowrap justify-content-center align-items-center gap-2">
                                     <a
                                         class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
                                         href="{{ route('users.show', $user) }}"
@@ -105,15 +113,16 @@
                                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         <span>Detail</span>
                                     </a>
-                                    <a
-                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
-                                        href="{{ route('users.edit', $user) }}"
-                                        aria-label="Edit {{ $user->name }}"
-                                    >
-                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                        <span>Edit</span>
-                                    </a>
-                                    @if (auth()->user()->is($user) && $user->is_active)
+                                    @if ($isOwnActiveAccount)
+                                        <a
+                                            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                                            href="{{ route('users.edit', $user) }}"
+                                            aria-label="Edit {{ $user->name }}"
+                                            data-testid="user-edit-link"
+                                        >
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                            <span>Edit</span>
+                                        </a>
                                         <span
                                             class="badge text-bg-light border text-secondary d-inline-flex align-items-center gap-1 px-2 py-2"
                                             title="Akun yang sedang digunakan tidak dapat dinonaktifkan"
@@ -129,6 +138,7 @@
                                             data-user-name="{{ $user->name }}"
                                             data-status-action="{{ $user->is_active ? 'menonaktifkan' : 'mengaktifkan' }}"
                                             data-next-status="{{ $user->is_active ? 'nonaktif' : 'aktif' }}"
+                                            data-testid="user-status-form"
                                         >
                                             @csrf
                                             @method('PATCH')
@@ -146,6 +156,34 @@
                                                 @endif
                                             </button>
                                         </form>
+                                        <div class="dropdown">
+                                            <button
+                                                class="btn btn-sm btn-link rs-overflow-toggle d-inline-flex align-items-center justify-content-center"
+                                                id="userActions{{ $user->id }}"
+                                                type="button"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport"
+                                                data-rs-table-dropdown
+                                                aria-expanded="false"
+                                                aria-label="Aksi lainnya untuk pengguna {{ $user->name }}"
+                                                data-testid="user-utility-menu"
+                                            >
+                                                <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end rs-table-dropdown-menu" aria-labelledby="userActions{{ $user->id }}">
+                                                <li>
+                                                    <a
+                                                        class="dropdown-item d-flex align-items-center gap-2"
+                                                        href="{{ route('users.edit', $user) }}"
+                                                        aria-label="Edit {{ $user->name }}"
+                                                        data-testid="user-edit-link"
+                                                    >
+                                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                                        <span>Edit Data</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     @endif
                                 </div>
                             </td>
@@ -153,8 +191,25 @@
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="6">
-                                <i class="fa-solid fa-users-slash d-block fs-3 mb-2" aria-hidden="true"></i>
-                                Tidak ada pengguna yang sesuai dengan pencarian atau filter.
+                                @if ($hasFilters)
+                                    <x-empty-state
+                                        icon="fa-solid fa-magnifying-glass"
+                                        title="Data tidak ditemukan"
+                                        description="Tidak ada data yang sesuai dengan pencarian atau filter."
+                                        :action-url="route('users.index')"
+                                        action-label="Reset"
+                                    />
+                                @else
+                                    <x-empty-state
+                                        icon="fa-solid fa-users"
+                                        title="Belum ada Pengguna"
+                                        description="Akun pengguna yang dibuat akan tampil di sini."
+                                        :action-url="route('users.create')"
+                                        action-label="Tambah Pengguna"
+                                        action-icon="fa-plus"
+                                        action-variant="primary"
+                                    />
+                                @endif
                             </td>
                         </tr>
                     @endforelse

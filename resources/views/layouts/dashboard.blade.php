@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,7 +28,7 @@
             $canViewCertificates = $currentUser?->is_active
                 && $currentUser?->can('viewAny', \App\Models\InternshipCertificate::class);
             $reportsActive = request()->routeIs('reports.*');
-            $currentUserRoleLabel = $currentUser?->role?->name
+            $currentUserRoleLabel = $currentUser?->role?->display_name
                 ?? \Illuminate\Support\Str::headline($currentUser?->role?->slug ?? 'Pengguna');
             $currentUserInitials = \Illuminate\Support\Str::of($currentUser?->name ?? 'Pengguna')
                 ->trim()
@@ -61,7 +61,7 @@
                         height="724"
                     >
                     <span class="rs-sidebar-brand-mark d-inline-flex align-items-center justify-content-center" aria-hidden="true">
-                        <i class="fa-solid fa-box-archive"></i>
+                        <i class="fa-solid fa-box-archive" aria-hidden="true"></i>
                     </span>
                 </a>
 
@@ -135,17 +135,24 @@
 
                 <main class="rs-main">
                     <div class="rs-content-container d-flex flex-column">
-                        @if (session('success'))
-                            <div class="alert alert-success rs-flash-alert" role="status">
-                                <i class="fa-solid fa-circle-check me-2" aria-hidden="true"></i>{{ session('success') }}
-                            </div>
-                        @endif
+                        @php
+                            $flashMessages = [
+                                'success' => ['success', 'fa-circle-check', 'status'],
+                                'error' => ['danger', 'fa-circle-exclamation', 'alert'],
+                                'warning' => ['warning', 'fa-triangle-exclamation', 'alert'],
+                                'info' => ['info', 'fa-circle-info', 'status'],
+                            ];
+                        @endphp
 
-                        @if (session('error'))
-                            <div class="alert alert-danger rs-flash-alert" role="alert">
-                                <i class="fa-solid fa-circle-exclamation me-2" aria-hidden="true"></i>{{ session('error') }}
-                            </div>
-                        @endif
+                        @foreach ($flashMessages as $flashKey => [$flashStyle, $flashIcon, $flashRole])
+                            @if (session()->has($flashKey))
+                                <div class="alert alert-{{ $flashStyle }} alert-dismissible fade show rs-flash-alert d-flex align-items-start gap-2" role="{{ $flashRole }}">
+                                    <i class="fa-solid {{ $flashIcon }} mt-1" aria-hidden="true"></i>
+                                    <div class="flex-grow-1">{{ session($flashKey) }}</div>
+                                    <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Tutup pesan"></button>
+                                </div>
+                            @endif
+                        @endforeach
 
                         @yield('content')
 

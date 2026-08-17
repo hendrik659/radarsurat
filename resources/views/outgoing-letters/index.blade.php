@@ -27,14 +27,19 @@
             <form method="GET" action="{{ route('outgoing-letters.index') }}" class="row g-3 align-items-end">
                 <div class="col-12 col-lg-6">
                     <label class="form-label" for="search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="search"
-                        name="search"
-                        type="search"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Kode, nomor surat, tujuan, atau perihal"
-                    >
+                    <div class="input-group">
+                        <span class="input-group-text bg-body" aria-hidden="true">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            class="form-control"
+                            id="search"
+                            name="search"
+                            type="search"
+                            value="{{ $filters['search'] ?? '' }}"
+                            placeholder="Kode, nomor surat, tujuan, atau perihal"
+                        >
+                    </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3">
                     <label class="form-label" for="division_id">Divisi</label>
@@ -61,7 +66,7 @@
                     <div class="d-grid d-sm-flex gap-2">
                         <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2" type="submit">
                             <i class="fa-solid fa-filter" aria-hidden="true"></i>
-                            <span>Terapkan</span>
+                            <span>Terapkan Filter</span>
                         </button>
                         <a
                             class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-2"
@@ -100,37 +105,81 @@
                             <td>{{ $outgoingLetter->subject ?: '-' }}</td>
                             <td>{{ $outgoingLetter->division?->name ?? '-' }}</td>
                             <td class="text-center">
-                                <div class="rs-outgoing-actions d-flex flex-wrap justify-content-center align-items-center gap-2">
+                                <div class="rs-outgoing-actions d-flex flex-nowrap justify-content-center align-items-center gap-2">
                                     <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" href="{{ route('outgoing-letters.show', $outgoingLetter) }}">
                                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         <span>Detail</span>
                                     </a>
-                                    <a
-                                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-                                        href="{{ route('outgoing-letters.preview', $outgoingLetter) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                        data-testid="outgoing-letter-preview-link"
-                                    >
-                                        <i class="fa-solid fa-file" aria-hidden="true"></i>
-                                        <span>Preview</span>
-                                    </a>
-                                    <a
-                                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-                                        href="{{ route('outgoing-letters.download', $outgoingLetter) }}"
-                                        data-testid="outgoing-letter-download-link"
-                                    >
-                                        <i class="fa-solid fa-download" aria-hidden="true"></i>
-                                        <span>Download</span>
-                                    </a>
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-sm btn-link rs-overflow-toggle d-inline-flex align-items-center justify-content-center"
+                                            id="outgoingLetterActions{{ $outgoingLetter->id }}"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            data-bs-boundary="viewport"
+                                            data-rs-table-dropdown
+                                            aria-expanded="false"
+                                            aria-label="Aksi lainnya untuk surat {{ $outgoingLetter->reference_code }}"
+                                            data-testid="outgoing-letter-utility-menu"
+                                        >
+                                            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end rs-table-dropdown-menu" aria-labelledby="outgoingLetterActions{{ $outgoingLetter->id }}">
+                                            <li>
+                                                <a
+                                                    class="dropdown-item d-flex align-items-center gap-2"
+                                                    href="{{ route('outgoing-letters.preview', $outgoingLetter) }}"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    data-testid="outgoing-letter-preview-link"
+                                                >
+                                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                                                    <span>Preview Dokumen</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    class="dropdown-item d-flex align-items-center gap-2"
+                                                    href="{{ route('outgoing-letters.download', $outgoingLetter) }}"
+                                                    data-testid="outgoing-letter-download-link"
+                                                >
+                                                    <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                                    <span>Download Dokumen</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-5 text-center text-body-secondary" data-testid="outgoing-letter-empty-state">
-                                <i class="fa-regular fa-folder-open d-block fs-2 mb-2" aria-hidden="true"></i>
-                                {{ $hasFilters ? 'Tidak ada surat keluar yang sesuai pencarian atau filter.' : 'Belum ada surat keluar yang dicatat.' }}
+                            <td class="rs-empty-state text-center text-body-secondary py-5" colspan="7" data-testid="outgoing-letter-empty-state">
+                                @if ($hasFilters)
+                                    <x-empty-state
+                                        icon="fa-solid fa-magnifying-glass"
+                                        title="Data tidak ditemukan"
+                                        description="Tidak ada data yang sesuai dengan pencarian atau filter."
+                                        :action-url="route('outgoing-letters.index')"
+                                        action-label="Reset"
+                                    />
+                                @else
+                                    @can('create', App\Models\OutgoingLetter::class)
+                                        <x-empty-state
+                                            title="Belum ada Surat Keluar"
+                                            description="Surat keluar yang dicatat akan tampil di sini."
+                                            :action-url="route('outgoing-letters.create')"
+                                            action-label="Tambah Surat Keluar"
+                                            action-icon="fa-plus"
+                                            action-variant="primary"
+                                        />
+                                    @else
+                                        <x-empty-state
+                                            title="Belum ada Surat Keluar"
+                                            description="Surat keluar yang dicatat akan tampil di sini."
+                                        />
+                                    @endcan
+                                @endif
                             </td>
                         </tr>
                     @endforelse
@@ -139,8 +188,14 @@
         </div>
 
         @if ($outgoingLetters->hasPages())
-            <div class="card-footer bg-body p-3">
-                {{ $outgoingLetters->links('pagination::bootstrap-5') }}
+            <div class="card-footer bg-body d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-3 py-3">
+                <span class="small text-body-secondary">
+                    Halaman {{ $outgoingLetters->currentPage() }} dari {{ $outgoingLetters->lastPage() }}
+                    ({{ $outgoingLetters->total() }} surat keluar)
+                </span>
+                <div class="rs-pagination">
+                    {{ $outgoingLetters->onEachSide(1)->links('pagination::bootstrap-5') }}
+                </div>
             </div>
         @endif
     </section>

@@ -16,18 +16,21 @@
             data-testid="certificate-report-export"
         >
             <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
-            <span>Export Excel</span>
+            <span>Ekspor Excel</span>
         </a>
     </header>
 
     @if ($errors->any())
-        <div class="alert alert-danger" role="alert">
-            <div class="fw-semibold mb-1">Filter belum dapat diterapkan.</div>
-            <ul class="mb-0 ps-3">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+            <i class="fa-solid fa-circle-exclamation mt-1" aria-hidden="true"></i>
+            <div>
+                <div class="fw-semibold mb-1">Filter belum dapat diterapkan.</div>
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
     @endif
 
@@ -36,14 +39,19 @@
             <form method="GET" action="{{ route('reports.certificates.index') }}" class="row g-3 align-items-end">
                 <div class="col-12 col-lg-7 col-xl-6">
                     <label class="form-label" for="certificate-report-search">Pencarian</label>
-                    <input
-                        class="form-control"
-                        id="certificate-report-search"
-                        name="search"
-                        type="search"
-                        value="{{ $filters['search'] ?? '' }}"
-                        placeholder="Cari nama peserta, institusi, atau program studi/jurusan..."
-                    >
+                    <div class="input-group">
+                        <span class="input-group-text bg-body" aria-hidden="true">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                        <input
+                            class="form-control"
+                            id="certificate-report-search"
+                            name="search"
+                            type="search"
+                            value="{{ $filters['search'] ?? '' }}"
+                            placeholder="Cari nama peserta, institusi, atau program studi/jurusan..."
+                        >
+                    </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
                     <label class="form-label" for="certificate-report-year">Tahun</label>
@@ -114,14 +122,20 @@
                     @empty
                         <tr>
                             <td class="rs-empty-state text-center text-body-secondary py-5" colspan="5" data-testid="certificate-report-empty-state">
-                                <i class="fa-regular fa-folder-open d-block fs-2 mb-2" aria-hidden="true"></i>
                                 @if (! $hasAnyCertificates)
-                                    Belum ada data sertifikat untuk ditampilkan.
+                                    <x-empty-state
+                                        icon="fa-solid fa-award"
+                                        title="Belum ada Sertifikat"
+                                        description="Data laporan sertifikat akan tampil di sini."
+                                    />
                                 @else
-                                    Tidak ada sertifikat yang sesuai dengan filter.
-                                    @if ($hasFilters)
-                                        <a class="d-block mt-2" href="{{ route('reports.certificates.index') }}">Reset Filter</a>
-                                    @endif
+                                    <x-empty-state
+                                        icon="fa-solid fa-magnifying-glass"
+                                        title="Data tidak ditemukan"
+                                        description="Tidak ada data yang sesuai dengan pencarian atau filter."
+                                        :action-url="$hasFilters ? route('reports.certificates.index') : null"
+                                        :action-label="$hasFilters ? 'Reset' : null"
+                                    />
                                 @endif
                             </td>
                         </tr>
