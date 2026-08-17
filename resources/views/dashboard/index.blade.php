@@ -123,19 +123,6 @@
     </section>
 
     @if ($isAdminDashboard)
-        @php
-            $statusLabels = [
-                'baru_diterima' => 'Baru Diterima',
-                'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-                'selesai' => 'Selesai',
-            ];
-            $statusBadgeClasses = [
-                'baru_diterima' => 'rs-badge-soft-info',
-                'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
-                'selesai' => 'rs-badge-soft-success',
-            ];
-        @endphp
-
         <section class="mb-4" aria-labelledby="dashboardStatisticsTitle">
             <h2 class="visually-hidden" id="dashboardStatisticsTitle">Statistik utama surat</h2>
             <div class="row g-3">
@@ -227,9 +214,7 @@
                                         <td>{{ $letter->sender_name }}</td>
                                         <td class="text-nowrap rs-dashboard-cell-date">{{ $letter->received_date?->format('d-m-Y') ?? '-' }}</td>
                                         <td>
-                                            <span class="badge {{ $statusBadgeClasses[$letter->status] ?? 'text-bg-secondary' }}">
-                                                {{ $statusLabels[$letter->status] ?? $letter->status }}
-                                            </span>
+                                            <x-incoming-letter-status-badge :status="$letter->status" />
                                         </td>
                                     </tr>
                                 @empty

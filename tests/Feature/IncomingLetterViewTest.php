@@ -119,6 +119,42 @@ class IncomingLetterViewTest extends TestCase
             ->assertDontSee('Hapus');
     }
 
+    public function test_status_badges_use_the_same_final_mapping_on_index_dashboard_and_report(): void
+    {
+        $admin = $this->makeUser('admin_surat', 'Admin Surat');
+
+        foreach ([
+            IncomingLetter::STATUS_BARU_DITERIMA => ['Baru Diterima', 'new', '2026-08-01'],
+            IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN => ['Menunggu Pemeriksaan', 'waiting', '2026-08-02'],
+            IncomingLetter::STATUS_SELESAI => ['Selesai', 'done', '2026-08-03'],
+        ] as $status => [$label, $variant, $receivedDate]) {
+            $this->makeLetter($admin, [
+                'agenda_number' => 'AGD-STATUS-'.strtoupper($variant),
+                'status' => $status,
+                'received_date' => $receivedDate,
+            ]);
+        }
+
+        foreach ([
+            route('incoming-letters.index'),
+            route('dashboard'),
+            route('reports.incoming-letters.index'),
+        ] as $url) {
+            $response = $this->actingAs($admin)->get($url)->assertOk();
+
+            foreach ([
+                IncomingLetter::STATUS_BARU_DITERIMA => ['Baru Diterima', 'new'],
+                IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN => ['Menunggu Pemeriksaan', 'waiting'],
+                IncomingLetter::STATUS_SELESAI => ['Selesai', 'done'],
+            ] as $status => [$label, $variant]) {
+                $response
+                    ->assertSee('class="badge rs-status-badge rs-status-'.$variant.'"', false)
+                    ->assertSee('data-incoming-letter-status="'.$status.'"', false)
+                    ->assertSee($label);
+            }
+        }
+    }
+
     public function test_detail_displays_letter_data_preview_and_download_routes(): void
     {
         $user = $this->makeUser('anggota_divisi', 'Anggota Divisi');

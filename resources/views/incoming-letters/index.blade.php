@@ -5,16 +5,7 @@
 @section('content')
     @php
         $isAdminSurat = auth()->user()?->role?->slug === 'admin_surat';
-        $statusLabels = [
-            'baru_diterima' => 'Baru Diterima',
-            'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-            'selesai' => 'Selesai',
-        ];
-        $statusBadgeClasses = [
-            'baru_diterima' => 'rs-badge-soft-info',
-            'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
-            'selesai' => 'rs-badge-soft-success',
-        ];
+        $statusLabels = \App\Support\IncomingLetterStatusPresenter::labels();
         $priorityLabels = [
             'biasa' => 'Biasa',
             'segera' => 'Segera',
@@ -147,9 +138,7 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge {{ $statusBadgeClasses[$incomingLetter->status] ?? 'text-bg-secondary' }}">
-                                    {{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}
-                                </span>
+                                <x-incoming-letter-status-badge :status="$incomingLetter->status" />
                             </td>
                             <td class="text-center">
                                 <div class="rs-incoming-actions d-flex flex-nowrap justify-content-center align-items-center gap-2">

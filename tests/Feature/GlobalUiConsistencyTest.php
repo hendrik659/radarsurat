@@ -77,22 +77,35 @@ class GlobalUiConsistencyTest extends TestCase
 
     public function test_incoming_status_labels_and_badges_are_consistent(): void
     {
+        $presenter = File::get(app_path('Support/IncomingLetterStatusPresenter.php'));
+        $component = File::get(resource_path('views/components/incoming-letter-status-badge.blade.php'));
+        $css = File::get(resource_path('css/app.css'));
         $paths = [
             resource_path('views/incoming-letters/index.blade.php'),
             resource_path('views/incoming-letters/show.blade.php'),
+            resource_path('views/incoming-letters/review.blade.php'),
             resource_path('views/dashboard/index.blade.php'),
             resource_path('views/reports/incoming-letters.blade.php'),
         ];
 
+        foreach (['Baru Diterima', 'Menunggu Pemeriksaan', 'Selesai'] as $label) {
+            $this->assertStringContainsString("'label' => '".$label."'", $presenter);
+        }
+
+        foreach (['new', 'waiting', 'done'] as $variant) {
+            $this->assertStringContainsString("'variant' => '".$variant."'", $presenter);
+            $this->assertStringContainsString('.rs-status-badge.rs-status-'.$variant, $css);
+        }
+
+        $this->assertStringContainsString("['badge', 'rs-status-badge'", $component);
+        $this->assertStringContainsString('IncomingLetterStatusPresenter::variant', $component);
+        $this->assertStringContainsString('data-incoming-letter-status', $component);
+
         foreach ($paths as $path) {
             $view = File::get($path);
 
-            $this->assertStringContainsString("'baru_diterima' => 'Baru Diterima'", $view, $path);
-            $this->assertStringContainsString("'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan'", $view, $path);
-            $this->assertStringContainsString("'selesai' => 'Selesai'", $view, $path);
-            $this->assertStringContainsString("'baru_diterima' => 'rs-badge-soft-info'", $view, $path);
-            $this->assertStringContainsString("'menunggu_pemeriksaan' => 'rs-badge-soft-warning'", $view, $path);
-            $this->assertStringContainsString("'selesai' => 'rs-badge-soft-success'", $view, $path);
+            $this->assertStringContainsString('<x-incoming-letter-status-badge', $view, $path);
+            $this->assertStringNotContainsString('$statusBadgeClasses', $view, $path);
         }
     }
 

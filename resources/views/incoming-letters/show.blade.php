@@ -13,16 +13,7 @@
         $canReview = ($isPimpinan || $isSdmDivisionHead)
             && $incomingLetter->status === 'menunggu_pemeriksaan'
             && $incomingLetter->review === null;
-        $statusLabels = [
-            'baru_diterima' => 'Baru Diterima',
-            'menunggu_pemeriksaan' => 'Menunggu Pemeriksaan',
-            'selesai' => 'Selesai',
-        ];
-        $statusBadgeClasses = [
-            'baru_diterima' => 'rs-badge-soft-info',
-            'menunggu_pemeriksaan' => 'rs-badge-soft-warning',
-            'selesai' => 'rs-badge-soft-success',
-        ];
+        $statusLabels = \App\Support\IncomingLetterStatusPresenter::labels();
         $priorityLabels = [
             'biasa' => 'Biasa',
             'segera' => 'Segera',
@@ -50,9 +41,7 @@
         <h1 class="rs-page-title h3 mb-1">Detail Surat Masuk</h1>
         <p class="rs-page-description text-body-secondary mb-2">Nomor agenda {{ $incomingLetter->agenda_number }}</p>
         <div class="d-flex flex-wrap gap-2">
-            <span class="badge {{ $statusBadgeClasses[$incomingLetter->status] ?? 'text-bg-secondary' }}">
-                {{ $statusLabels[$incomingLetter->status] ?? $incomingLetter->status }}
-            </span>
+            <x-incoming-letter-status-badge :status="$incomingLetter->status" />
             <span class="badge {{ $incomingLetter->priority === 'segera' ? 'text-bg-danger' : 'text-bg-primary' }}">
                 {{ $priorityLabels[$incomingLetter->priority] ?? $incomingLetter->priority }}
             </span>
@@ -123,7 +112,13 @@
                 ] as [$label, $value])
                     <div class="col-12 col-md-6 rs-detail-item border-bottom pb-3">
                         <dt class="rs-detail-label small text-body-secondary">{{ $label }}</dt>
-                        <dd>{{ $value }}</dd>
+                        <dd>
+                            @if ($label === 'Status')
+                                <x-incoming-letter-status-badge :status="$incomingLetter->status" />
+                            @else
+                                {{ $value }}
+                            @endif
+                        </dd>
                     </div>
                 @endforeach
             </dl>
@@ -177,9 +172,17 @@
                     </div>
                     <p class="small mb-2">
                         <span class="text-body-secondary">Status:</span>
-                        <span>{{ $history->previous_status ? ($statusLabels[$history->previous_status] ?? $history->previous_status) : '-' }}</span>
+                        @if ($history->previous_status)
+                            <x-incoming-letter-status-badge :status="$history->previous_status" />
+                        @else
+                            <span>-</span>
+                        @endif
                         <i class="fa-solid fa-arrow-right mx-1" aria-hidden="true"></i>
-                        <span>{{ $history->new_status ? ($statusLabels[$history->new_status] ?? $history->new_status) : '-' }}</span>
+                        @if ($history->new_status)
+                            <x-incoming-letter-status-badge :status="$history->new_status" />
+                        @else
+                            <span>-</span>
+                        @endif
                     </p>
                     @if (filled($history->notes))
                         <p class="small text-break mb-2">{{ $history->notes }}</p>

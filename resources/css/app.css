@@ -1574,6 +1574,47 @@ body {
     background: #dcfce7;
 }
 
+.rs-body .rs-status-badge {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.38rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    opacity: 1;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-shadow: none;
+    vertical-align: middle;
+    background-image: none;
+}
+
+.rs-body .rs-status-badge.rs-status-new {
+    border-color: #93c5fd;
+    color: #0c3d75;
+    background-color: #dbeafe;
+}
+
+.rs-body .rs-status-badge.rs-status-waiting {
+    border-color: #f5c451;
+    color: #664d03;
+    background-color: #fff3cd;
+}
+
+.rs-body .rs-status-badge.rs-status-done {
+    border-color: #86c7a2;
+    color: #0f5132;
+    background-color: #d1e7dd;
+}
+
+.rs-body .rs-status-badge.rs-status-unknown {
+    border-color: #cbd5e1;
+    color: #334155;
+    background-color: #f1f5f9;
+}
+
 .rs-overflow-toggle {
     width: 2.15rem;
     height: 2.15rem;
