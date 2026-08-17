@@ -51,6 +51,8 @@ class UserIndexTest extends TestCase
             ->assertDontSee('<th>Role</th>', false)
             ->assertDontSee('<th>Status akun</th>', false)
             ->assertSee('<th class="text-center" scope="col">Aksi</th>', false)
+            ->assertSee('data-confirmation-title="Nonaktifkan Pengguna"', false)
+            ->assertSee('data-confirmation-variant="danger"', false)
             ->assertDontSee('Budi Tidak Cocok');
 
         $this->actingAs($manager)

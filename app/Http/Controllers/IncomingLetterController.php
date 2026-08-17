@@ -135,7 +135,7 @@ class IncomingLetterController extends Controller
 
         return redirect()
             ->route('incoming-letters.show', $letter)
-            ->with('success', 'Surat masuk berhasil ditambahkan.');
+            ->with('success', 'Surat Masuk berhasil disimpan.');
     }
 
     public function show(Request $request, IncomingLetter $incomingLetter): View|JsonResponse
@@ -231,7 +231,7 @@ class IncomingLetterController extends Controller
 
         return redirect()
             ->route('incoming-letters.show', $letter)
-            ->with('success', 'Surat masuk berhasil diperbarui.');
+            ->with('success', 'Surat Masuk berhasil diperbarui.');
     }
 
     public function submitForReview(
@@ -275,7 +275,7 @@ class IncomingLetterController extends Controller
 
         return redirect()
             ->route('incoming-letters.show', $submittedLetter)
-            ->with('success', 'Surat masuk berhasil dikirim untuk pemeriksaan.');
+            ->with('success', 'Surat Masuk berhasil dikirim untuk pemeriksaan.');
     }
 
     public function preview(IncomingLetter $incomingLetter): BinaryFileResponse

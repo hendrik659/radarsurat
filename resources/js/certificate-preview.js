@@ -45,8 +45,10 @@ if (certificateDocumentInput) {
         if (errorMessage) {
             errorMessage.textContent = message;
             errorMessage.classList.remove('d-none');
+            errorMessage.classList.add('d-block');
         }
 
+        certificateDocumentInput.classList.add('is-invalid');
         certificateDocumentInput.value = '';
     };
 
@@ -60,6 +62,8 @@ if (certificateDocumentInput) {
 
     certificateDocumentInput.addEventListener('change', () => {
         errorMessage?.classList.add('d-none');
+        errorMessage?.classList.remove('d-block');
+        certificateDocumentInput.classList.remove('is-invalid');
 
         const file = certificateDocumentInput.files?.[0];
 

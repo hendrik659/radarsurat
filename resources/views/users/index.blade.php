@@ -134,10 +134,14 @@
                                         <form
                                             method="POST"
                                             action="{{ route('users.status', $user) }}"
-                                            data-status-form
-                                            data-user-name="{{ $user->name }}"
-                                            data-status-action="{{ $user->is_active ? 'menonaktifkan' : 'mengaktifkan' }}"
-                                            data-next-status="{{ $user->is_active ? 'nonaktif' : 'aktif' }}"
+                                            data-confirmation
+                                            data-confirmation-title="{{ $user->is_active ? 'Nonaktifkan Pengguna' : 'Aktifkan Pengguna' }}"
+                                            data-confirmation-message="{{ $user->is_active
+                                                ? 'Akun '.$user->name.' akan dinonaktifkan dan tidak dapat mengakses SIRAPI.'
+                                                : 'Akun '.$user->name.' akan diaktifkan dan dapat kembali mengakses SIRAPI.' }}"
+                                            data-confirmation-action-label="{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"
+                                            data-confirmation-variant="{{ $user->is_active ? 'danger' : 'success' }}"
+                                            data-confirmation-icon="{{ $user->is_active ? 'fa-circle-xmark' : 'fa-circle-check' }}"
                                             data-testid="user-status-form"
                                         >
                                             @csrf

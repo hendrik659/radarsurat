@@ -175,7 +175,8 @@ class DivisionViewTest extends TestCase
             ->assertSee('action="'.route('divisions.status', $division).'"', false)
             ->assertSee('name="_method" value="PATCH"', false)
             ->assertSee('name="is_active" value="0"', false)
-            ->assertSee('Apakah Anda yakin ingin menonaktifkan divisi ini?')
+            ->assertSee('data-confirmation-title="Nonaktifkan Divisi"', false)
+            ->assertSee('data-confirmation-variant="danger"', false)
             ->assertSee('Nonaktifkan');
     }
 
@@ -190,7 +191,8 @@ class DivisionViewTest extends TestCase
             ->assertSee('action="'.route('divisions.status', $division).'"', false)
             ->assertSee('name="_method" value="PATCH"', false)
             ->assertSee('name="is_active" value="1"', false)
-            ->assertSee('Apakah Anda yakin ingin mengaktifkan divisi ini?')
+            ->assertSee('data-confirmation-title="Aktifkan Divisi"', false)
+            ->assertSee('data-confirmation-variant="success"', false)
             ->assertSee('Aktifkan');
     }
 

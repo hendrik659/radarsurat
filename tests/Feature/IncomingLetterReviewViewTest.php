@@ -127,7 +127,9 @@ class IncomingLetterReviewViewTest extends TestCase
             ->assertDontSee($inactiveDivision->name)
             ->assertSee('name="review_note"', false)
             ->assertSee('maxlength="2000"', false)
-            ->assertSee('Teruskan surat ini ke divisi yang dipilih? Setelah diteruskan, pemeriksaan tidak dapat diulang.')
+            ->assertSee('data-confirmation-title="Teruskan Surat"', false)
+            ->assertSee('data-confirmation-action-label="Teruskan Surat"', false)
+            ->assertSee('Surat akan diteruskan ke divisi yang dipilih dan pemeriksaan tidak dapat diulang.')
             ->assertDontSee('summary')
             ->assertDontSee($letter->document_path)
             ->assertDontSee('/storage/');

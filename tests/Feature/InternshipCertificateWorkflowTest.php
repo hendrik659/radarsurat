@@ -75,7 +75,7 @@ class InternshipCertificateWorkflowTest extends TestCase
                 'document' => UploadedFile::fake()->create('Sertifikat Ahmad.pdf', 120, 'application/pdf'),
             ]))
             ->assertRedirect()
-            ->assertSessionHas('success', 'Sertifikat berhasil diarsipkan.');
+            ->assertSessionHas('success', 'Sertifikat berhasil ditambahkan.');
 
         $certificate = InternshipCertificate::query()->firstOrFail();
 

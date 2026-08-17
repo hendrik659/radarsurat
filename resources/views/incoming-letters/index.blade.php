@@ -164,8 +164,12 @@
                                         <form
                                             method="POST"
                                             action="{{ route('incoming-letters.submit-for-review', $incomingLetter) }}"
-                                            data-incoming-letter-submit-form
-                                            data-confirm-message="Kirim surat ini untuk pemeriksaan? Setelah dikirim, data surat tidak dapat diedit."
+                                            data-confirmation
+                                            data-confirmation-title="Kirim untuk Pemeriksaan"
+                                            data-confirmation-message="Surat akan dikirim kepada pihak pemeriksa dan tidak dapat diedit kembali oleh Admin."
+                                            data-confirmation-action-label="Kirim untuk Pemeriksaan"
+                                            data-confirmation-variant="primary"
+                                            data-confirmation-icon="fa-paper-plane"
                                             data-testid="incoming-letter-submit-form"
                                         >
                                             @csrf

@@ -45,8 +45,10 @@ if (documentInput) {
         if (errorMessage) {
             errorMessage.textContent = message;
             errorMessage.classList.remove('d-none');
+            errorMessage.classList.add('d-block');
         }
 
+        documentInput.classList.add('is-invalid');
         documentInput.value = '';
     };
 
@@ -60,6 +62,8 @@ if (documentInput) {
 
     documentInput.addEventListener('change', () => {
         errorMessage?.classList.add('d-none');
+        errorMessage?.classList.remove('d-block');
+        documentInput.classList.remove('is-invalid');
 
         const file = documentInput.files?.[0];
 
@@ -112,13 +116,3 @@ if (documentInput) {
 
     window.addEventListener('pagehide', revokeObjectUrl);
 }
-
-document.querySelectorAll('[data-incoming-letter-submit-form]').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-        const message = form.dataset.confirmMessage;
-
-        if (message && !window.confirm(message)) {
-            event.preventDefault();
-        }
-    });
-});

@@ -36,7 +36,7 @@ class DivisionController extends Controller
 
         return redirect()
             ->route('divisions.show', $division)
-            ->with('success', 'Divisi berhasil ditambahkan.');
+            ->with('success', 'Data divisi berhasil ditambahkan.');
     }
 
     public function show(Division $division): View
@@ -64,7 +64,7 @@ class DivisionController extends Controller
 
         return redirect()
             ->route('divisions.show', $division)
-            ->with('success', 'Divisi berhasil diperbarui.');
+            ->with('success', 'Data divisi berhasil diperbarui.');
     }
 
     public function updateStatus(Request $request, Division $division): RedirectResponse
@@ -84,7 +84,7 @@ class DivisionController extends Controller
 
         return back()->with(
             'success',
-            $isActive ? 'Divisi berhasil diaktifkan.' : 'Divisi berhasil dinonaktifkan.',
+            $isActive ? 'Data divisi berhasil diaktifkan.' : 'Data divisi berhasil dinonaktifkan.',
         );
     }
 

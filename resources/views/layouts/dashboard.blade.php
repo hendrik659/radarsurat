@@ -135,24 +135,7 @@
 
                 <main class="rs-main">
                     <div class="rs-content-container d-flex flex-column">
-                        @php
-                            $flashMessages = [
-                                'success' => ['success', 'fa-circle-check', 'status'],
-                                'error' => ['danger', 'fa-circle-exclamation', 'alert'],
-                                'warning' => ['warning', 'fa-triangle-exclamation', 'alert'],
-                                'info' => ['info', 'fa-circle-info', 'status'],
-                            ];
-                        @endphp
-
-                        @foreach ($flashMessages as $flashKey => [$flashStyle, $flashIcon, $flashRole])
-                            @if (session()->has($flashKey))
-                                <div class="alert alert-{{ $flashStyle }} alert-dismissible fade show rs-flash-alert d-flex align-items-start gap-2" role="{{ $flashRole }}">
-                                    <i class="fa-solid {{ $flashIcon }} mt-1" aria-hidden="true"></i>
-                                    <div class="flex-grow-1">{{ session($flashKey) }}</div>
-                                    <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Tutup pesan"></button>
-                                </div>
-                            @endif
-                        @endforeach
+                        <x-global-alerts />
 
                         @yield('content')
 
@@ -165,6 +148,8 @@
                 </main>
             </div>
         </div>
+
+        <x-confirmation-modal />
 
         @stack('scripts')
     </body>
