@@ -90,12 +90,11 @@ class DashboardAdminViewTest extends TestCase
         $css = File::get(resource_path('css/app.css'));
 
         $response
-            ->assertSee('data-testid="dashboard-quick-access-grid"', false)
-            ->assertSee('class="rs-quick-access-item"', false)
-            ->assertSee('class="rs-quick-card-copy"', false)
-            ->assertSee('class="rs-quick-card-label d-block">Divisions</strong>', false);
+            ->assertSee('<div class="rs-quick-access-grid">', false)
+            ->assertSee('class="rs-quick-card d-flex h-100', false)
+            ->assertSee('<strong>Divisions</strong>', false);
 
-        $this->assertSame(7, substr_count($content, 'class="rs-quick-access-item"'));
+        $this->assertSame(9, substr_count($content, 'data-testid="dashboard-quick-access"'));
         $this->assertStringContainsString(
             'grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));',
             $css,

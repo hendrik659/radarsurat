@@ -90,7 +90,7 @@ class IncomingLetterReviewController extends Controller
 
         return redirect()
             ->route('incoming-letters.show', $reviewedLetter)
-            ->with('success', 'Surat masuk berhasil diperiksa dan diteruskan ke divisi tujuan.');
+            ->with('success', 'Surat Masuk berhasil diperiksa dan diteruskan ke divisi tujuan.');
     }
 
     private function ensureReviewable(IncomingLetter $incomingLetter): void

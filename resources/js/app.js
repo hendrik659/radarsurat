@@ -5,6 +5,7 @@ import './incoming-letter-preview';
 import './outgoing-letter-preview';
 import './certificate-preview';
 import './dashboard-admin';
+import './global-alerts';
 
 document.querySelectorAll('[data-password-toggle]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -23,30 +24,5 @@ document.querySelectorAll('[data-password-toggle]').forEach((button) => {
         button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
         icon?.classList.toggle('fa-eye', !isHidden);
         icon?.classList.toggle('fa-eye-slash', isHidden);
-    });
-});
-
-document.querySelectorAll('[data-status-form]').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-        const confirmationMessage = form.dataset.statusConfirm;
-
-        if (confirmationMessage) {
-            if (!window.confirm(confirmationMessage)) {
-                event.preventDefault();
-            }
-
-            return;
-        }
-
-        const action = form.dataset.statusAction;
-        const userName = form.dataset.userName;
-
-        if (!action || !userName) {
-            return;
-        }
-
-        if (!window.confirm(`Yakin ingin ${action} akun ${userName}?`)) {
-            event.preventDefault();
-        }
     });
 });

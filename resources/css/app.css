@@ -755,11 +755,6 @@ body {
     }
 }
 
-.rs-flash-alert {
-    width: 100%;
-    max-width: 64rem;
-}
-
 .rs-page-header {
     max-width: 64rem;
 }
@@ -1431,15 +1426,6 @@ body {
     margin-inline: auto;
 }
 
-.rs-flash-alert {
-    width: 100%;
-    max-width: none;
-    padding: 0.9rem 1rem;
-    border-width: 1px;
-    border-radius: var(--rs-radius-sm);
-    box-shadow: var(--rs-shadow-sm);
-}
-
 .rs-page-header {
     width: 100%;
     max-width: none;
@@ -1823,6 +1809,139 @@ body {
     color: var(--rs-muted);
 }
 
+.rs-toast-container {
+    position: fixed;
+    top: calc(var(--rs-navbar-height) + 1rem);
+    right: 1rem;
+    z-index: 1090;
+    display: flex;
+    width: min(24rem, calc(100vw - 2rem));
+    max-height: calc(100vh - var(--rs-navbar-height) - 2rem);
+    max-height: calc(100dvh - var(--rs-navbar-height) - 2rem);
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    pointer-events: none;
+}
+
+.rs-toast {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    border: 1px solid var(--rs-line);
+    border-left: 0.3rem solid var(--rs-primary);
+    border-radius: 0.85rem;
+    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.16);
+    pointer-events: auto;
+}
+
+.rs-toast-success {
+    border-left-color: var(--bs-success);
+}
+
+.rs-toast-error {
+    border-left-color: var(--bs-danger);
+}
+
+.rs-toast-warning {
+    border-left-color: var(--bs-warning);
+}
+
+.rs-toast-info {
+    border-left-color: var(--bs-info);
+}
+
+.rs-toast-header {
+    gap: 0.65rem;
+    padding: 0.8rem 0.9rem 0.35rem;
+    color: inherit;
+    background: transparent;
+    border-bottom: 0;
+}
+
+.rs-toast-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--rs-primary-dark);
+    background: var(--rs-primary-soft);
+}
+
+.rs-toast-icon-success {
+    color: var(--bs-success-text-emphasis);
+    background: var(--bs-success-bg-subtle);
+}
+
+.rs-toast-icon-error {
+    color: var(--bs-danger-text-emphasis);
+    background: var(--bs-danger-bg-subtle);
+}
+
+.rs-toast-icon-warning {
+    color: var(--bs-warning-text-emphasis);
+    background: var(--bs-warning-bg-subtle);
+}
+
+.rs-toast-icon-info {
+    color: var(--bs-info-text-emphasis);
+    background: var(--bs-info-bg-subtle);
+}
+
+.rs-toast-body {
+    padding: 0.25rem 0.9rem 0.9rem 3.55rem;
+    overflow-wrap: anywhere;
+    color: var(--rs-muted);
+}
+
+.rs-toast .btn-close:focus-visible,
+.rs-confirmation-modal .btn:focus-visible,
+.rs-confirmation-modal .btn-close:focus-visible {
+    outline: 0.2rem solid rgba(var(--bs-primary-rgb), 0.28);
+    outline-offset: 0.15rem;
+    box-shadow: none;
+}
+
+.rs-confirmation-modal {
+    overflow: hidden;
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 1.25rem 3rem rgba(15, 23, 42, 0.2);
+}
+
+.rs-confirmation-icon {
+    display: inline-flex;
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    font-size: 1.2rem;
+    color: var(--bs-primary-text-emphasis);
+    background: var(--bs-primary-bg-subtle);
+}
+
+.rs-confirmation-icon[data-confirmation-variant="success"] {
+    color: var(--bs-success-text-emphasis);
+    background: var(--bs-success-bg-subtle);
+}
+
+.rs-confirmation-icon[data-confirmation-variant="danger"] {
+    color: var(--bs-danger-text-emphasis);
+    background: var(--bs-danger-bg-subtle);
+}
+
+.rs-confirmation-icon[data-confirmation-variant="warning"] {
+    color: var(--bs-warning-text-emphasis);
+    background: var(--bs-warning-bg-subtle);
+}
+
 @media (min-width: 576px) {
     .rs-quick-access-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1934,6 +2053,25 @@ body {
 }
 
 @media (max-width: 575.98px) {
+    .rs-toast-container {
+        top: 5.25rem;
+        right: 0.75rem;
+        left: 0.75rem;
+        width: auto;
+        max-height: calc(100vh - 6rem);
+        max-height: calc(100dvh - 6rem);
+    }
+
+    .rs-confirmation-modal .modal-footer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rs-confirmation-modal .modal-footer .btn {
+        width: 100%;
+        margin: 0;
+    }
+
     .rs-navbar {
         min-height: 4.5rem;
         padding: 0.65rem 1rem;

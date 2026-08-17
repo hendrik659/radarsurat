@@ -65,7 +65,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.show', $user)
-            ->with('success', 'Pengguna berhasil ditambahkan.');
+            ->with('success', 'Data pengguna berhasil ditambahkan.');
     }
 
     public function show(User $user): View
@@ -120,7 +120,7 @@ class UserController extends Controller
 
         return back()->with(
             'success',
-            $data['is_active'] ? 'Pengguna berhasil diaktifkan.' : 'Pengguna berhasil dinonaktifkan.',
+            $data['is_active'] ? 'Data pengguna berhasil diaktifkan.' : 'Data pengguna berhasil dinonaktifkan.',
         );
     }
 

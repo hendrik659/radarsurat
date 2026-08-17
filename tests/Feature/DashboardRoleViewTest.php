@@ -19,7 +19,7 @@ class DashboardRoleViewTest extends TestCase
         $cases = [
             [$this->makeUser('admin_surat'), 'Dashboard Admin Sirapi', 9, true, true],
             [$this->makeUser('pimpinan'), 'Dashboard Pimpinan', 6, true, false],
-            [$this->makeUser('ketua_divisi', $sdm), 'Dashboard Ketua Divisi SDM', 6, true, false],
+            [$this->makeUser('ketua_divisi', $sdm), 'Dashboard Ketua Divisi', 6, true, false],
             [$this->makeUser('ketua_divisi', $editorial), 'Dashboard Ketua Divisi', 4, false, false],
             [$this->makeUser('anggota_divisi', $editorial), 'Dashboard Anggota Divisi', 4, false, false],
         ];

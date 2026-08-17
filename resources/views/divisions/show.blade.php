@@ -21,10 +21,14 @@
             <form
                 method="POST"
                 action="{{ route('divisions.status', $division) }}"
-                data-status-form
-                data-status-confirm="{{ $division->is_active
-                    ? 'Apakah Anda yakin ingin menonaktifkan divisi ini?'
-                    : 'Apakah Anda yakin ingin mengaktifkan divisi ini?' }}"
+                data-confirmation
+                data-confirmation-title="{{ $division->is_active ? 'Nonaktifkan Divisi' : 'Aktifkan Divisi' }}"
+                data-confirmation-message="{{ $division->is_active
+                    ? 'Divisi '.$division->name.' akan dinonaktifkan. Pastikan tidak ada pengguna aktif yang masih terhubung.'
+                    : 'Divisi '.$division->name.' akan diaktifkan dan dapat kembali digunakan.' }}"
+                data-confirmation-action-label="{{ $division->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"
+                data-confirmation-variant="{{ $division->is_active ? 'danger' : 'success' }}"
+                data-confirmation-icon="{{ $division->is_active ? 'fa-circle-xmark' : 'fa-circle-check' }}"
                 data-testid="division-status-form"
             >
                 @csrf

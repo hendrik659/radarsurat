@@ -31,7 +31,7 @@ class DivisionBackendTest extends TestCase
 
         $response
             ->assertRedirect(route('divisions.show', $division))
-            ->assertSessionHas('success', 'Divisi berhasil ditambahkan.');
+            ->assertSessionHas('success', 'Data divisi berhasil ditambahkan.');
 
         $this->assertDatabaseHas('divisions', [
             'id' => $division->id,
@@ -148,7 +148,7 @@ class DivisionBackendTest extends TestCase
 
         $response
             ->assertRedirect(route('divisions.show', $division))
-            ->assertSessionHas('success', 'Divisi berhasil diperbarui.');
+            ->assertSessionHas('success', 'Data divisi berhasil diperbarui.');
 
         $this->assertDatabaseHas('divisions', [
             'id' => $division->id,
@@ -202,7 +202,7 @@ class DivisionBackendTest extends TestCase
             ->from(route('divisions.index'))
             ->patch(route('divisions.status', $division), ['is_active' => '0'])
             ->assertRedirect(route('divisions.index'))
-            ->assertSessionHas('success', 'Divisi berhasil dinonaktifkan.');
+            ->assertSessionHas('success', 'Data divisi berhasil dinonaktifkan.');
 
         $this->assertFalse($division->fresh()->is_active);
 
@@ -210,7 +210,7 @@ class DivisionBackendTest extends TestCase
             ->from(route('divisions.index'))
             ->patch(route('divisions.status', $division), ['is_active' => '1'])
             ->assertRedirect(route('divisions.index'))
-            ->assertSessionHas('success', 'Divisi berhasil diaktifkan.');
+            ->assertSessionHas('success', 'Data divisi berhasil diaktifkan.');
 
         $this->assertTrue($division->fresh()->is_active);
     }

@@ -173,7 +173,9 @@ class IncomingLetterViewTest extends TestCase
             ->assertSee('data-testid="incoming-letter-edit-link"', false)
             ->assertSee('data-testid="incoming-letter-submit-form"', false)
             ->assertSee('action="'.route('incoming-letters.submit-for-review', $letter).'"', false)
-            ->assertSee('Kirim surat ini untuk pemeriksaan? Setelah dikirim, data surat tidak dapat diedit.');
+            ->assertSee('data-confirmation', false)
+            ->assertSee('data-confirmation-title="Kirim untuk Pemeriksaan"', false)
+            ->assertSee('Surat akan dikirim kepada pihak pemeriksa dan tidak dapat diedit kembali oleh Admin.');
     }
 
     public function test_non_admin_does_not_see_edit_or_submit_actions(): void
@@ -236,12 +238,12 @@ class IncomingLetterViewTest extends TestCase
                 'document' => UploadedFile::fake()->create('surat-revisi.pdf', 20, 'application/pdf'),
             ]))
             ->assertRedirect(route('incoming-letters.show', $letter))
-            ->assertSessionHas('success', 'Surat masuk berhasil diperbarui.');
+            ->assertSessionHas('success', 'Surat Masuk berhasil diperbarui.');
 
         $this->actingAs($admin)
             ->patch(route('incoming-letters.submit-for-review', $letter))
             ->assertRedirect(route('incoming-letters.show', $letter))
-            ->assertSessionHas('success', 'Surat masuk berhasil dikirim untuk pemeriksaan.');
+            ->assertSessionHas('success', 'Surat Masuk berhasil dikirim untuk pemeriksaan.');
 
         $this->assertSame(
             IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,

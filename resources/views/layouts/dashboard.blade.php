@@ -135,17 +135,7 @@
 
                 <main class="rs-main">
                     <div class="rs-content-container d-flex flex-column">
-                        @if (session('success'))
-                            <div class="alert alert-success rs-flash-alert" role="status">
-                                <i class="fa-solid fa-circle-check me-2" aria-hidden="true"></i>{{ session('success') }}
-                            </div>
-                        @endif
-
-                        @if (session('error'))
-                            <div class="alert alert-danger rs-flash-alert" role="alert">
-                                <i class="fa-solid fa-circle-exclamation me-2" aria-hidden="true"></i>{{ session('error') }}
-                            </div>
-                        @endif
+                        <x-global-alerts />
 
                         @yield('content')
 
@@ -158,6 +148,8 @@
                 </main>
             </div>
         </div>
+
+        <x-confirmation-modal />
 
         @stack('scripts')
     </body>

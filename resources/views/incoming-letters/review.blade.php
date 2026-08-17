@@ -96,8 +96,12 @@
                     <form
                         method="POST"
                         action="{{ route('incoming-letters.review.store', $incomingLetter) }}"
-                        data-incoming-letter-submit-form
-                        data-confirm-message="Teruskan surat ini ke divisi yang dipilih? Setelah diteruskan, pemeriksaan tidak dapat diulang."
+                        data-confirmation
+                        data-confirmation-title="Teruskan Surat"
+                        data-confirmation-message="Surat akan diteruskan ke divisi yang dipilih dan pemeriksaan tidak dapat diulang."
+                        data-confirmation-action-label="Teruskan Surat"
+                        data-confirmation-variant="primary"
+                        data-confirmation-icon="fa-share-from-square"
                         data-testid="incoming-letter-review-form"
                     >
                         @csrf

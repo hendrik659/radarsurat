@@ -193,10 +193,9 @@
                     @error('document')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback d-none mt-2" role="alert" data-document-error></div>
                 </div>
             </div>
-
-                        <div class="alert alert-danger d-none mt-3 mb-0" role="alert" data-document-error></div>
 
                         <div class="d-grid d-sm-flex flex-wrap gap-2 mt-4">
                             <a

@@ -186,7 +186,7 @@ class OutgoingLetterViewTest extends TestCase
                 'document' => UploadedFile::fake()->create('final.pdf', 100, 'application/pdf'),
             ])
             ->assertRedirect(route('outgoing-letters.show', OutgoingLetter::query()->firstOrFail()))
-            ->assertSessionHas('success', 'Surat keluar berhasil dicatat.');
+            ->assertSessionHas('success', 'Surat Keluar berhasil disimpan.');
 
         $letter = OutgoingLetter::query()->firstOrFail();
         $this->actingAs($creator)

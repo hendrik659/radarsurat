@@ -126,7 +126,7 @@ class OutgoingLetterController extends Controller
 
         return redirect()
             ->route('outgoing-letters.show', $outgoingLetter)
-            ->with('success', 'Surat keluar berhasil dicatat.');
+            ->with('success', 'Surat Keluar berhasil disimpan.');
     }
 
     public function show(Request $request, OutgoingLetter $outgoingLetter): View|JsonResponse

@@ -99,7 +99,7 @@ class InternshipCertificateController extends Controller
 
         return redirect()
             ->route('dashboard.certificates.show', $certificate)
-            ->with('success', 'Sertifikat berhasil diarsipkan.');
+            ->with('success', 'Sertifikat berhasil ditambahkan.');
     }
 
     public function show(InternshipCertificate $certificate): View
