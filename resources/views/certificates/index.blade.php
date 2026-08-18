@@ -98,16 +98,6 @@
                                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         <span>Detail</span>
                                     </a>
-                                    @if ($canManageCertificates)
-                                        <a
-                                            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-                                            href="{{ route('dashboard.certificates.edit', $certificate) }}"
-                                            data-testid="certificate-edit-link"
-                                        >
-                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                            <span>Edit</span>
-                                        </a>
-                                    @endif
                                 </div>
                             </td>
                         </tr>

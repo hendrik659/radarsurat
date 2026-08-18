@@ -4,8 +4,6 @@
 
 @section('content')
     @php
-        $canManageCertificates = auth()->user()?->role?->slug === 'ketua_divisi'
-            && auth()->user()?->division?->code === 'SDM';
         $formatDate = static fn ($date) => $date?->locale('id')->translatedFormat('d F Y') ?? '-';
     @endphp
 
@@ -14,12 +12,12 @@
             <h1 class="rs-page-title h3 mb-1">Detail Sertifikat</h1>
             <p class="rs-page-description text-body-secondary mb-0">Arsip sertifikat peserta magang/PKL.</p>
         </div>
-        @if ($canManageCertificates)
+        @can('update', $certificate)
             <a class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('dashboard.certificates.edit', $certificate) }}" data-testid="certificate-edit-link">
                 <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
                 <span>Edit</span>
             </a>
-        @endif
+        @endcan
     </header>
 
     <div class="row g-4 align-items-start">

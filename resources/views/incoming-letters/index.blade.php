@@ -145,11 +145,20 @@
                                     <a
                                         class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
                                         href="{{ route('incoming-letters.show', $incomingLetter) }}"
+                                        data-testid="incoming-letter-detail-link"
                                     >
                                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         <span>Detail</span>
                                     </a>
                                     @if ($isAdminSurat && $incomingLetter->status === 'baru_diterima')
+                                        <a
+                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                                            href="{{ route('incoming-letters.edit', $incomingLetter) }}"
+                                            data-testid="incoming-letter-edit-link"
+                                        >
+                                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                            <span>Edit</span>
+                                        </a>
                                         <form
                                             method="POST"
                                             action="{{ route('incoming-letters.submit-for-review', $incomingLetter) }}"
@@ -169,57 +178,10 @@
                                                 data-testid="incoming-letter-submit-button"
                                             >
                                                 <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
-                                                <span>Kirim untuk Pemeriksaan</span>
+                                                <span>Kirim Pemeriksaan</span>
                                             </button>
                                         </form>
                                     @endif
-                                    <div class="dropdown">
-                                        <button
-                                            class="btn btn-sm btn-link rs-overflow-toggle d-inline-flex align-items-center justify-content-center"
-                                            id="incomingLetterActions{{ $incomingLetter->id }}"
-                                            type="button"
-                                            data-bs-toggle="dropdown"
-                                            data-bs-boundary="viewport"
-                                            data-rs-table-dropdown
-                                            aria-expanded="false"
-                                            aria-label="Aksi lainnya untuk surat {{ $incomingLetter->agenda_number }}"
-                                            data-testid="incoming-letter-utility-menu"
-                                        >
-                                            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end rs-table-dropdown-menu" aria-labelledby="incomingLetterActions{{ $incomingLetter->id }}">
-                                            <li>
-                                                <a
-                                                    class="dropdown-item d-flex align-items-center gap-2"
-                                                    href="{{ route('incoming-letters.preview', $incomingLetter) }}"
-                                                    target="_blank"
-                                                    rel="noopener"
-                                                >
-                                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
-                                                    <span>Preview Dokumen</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('incoming-letters.download', $incomingLetter) }}">
-                                                    <i class="fa-solid fa-download" aria-hidden="true"></i>
-                                                    <span>Download Dokumen</span>
-                                                </a>
-                                            </li>
-                                            @if ($isAdminSurat && $incomingLetter->status === 'baru_diterima')
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a
-                                                        class="dropdown-item d-flex align-items-center gap-2"
-                                                        href="{{ route('incoming-letters.edit', $incomingLetter) }}"
-                                                        data-testid="incoming-letter-edit-link"
-                                                    >
-                                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                                        <span>Edit Data</span>
-                                                    </a>
-                                                </li>
-                                            @endif
-                                        </ul>
-                                    </div>
                                 </div>
                             </td>
                         </tr>

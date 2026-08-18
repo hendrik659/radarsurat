@@ -106,49 +106,14 @@
                             <td>{{ $outgoingLetter->division?->name ?? '-' }}</td>
                             <td class="text-center">
                                 <div class="rs-outgoing-actions d-flex flex-nowrap justify-content-center align-items-center gap-2">
-                                    <a class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" href="{{ route('outgoing-letters.show', $outgoingLetter) }}">
+                                    <a
+                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                                        href="{{ route('outgoing-letters.show', $outgoingLetter) }}"
+                                        data-testid="outgoing-letter-detail-link"
+                                    >
                                         <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         <span>Detail</span>
                                     </a>
-                                    <div class="dropdown">
-                                        <button
-                                            class="btn btn-sm btn-link rs-overflow-toggle d-inline-flex align-items-center justify-content-center"
-                                            id="outgoingLetterActions{{ $outgoingLetter->id }}"
-                                            type="button"
-                                            data-bs-toggle="dropdown"
-                                            data-bs-boundary="viewport"
-                                            data-rs-table-dropdown
-                                            aria-expanded="false"
-                                            aria-label="Aksi lainnya untuk surat {{ $outgoingLetter->reference_code }}"
-                                            data-testid="outgoing-letter-utility-menu"
-                                        >
-                                            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end rs-table-dropdown-menu" aria-labelledby="outgoingLetterActions{{ $outgoingLetter->id }}">
-                                            <li>
-                                                <a
-                                                    class="dropdown-item d-flex align-items-center gap-2"
-                                                    href="{{ route('outgoing-letters.preview', $outgoingLetter) }}"
-                                                    target="_blank"
-                                                    rel="noopener"
-                                                    data-testid="outgoing-letter-preview-link"
-                                                >
-                                                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
-                                                    <span>Preview Dokumen</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a
-                                                    class="dropdown-item d-flex align-items-center gap-2"
-                                                    href="{{ route('outgoing-letters.download', $outgoingLetter) }}"
-                                                    data-testid="outgoing-letter-download-link"
-                                                >
-                                                    <i class="fa-solid fa-download" aria-hidden="true"></i>
-                                                    <span>Download Dokumen</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </div>
                             </td>
                         </tr>

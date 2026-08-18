@@ -51,8 +51,12 @@ class UserIndexTest extends TestCase
             ->assertDontSee('<th>Role</th>', false)
             ->assertDontSee('<th>Status akun</th>', false)
             ->assertSee('<th class="text-center" scope="col">Aksi</th>', false)
-            ->assertSee('data-confirmation-title="Nonaktifkan Pengguna"', false)
-            ->assertSee('data-confirmation-variant="danger"', false)
+            ->assertSee('class="rs-user-filter-form row g-3 align-items-end"', false)
+            ->assertSee('class="rs-user-filter-actions"', false)
+            ->assertSee('fa-rotate-left', false)
+            ->assertSee('aria-label="Lihat detail '.$matchingUser->name.'"', false)
+            ->assertDontSee('data-testid="user-edit-link"', false)
+            ->assertDontSee('data-testid="user-status-form"', false)
             ->assertDontSee('Budi Tidak Cocok');
 
         $this->actingAs($manager)
@@ -94,7 +98,7 @@ class UserIndexTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_user_actions_keep_status_visible_and_move_edit_to_the_overflow_menu(): void
+    public function test_user_index_only_displays_detail_and_user_detail_contains_authorized_management_actions(): void
     {
         $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
         $memberRole = Role::query()->create(['name' => 'Anggota Divisi', 'slug' => 'anggota_divisi']);
@@ -105,23 +109,50 @@ class UserIndexTest extends TestCase
             ->get(route('users.index', ['search' => $member->name]))
             ->assertOk()
             ->assertSee('aria-label="Lihat detail '.$member->name.'"', false)
-            ->assertSee('data-testid="user-status-form"', false)
-            ->assertSee('btn-outline-danger', false)
-            ->assertSee('data-testid="user-utility-menu"', false)
-            ->assertSee('data-rs-table-dropdown', false)
-            ->assertSee('data-testid="user-edit-link"', false)
-            ->assertSee('fa-ellipsis-vertical', false)
-            ->assertSee('Edit Data')
-            ->assertDontSee('<span>Edit</span>', false);
+            ->assertSee('<span>Detail</span>', false)
+            ->assertDontSee('data-testid="user-status-form"', false)
+            ->assertDontSee('data-testid="user-utility-menu"', false)
+            ->assertDontSee('data-rs-table-dropdown', false)
+            ->assertDontSee('data-testid="user-edit-link"', false)
+            ->assertDontSee('fa-ellipsis-vertical', false)
+            ->assertDontSee('Edit Data');
 
         $this->actingAs($manager)
-            ->get(route('users.index', ['search' => $manager->name]))
+            ->get(route('users.show', $member))
             ->assertOk()
             ->assertSee('data-testid="user-edit-link"', false)
-            ->assertSee('btn-outline-secondary', false)
+            ->assertSee('<span>Edit</span>', false)
+            ->assertSee('data-testid="user-status-form"', false)
+            ->assertSee('data-confirmation-title="Nonaktifkan Pengguna"', false)
+            ->assertSee('data-confirmation-variant="danger"', false)
+            ->assertSee('<span>Nonaktifkan</span>', false)
+            ->assertSee('fa-arrow-left', false)
+            ->assertSee('fa-pen-to-square', false);
+
+        $this->actingAs($manager)
+            ->get(route('users.show', $manager))
+            ->assertOk()
+            ->assertSee('data-testid="user-edit-link"', false)
             ->assertSee('Akun Anda')
             ->assertDontSee('data-testid="user-status-form"', false)
             ->assertDontSee('data-testid="user-utility-menu"', false);
+    }
+
+    public function test_inactive_user_detail_displays_activation_action_with_global_confirmation(): void
+    {
+        $managerRole = Role::query()->create(['name' => 'Admin Surat', 'slug' => 'admin_surat']);
+        $memberRole = Role::query()->create(['name' => 'Anggota Divisi', 'slug' => 'anggota_divisi']);
+        $manager = $this->makeUser($managerRole, 'Pengelola Pengguna');
+        $inactiveMember = $this->makeUser($memberRole, 'Pengguna Nonaktif', ['is_active' => false]);
+
+        $this->actingAs($manager)
+            ->get(route('users.show', $inactiveMember))
+            ->assertOk()
+            ->assertSee('data-testid="user-status-form"', false)
+            ->assertSee('data-confirmation-title="Aktifkan Pengguna"', false)
+            ->assertSee('data-confirmation-action-label="Aktifkan"', false)
+            ->assertSee('data-confirmation-variant="success"', false)
+            ->assertSee('<span>Aktifkan</span>', false);
     }
 
     public function test_admin_can_manage_users_without_permanent_delete_routes(): void

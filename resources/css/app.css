@@ -1539,6 +1539,29 @@ body {
     font-weight: 650;
 }
 
+.rs-user-filter-form,
+.rs-user-filter-form > [class*="col-"],
+.rs-user-filter-form .input-group,
+.rs-user-filter-form .form-control,
+.rs-user-filter-form .form-select,
+.rs-user-filter-actions {
+    min-width: 0;
+}
+
+.rs-user-filter-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 0.5rem;
+}
+
+.rs-user-filter-actions .btn {
+    min-width: 0;
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
 .rs-body .btn {
     border-radius: var(--rs-radius-sm);
     font-weight: 650;
