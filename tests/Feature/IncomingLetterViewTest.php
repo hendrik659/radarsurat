@@ -114,8 +114,11 @@ class IncomingLetterViewTest extends TestCase
             ->assertSee('Segera')
             ->assertSee('Baru Diterima')
             ->assertSee('href="'.route('incoming-letters.show', $letter).'"', false)
-            ->assertSee('href="'.route('incoming-letters.preview', $letter).'"', false)
-            ->assertSee('href="'.route('incoming-letters.download', $letter).'"', false)
+            ->assertSee('data-testid="incoming-letter-detail-link"', false)
+            ->assertDontSee('href="'.route('incoming-letters.preview', $letter).'"', false)
+            ->assertDontSee('href="'.route('incoming-letters.download', $letter).'"', false)
+            ->assertDontSee('data-testid="incoming-letter-utility-menu"', false)
+            ->assertDontSee('fa-ellipsis-vertical', false)
             ->assertDontSee('Hapus');
     }
 
@@ -181,6 +184,7 @@ class IncomingLetterViewTest extends TestCase
             ->assertSee('data="'.route('incoming-letters.preview', $letter).'"', false)
             ->assertSee('href="'.route('incoming-letters.download', $letter).'"', false)
             ->assertSee('data-testid="incoming-letter-preview"', false)
+            ->assertSee('data-testid="incoming-letter-preview-link"', false)
             ->assertSee('data-testid="incoming-letter-download-link"', false);
     }
 
@@ -206,14 +210,20 @@ class IncomingLetterViewTest extends TestCase
         $this->actingAs($admin)
             ->get(route('incoming-letters.index'))
             ->assertOk()
+            ->assertSeeInOrder([
+                'data-testid="incoming-letter-detail-link"',
+                'data-testid="incoming-letter-edit-link"',
+                'data-testid="incoming-letter-submit-form"',
+            ], false)
             ->assertSee('data-testid="incoming-letter-submit-button"', false)
             ->assertSee('class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"', false)
-            ->assertSee('data-testid="incoming-letter-utility-menu"', false)
-            ->assertSee('data-rs-table-dropdown', false)
-            ->assertSee('Preview Dokumen')
-            ->assertSee('Download Dokumen')
-            ->assertSee('Edit Data')
-            ->assertSee('data-testid="incoming-letter-edit-link"', false);
+            ->assertSee('<span>Detail</span>', false)
+            ->assertSee('<span>Edit</span>', false)
+            ->assertSee('<span>Kirim Pemeriksaan</span>', false)
+            ->assertDontSee('href="'.route('incoming-letters.preview', $letter).'"', false)
+            ->assertDontSee('href="'.route('incoming-letters.download', $letter).'"', false)
+            ->assertDontSee('data-testid="incoming-letter-utility-menu"', false)
+            ->assertDontSee('fa-ellipsis-vertical', false);
 
         $this->actingAs($admin)
             ->get(route('incoming-letters.show', $letter))
@@ -240,11 +250,9 @@ class IncomingLetterViewTest extends TestCase
         $this->actingAs($reader)
             ->get(route('incoming-letters.index'))
             ->assertOk()
-            ->assertSee('data-testid="incoming-letter-utility-menu"', false)
-            ->assertSee('data-rs-table-dropdown', false)
-            ->assertSee('Preview Dokumen')
-            ->assertSee('Download Dokumen')
-            ->assertDontSee('Edit Data')
+            ->assertSee('data-testid="incoming-letter-detail-link"', false)
+            ->assertDontSee('data-testid="incoming-letter-utility-menu"', false)
+            ->assertDontSee('data-testid="incoming-letter-edit-link"', false)
             ->assertDontSee('data-testid="incoming-letter-submit-form"', false);
     }
 
@@ -262,6 +270,15 @@ class IncomingLetterViewTest extends TestCase
             ->assertSee('Menunggu Pemeriksaan')
             ->assertDontSee('data-testid="incoming-letter-edit-link"', false)
             ->assertDontSee('data-testid="incoming-letter-submit-form"', false);
+
+        $this->actingAs($admin)
+            ->get(route('incoming-letters.index'))
+            ->assertOk()
+            ->assertSee('data-testid="incoming-letter-detail-link"', false)
+            ->assertDontSee('data-testid="incoming-letter-edit-link"', false)
+            ->assertDontSee('data-testid="incoming-letter-submit-form"', false)
+            ->assertDontSee('href="'.route('incoming-letters.preview', $letter).'"', false)
+            ->assertDontSee('href="'.route('incoming-letters.download', $letter).'"', false);
     }
 
     public function test_priority_options_only_contain_biasa_and_segera(): void

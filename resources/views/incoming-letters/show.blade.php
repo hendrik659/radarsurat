@@ -49,16 +49,8 @@
     </header>
 
     <section class="card rs-card shadow-sm mb-4" aria-label="Preview dokumen surat masuk">
-        <div class="card-header bg-body d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 py-3">
+        <div class="card-header bg-body py-3">
             <h2 class="h5 mb-0">Preview Dokumen</h2>
-            <a
-                class="btn btn-sm btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2"
-                href="{{ route('incoming-letters.download', $incomingLetter) }}"
-                data-testid="incoming-letter-download-link"
-            >
-                <i class="fa-solid fa-download" aria-hidden="true"></i>
-                <span>Download</span>
-            </a>
         </div>
         <div class="card-body p-3 p-md-4">
             <div class="rs-document-preview">
@@ -241,11 +233,25 @@
                 @method('PATCH')
                 <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100" type="submit">
                     <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
-                    <span>Kirim untuk Pemeriksaan</span>
+                    <span>Kirim Pemeriksaan</span>
                 </button>
             </form>
         @endif
-        <a class="btn btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2" href="{{ route('incoming-letters.download', $incomingLetter) }}">
+        <a
+            class="btn btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2"
+            href="{{ route('incoming-letters.preview', $incomingLetter) }}"
+            target="_blank"
+            rel="noopener"
+            data-testid="incoming-letter-preview-link"
+        >
+            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+            <span>Preview</span>
+        </a>
+        <a
+            class="btn btn-link rs-utility-action d-inline-flex align-items-center justify-content-center gap-2"
+            href="{{ route('incoming-letters.download', $incomingLetter) }}"
+            data-testid="incoming-letter-download-link"
+        >
             <i class="fa-solid fa-download" aria-hidden="true"></i>
             <span>Download</span>
         </a>

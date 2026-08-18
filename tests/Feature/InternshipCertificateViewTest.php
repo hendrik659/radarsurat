@@ -47,8 +47,10 @@ class InternshipCertificateViewTest extends TestCase
             ->assertSee('01 Mei 2026')
             ->assertSee('31 Juli 2026')
             ->assertSee(route('dashboard.certificates.show', $certificate), false)
-            ->assertSee('data-testid="certificate-edit-link"', false)
-            ->assertSee('class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"', false)
+            ->assertSee('<i class="fa-solid fa-eye"', false)
+            ->assertSee('<span>Detail</span>', false)
+            ->assertDontSee('data-testid="certificate-edit-link"', false)
+            ->assertDontSee('<span>Edit</span>', false)
             ->assertDontSee('Kode Sistem')
             ->assertDontSee('SERT-2026-014')
             ->assertDontSee($certificate->document_path)
@@ -165,7 +167,8 @@ class InternshipCertificateViewTest extends TestCase
                 ->get(route('dashboard.certificates.index'))
                 ->assertOk()
                 ->assertDontSee('data-testid="certificate-create-link"', false)
-                ->assertDontSee('data-testid="certificate-edit-link"', false);
+                ->assertDontSee('data-testid="certificate-edit-link"', false)
+                ->assertSee('<span>Detail</span>', false);
             $this->actingAs($reader)
                 ->get(route('dashboard.certificates.show', $certificate))
                 ->assertOk()
