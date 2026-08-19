@@ -21,7 +21,7 @@ class StoreIncomingLetterRequest extends FormRequest
             'agenda_number' => ['required', 'string', 'max:100', 'unique:incoming_letters,agenda_number'],
             'letter_number' => ['nullable', 'string', 'max:100'],
             'sender_name' => ['required', 'string', 'max:255'],
-            'addressed_to' => ['required', 'string', 'max:255'],
+            'addressed_to' => ['nullable', 'string', 'max:255'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['required', 'date'],
             'received_via' => ['required', 'string', 'max:100'],

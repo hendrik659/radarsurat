@@ -100,6 +100,7 @@ class IncomingLetterController extends Controller
     public function store(StoreIncomingLetterRequest $request): JsonResponse|RedirectResponse
     {
         $data = $request->validated();
+        $data['addressed_to'] = $data['addressed_to'] ?? null;
         $document = $data['document'];
         unset($data['document']);
 
@@ -189,6 +190,7 @@ class IncomingLetterController extends Controller
         $this->ensureEditable($incomingLetter);
 
         $data = $request->validated();
+        $data['addressed_to'] = $data['addressed_to'] ?? null;
         $document = $data['document'] ?? null;
         unset($data['document']);
 
