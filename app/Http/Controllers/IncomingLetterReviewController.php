@@ -48,56 +48,74 @@ class IncomingLetterReviewController extends Controller
 
         $data = $request->validated();
         $reviewerId = $request->user()->id;
+        $reviewerName = $request->user()->name;
+        $action = $data['action'];
 
-        $reviewedLetter = DB::transaction(function () use ($data, $incomingLetter, $reviewerId) {
+        $reviewedLetter = DB::transaction(function () use ($action, $data, $incomingLetter, $reviewerId, $reviewerName) {
             $lockedLetter = IncomingLetter::query()
                 ->lockForUpdate()
                 ->findOrFail($incomingLetter->id);
 
             $this->ensureReviewable($lockedLetter);
 
-            $destinationDivision = Division::query()
-                ->whereKey($data['destination_division_id'])
-                ->where('is_active', true)
-                ->lockForUpdate()
-                ->first();
+            $destinationDivision = null;
 
-            abort_unless(
-                $destinationDivision !== null,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                'Divisi tujuan tidak tersedia atau sudah tidak aktif.',
-            );
+            if ($action === 'forward') {
+                $destinationDivision = Division::query()
+                    ->whereKey($data['destination_division_id'])
+                    ->where('is_active', true)
+                    ->lockForUpdate()
+                    ->first();
+
+                abort_unless(
+                    $destinationDivision !== null,
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'Divisi tujuan tidak tersedia atau sudah tidak aktif.',
+                );
+            }
 
             $reviewNote = $data['review_note'] ?? null;
 
             $lockedLetter->review()->create([
                 'reviewed_by' => $reviewerId,
-                'destination_division_id' => $destinationDivision->id,
+                'destination_division_id' => $destinationDivision?->id,
                 'review_note' => $reviewNote,
                 'reviewed_at' => now(),
             ]);
 
             $lockedLetter->update([
-                'destination_division_id' => $destinationDivision->id,
+                'destination_division_id' => $destinationDivision?->id,
                 'status' => IncomingLetter::STATUS_SELESAI,
             ]);
+
+            $activity = $action === 'archive_directly'
+                ? "Surat diarsipkan langsung oleh {$reviewerName} tanpa diteruskan ke divisi."
+                : "Surat diperiksa dan diteruskan ke Divisi {$destinationDivision->name}";
 
             $lockedLetter->statusHistories()->create([
                 'previous_status' => IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN,
                 'new_status' => IncomingLetter::STATUS_SELESAI,
-                'activity' => "Surat diperiksa dan diteruskan ke Divisi {$destinationDivision->name}",
+                'activity' => $activity,
                 'notes' => $reviewNote,
                 'changed_by' => $reviewerId,
             ]);
 
-            $this->notificationService->notifyForwardedToDivisionAfterCommit($lockedLetter->id);
+            if ($action === 'archive_directly') {
+                $this->notificationService->notifyArchivedDirectlyAfterCommit($lockedLetter->id);
+            } else {
+                $this->notificationService->notifyForwardedToDivisionAfterCommit($lockedLetter->id);
+            }
 
             return $lockedLetter;
         });
 
+        $successMessage = $action === 'archive_directly'
+            ? 'Surat Masuk berhasil diarsipkan langsung.'
+            : 'Surat Masuk berhasil diperiksa dan diteruskan ke divisi tujuan.';
+
         return redirect()
             ->route('incoming-letters.show', $reviewedLetter)
-            ->with('success', 'Surat Masuk berhasil diperiksa dan diteruskan ke divisi tujuan.');
+            ->with('success', $successMessage);
     }
 
     private function ensureReviewable(IncomingLetter $incomingLetter): void
