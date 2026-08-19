@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreIncomingLetterReviewRequest;
 use App\Models\Division;
 use App\Models\IncomingLetter;
+use App\Services\IncomingLetterNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class IncomingLetterReviewController extends Controller
 {
+    public function __construct(
+        private readonly IncomingLetterNotificationService $notificationService,
+    ) {}
+
     public function create(IncomingLetter $incomingLetter): View
     {
         Gate::authorize('review', $incomingLetter);
@@ -84,6 +89,8 @@ class IncomingLetterReviewController extends Controller
                 'notes' => $reviewNote,
                 'changed_by' => $reviewerId,
             ]);
+
+            $this->notificationService->notifyForwardedToDivisionAfterCommit($lockedLetter->id);
 
             return $lockedLetter;
         });
