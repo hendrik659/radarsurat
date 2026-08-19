@@ -98,6 +98,96 @@ class IncomingLetterBackendTest extends TestCase
         Storage::disk('local')->assertMissing($previousPath);
     }
 
+    public function test_admin_can_create_an_incoming_letter_with_or_without_the_optional_addressed_to(): void
+    {
+        $admin = $this->makeUser('admin_surat', 'Admin Surat');
+        $withoutAddressedTo = $this->letterPayload([
+            'agenda_number' => 'AGD-TUJUAN-OPSIONAL',
+        ]);
+        unset($withoutAddressedTo['addressed_to']);
+
+        $this->actingAs($admin)
+            ->postJson(route('incoming-letters.store'), $withoutAddressedTo)
+            ->assertCreated()
+            ->assertJsonPath('addressed_to', null);
+
+        $letterWithoutAddressedTo = IncomingLetter::query()
+            ->where('agenda_number', 'AGD-TUJUAN-OPSIONAL')
+            ->firstOrFail();
+
+        $this->assertNull($letterWithoutAddressedTo->addressed_to);
+
+        $this->actingAs($admin)
+            ->get(route('incoming-letters.show', $letterWithoutAddressedTo))
+            ->assertOk()
+            ->assertSee('Tidak dicantumkan');
+
+        $this->actingAs($admin)
+            ->postJson(route('incoming-letters.store'), $this->letterPayload([
+                'agenda_number' => 'AGD-TUJUAN-NULL',
+                'addressed_to' => null,
+            ]))
+            ->assertCreated()
+            ->assertJsonPath('addressed_to', null);
+
+        $this->assertDatabaseHas('incoming_letters', [
+            'agenda_number' => 'AGD-TUJUAN-NULL',
+            'addressed_to' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->postJson(route('incoming-letters.store'), $this->letterPayload([
+                'agenda_number' => 'AGD-TUJUAN-TERISI',
+                'addressed_to' => 'Pimpinan Jawa Pos Radar Kediri',
+            ]))
+            ->assertCreated()
+            ->assertJsonPath('addressed_to', 'Pimpinan Jawa Pos Radar Kediri');
+
+        $this->assertDatabaseHas('incoming_letters', [
+            'agenda_number' => 'AGD-TUJUAN-TERISI',
+            'addressed_to' => 'Pimpinan Jawa Pos Radar Kediri',
+        ]);
+    }
+
+    public function test_optional_addressed_to_still_enforces_length_and_other_required_fields(): void
+    {
+        $admin = $this->makeUser('admin_surat', 'Admin Surat');
+
+        $this->actingAs($admin)
+            ->postJson(route('incoming-letters.store'), $this->letterPayload([
+                'addressed_to' => str_repeat('a', 256),
+            ]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('addressed_to');
+
+        $payload = $this->letterPayload(['addressed_to' => null]);
+        unset($payload['sender_name']);
+
+        $this->actingAs($admin)
+            ->postJson(route('incoming-letters.store'), $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('sender_name');
+    }
+
+    public function test_admin_can_clear_addressed_to_when_updating_an_editable_letter(): void
+    {
+        $admin = $this->makeUser('admin_surat', 'Admin Surat');
+        $letter = $this->makeLetter($admin, [
+            'addressed_to' => 'Tujuan Surat Lama',
+        ]);
+        $payload = $this->letterPayload([
+            'agenda_number' => $letter->agenda_number,
+        ]);
+        unset($payload['addressed_to'], $payload['document']);
+
+        $this->actingAs($admin)
+            ->putJson(route('incoming-letters.update', $letter), $payload)
+            ->assertOk()
+            ->assertJsonPath('addressed_to', null);
+
+        $this->assertNull($letter->fresh()->addressed_to);
+    }
+
     public function test_upload_is_stored_privately_with_its_metadata(): void
     {
         $admin = $this->makeUser('admin_surat', 'Admin Surat');

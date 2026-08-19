@@ -88,7 +88,7 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label" for="addressed_to">Tujuan pada Surat <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden"> (wajib)</span></label>
+                    <label class="form-label" for="addressed_to">Tujuan pada Surat <span class="text-body-secondary fw-normal">(Opsional)</span></label>
                     <input
                         class="form-control @error('addressed_to') is-invalid @enderror"
                         id="addressed_to"
@@ -96,7 +96,6 @@
                         type="text"
                         value="{{ old('addressed_to', $incomingLetter->addressed_to ?? '') }}"
                         maxlength="255"
-                        required
                     >
                     @error('addressed_to')
                         <div class="invalid-feedback">{{ $message }}</div>

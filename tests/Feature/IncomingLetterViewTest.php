@@ -49,8 +49,10 @@ class IncomingLetterViewTest extends TestCase
         $admin = $this->makeUser('admin_surat', 'Admin Surat');
         $letter = $this->makeLetter($admin);
 
-        $this->actingAs($admin)
-            ->get(route('incoming-letters.create'))
+        $createResponse = $this->actingAs($admin)
+            ->get(route('incoming-letters.create'));
+
+        $createResponse
             ->assertOk()
             ->assertViewIs('incoming-letters.form')
             ->assertSee('Tambah Surat Masuk')
@@ -60,7 +62,13 @@ class IncomingLetterViewTest extends TestCase
             ->assertSee('class="col-12 col-lg-5"', false)
             ->assertSee('class="rs-document-preview-sticky"', false)
             ->assertSee('data-document-preview-area', false)
+            ->assertSee('Tujuan pada Surat')
+            ->assertSee('(Opsional)')
             ->assertSee('Belum ada dokumen dipilih. Pilih file untuk melihat preview.');
+
+        preg_match('/<input\b[^>]*\bid="addressed_to"[^>]*>/s', $createResponse->getContent(), $addressedToInput);
+        $this->assertNotEmpty($addressedToInput);
+        $this->assertStringNotContainsString('required', $addressedToInput[0]);
 
         $this->actingAs($admin)
             ->get(route('incoming-letters.edit', $letter))

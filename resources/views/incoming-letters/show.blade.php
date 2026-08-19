@@ -94,7 +94,7 @@
                     ['Nomor Agenda', $incomingLetter->agenda_number ?: '-'],
                     ['Nomor Surat', $incomingLetter->letter_number ?: '-'],
                     ['Pengirim', $incomingLetter->sender_name ?: '-'],
-                    ['Tujuan pada Surat', $incomingLetter->addressed_to ?: '-'],
+                    ['Tujuan pada Surat', $incomingLetter->addressed_to ?: 'Tidak dicantumkan'],
                     ['Tanggal Surat', $incomingLetter->letter_date?->format('d-m-Y') ?? '-'],
                     ['Tanggal Diterima', $incomingLetter->received_date?->format('d-m-Y') ?? '-'],
                     ['Media Penerimaan', $receivedViaLabels[$incomingLetter->received_via] ?? ($incomingLetter->received_via ?: '-')],

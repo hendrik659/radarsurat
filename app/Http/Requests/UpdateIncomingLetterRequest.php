@@ -26,7 +26,7 @@ class UpdateIncomingLetterRequest extends FormRequest
             ],
             'letter_number' => ['nullable', 'string', 'max:100'],
             'sender_name' => ['required', 'string', 'max:255'],
-            'addressed_to' => ['required', 'string', 'max:255'],
+            'addressed_to' => ['nullable', 'string', 'max:255'],
             'letter_date' => ['nullable', 'date'],
             'received_date' => ['required', 'date'],
             'received_via' => ['required', 'string', 'max:100'],
