@@ -6,6 +6,7 @@ use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\IncomingLetterController;
 use App\Http\Controllers\IncomingLetterReviewController;
 use App\Http\Controllers\InternshipCertificateController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OutgoingLetterController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -27,6 +28,13 @@ Route::middleware(['auth', 'active'])
     ->prefix('dashboard')
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        Route::get('/notifications', [NotificationController::class, 'index'])
+            ->name('notifications.index');
+        Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])
+            ->name('notifications.read-all');
+        Route::patch('/notifications/{notification}/open', [NotificationController::class, 'open'])
+            ->name('notifications.open');
 
         Route::get('/reports/incoming-letters/export', [ReportController::class, 'exportIncomingLetters'])
             ->name('reports.incoming-letters.export');

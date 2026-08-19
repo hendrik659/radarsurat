@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreOutgoingLetterRequest;
 use App\Models\Division;
 use App\Models\OutgoingLetter;
+use App\Services\OutgoingLetterNotificationService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +22,10 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class OutgoingLetterController extends Controller
 {
+    public function __construct(
+        private readonly OutgoingLetterNotificationService $notificationService,
+    ) {}
+
     public function index(Request $request): View|JsonResponse
     {
         Gate::authorize('viewAny', OutgoingLetter::class);
@@ -109,6 +114,8 @@ class OutgoingLetterController extends Controller
                     'notes' => null,
                     'changed_by' => $request->user()->id,
                 ]);
+
+                $this->notificationService->notifyCreatedAfterCommit($outgoingLetter->id);
 
                 return $outgoingLetter;
             });

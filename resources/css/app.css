@@ -2393,6 +2393,199 @@ body {
     }
 }
 
+.rs-navbar-notifications,
+.rs-notification-bell,
+.rs-notification-copy {
+    min-width: 0;
+}
+
+.rs-navbar-notifications,
+.rs-notification-bell {
+    flex: 0 0 auto;
+}
+
+.rs-notification-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--rs-line);
+    border-radius: 50%;
+    color: var(--rs-primary-dark);
+    background: var(--rs-surface);
+}
+
+.rs-notification-toggle:hover,
+.rs-notification-toggle:focus-visible,
+.rs-notification-toggle[aria-expanded="true"] {
+    color: var(--rs-primary-dark);
+    border-color: #9bbcec;
+    background: var(--rs-primary-soft);
+}
+
+.rs-notification-badge {
+    position: absolute;
+    top: -0.35rem;
+    right: -0.45rem;
+    min-width: 1.35rem;
+    padding: 0.28rem 0.35rem;
+    color: #fff;
+    background: #dc3545;
+    font-size: 0.65rem;
+    line-height: 1;
+}
+
+.rs-notification-dropdown {
+    width: min(25rem, calc(100vw - 2rem));
+    padding: 0;
+    overflow: hidden;
+    border-color: var(--rs-line);
+    border-radius: var(--rs-radius-md);
+}
+
+.rs-notification-dropdown-header,
+.rs-notification-dropdown-footer {
+    padding: 0.9rem 1rem;
+    background: var(--rs-surface);
+}
+
+.rs-notification-dropdown-header {
+    border-bottom: 1px solid var(--rs-line);
+}
+
+.rs-notification-dropdown-list {
+    max-height: min(26rem, calc(100vh - 12rem));
+    max-height: min(26rem, calc(100dvh - 12rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.rs-notification-dropdown-list form + form,
+.rs-notification-list .list-group > form + form {
+    border-top: 1px solid var(--rs-line);
+}
+
+.rs-notification-dropdown-item,
+.rs-notification-list-item {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    white-space: normal;
+}
+
+.rs-notification-dropdown-item {
+    padding: 0.9rem 1rem;
+}
+
+.rs-notification-list-item {
+    padding: 1.1rem 1.25rem;
+    color: var(--rs-ink);
+    background: var(--rs-surface);
+}
+
+.rs-notification-dropdown-item:hover,
+.rs-notification-dropdown-item:focus-visible,
+.rs-notification-list-item:hover,
+.rs-notification-list-item:focus-visible {
+    background: #f8faff;
+}
+
+.rs-notification-unread,
+.rs-notification-unread:hover,
+.rs-notification-unread:focus-visible {
+    background: var(--rs-primary-soft);
+}
+
+.rs-notification-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    color: var(--rs-primary-dark);
+    background: #dceaff;
+}
+
+.rs-notification-title,
+.rs-notification-message {
+    overflow-wrap: anywhere;
+}
+
+.rs-notification-title {
+    color: var(--rs-primary-dark);
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.rs-notification-message {
+    display: -webkit-box;
+    margin-top: 0.2rem;
+    overflow: hidden;
+    color: var(--rs-muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.rs-notification-time {
+    margin-top: 0.3rem;
+    color: var(--rs-muted);
+    font-size: 0.72rem;
+}
+
+.rs-notification-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-top: 0.25rem;
+    border-radius: 50%;
+    background: var(--rs-primary);
+}
+
+.rs-notification-empty {
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+
+.rs-notification-dropdown-footer {
+    border-top: 1px solid var(--rs-line);
+}
+
+.rs-notification-dropdown-footer a {
+    color: var(--rs-primary-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.rs-notification-list .list-group > form {
+    margin: 0;
+}
+
+.rs-notification-list-item .rs-notification-message {
+    display: block;
+    font-size: 0.9rem;
+}
+
+.rs-notification-open-icon {
+    color: #94a3b8;
+}
+
+.rs-notification-page-empty .rs-empty-state-content {
+    min-height: 12rem;
+}
+
+@media (max-width: 575.98px) {
+    .rs-notification-dropdown {
+        width: calc(100vw - 1.5rem);
+    }
+
+    .rs-notification-list-item {
+        padding: 1rem;
+    }
+
+    .rs-notification-open-icon {
+        display: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .rs-sidebar,
     .rs-main-wrapper,

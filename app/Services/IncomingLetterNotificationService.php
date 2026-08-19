@@ -6,6 +6,7 @@ use App\Models\IncomingLetter;
 use App\Models\User;
 use App\Notifications\IncomingLetterForwardedToDivision;
 use App\Notifications\IncomingLetterSubmittedForReview;
+use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,14 @@ class IncomingLetterNotificationService
                     new IncomingLetterSubmittedForReview($incomingLetter),
                     $incomingLetterId,
                     'submitted_for_review',
+                    ['mail'],
+                );
+                $this->notifySafely(
+                    $recipient,
+                    new IncomingLetterSubmittedForReview($incomingLetter),
+                    $incomingLetterId,
+                    'submitted_for_review',
+                    ['database'],
                 );
             }
         });
@@ -56,27 +65,43 @@ class IncomingLetterNotificationService
     {
         $this->runSafely($incomingLetterId, 'forwarded_to_division', function () use ($incomingLetterId) {
             $incomingLetter = IncomingLetter::query()
-                ->with('destinationDivision:id,name')
+                ->with([
+                    'destinationDivision:id,name',
+                    'review.reviewer:id,name',
+                ])
                 ->findOrFail($incomingLetterId);
 
             if ($incomingLetter->destination_division_id === null) {
                 throw new RuntimeException('Surat masuk tidak memiliki divisi tujuan.');
             }
 
-            $recipients = User::query()
+            $emailRecipients = User::query()
                 ->where('is_active', true)
                 ->where('division_id', $incomingLetter->destination_division_id)
                 ->whereHas('role', fn (Builder $roleQuery) => $roleQuery->where('slug', 'ketua_divisi'))
                 ->get();
 
-            foreach ($recipients as $recipient) {
+            foreach ($emailRecipients as $recipient) {
                 $this->notifySafely(
                     $recipient,
                     new IncomingLetterForwardedToDivision($incomingLetter),
                     $incomingLetterId,
                     'forwarded_to_division',
+                    ['mail'],
                 );
             }
+
+            User::query()
+                ->where('is_active', true)
+                ->eachById(function (User $recipient) use ($incomingLetter, $incomingLetterId) {
+                    $this->notifySafely(
+                        $recipient,
+                        new IncomingLetterForwardedToDivision($incomingLetter),
+                        $incomingLetterId,
+                        'forwarded_to_division',
+                        ['database'],
+                    );
+                });
         });
     }
 
@@ -85,11 +110,12 @@ class IncomingLetterNotificationService
         Notification $notification,
         int $incomingLetterId,
         string $event,
+        array $channels,
     ): void {
         try {
-            $recipient->notify($notification);
+            app(Dispatcher::class)->sendNow($recipient, $notification, $channels);
         } catch (Throwable $exception) {
-            $this->logFailure($incomingLetterId, $event, $exception, $recipient->id);
+            $this->logFailure($incomingLetterId, $event, $exception, $recipient->id, $channels);
         }
     }
 
@@ -107,10 +133,12 @@ class IncomingLetterNotificationService
         string $event,
         Throwable $exception,
         ?int $recipientId = null,
+        array $channels = [],
     ): void {
-        Log::error('Email notifikasi Surat Masuk gagal dikirim.', [
+        Log::error('Notifikasi Surat Masuk gagal dikirim.', [
             'incoming_letter_id' => $incomingLetterId,
             'notification_event' => $event,
+            'notification_channels' => $channels,
             'recipient_user_id' => $recipientId,
             'exception_class' => $exception::class,
         ]);

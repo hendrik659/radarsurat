@@ -42,13 +42,21 @@ class IncomingLetterEmailNotificationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', IncomingLetter::STATUS_MENUNGGU_PEMERIKSAAN);
 
-        Notification::assertSentToTimes($pimpinan, IncomingLetterSubmittedForReview::class, 1);
-        Notification::assertSentToTimes($sdmHead, IncomingLetterSubmittedForReview::class, 1);
+        Notification::assertSentTo(
+            $pimpinan,
+            IncomingLetterSubmittedForReview::class,
+            fn ($notification, array $channels): bool => $channels === ['mail'],
+        );
+        Notification::assertSentTo(
+            $sdmHead,
+            IncomingLetterSubmittedForReview::class,
+            fn ($notification, array $channels): bool => $channels === ['mail'],
+        );
         Notification::assertNotSentTo(
             [$nonSdmHead, $sdmMember, $inactivePimpinan, $inactiveSdmHead, $admin],
             IncomingLetterSubmittedForReview::class,
+            fn ($notification, array $channels): bool => in_array('mail', $channels, true),
         );
-        Notification::assertSentTimes(IncomingLetterSubmittedForReview::class, 2);
 
         $this->assertDatabaseHas('incoming_letters', [
             'id' => $letter->id,
@@ -82,12 +90,16 @@ class IncomingLetterEmailNotificationTest extends TestCase
             ])
             ->assertRedirect(route('incoming-letters.show', $letter));
 
-        Notification::assertSentToTimes($destinationHead, IncomingLetterForwardedToDivision::class, 1);
+        Notification::assertSentTo(
+            $destinationHead,
+            IncomingLetterForwardedToDivision::class,
+            fn ($notification, array $channels): bool => $channels === ['mail'],
+        );
         Notification::assertNotSentTo(
             [$otherHead, $destinationMember, $inactiveDestinationHead, $reviewer, $admin],
             IncomingLetterForwardedToDivision::class,
+            fn ($notification, array $channels): bool => in_array('mail', $channels, true),
         );
-        Notification::assertSentTimes(IncomingLetterForwardedToDivision::class, 1);
 
         $letter->refresh();
 
@@ -182,9 +194,21 @@ class IncomingLetterEmailNotificationTest extends TestCase
         $this->makeUser('pimpinan');
         $letter = $this->makeLetter($admin);
         $dispatcher = Mockery::mock(Dispatcher::class);
-        $dispatcher->shouldReceive('send')
+        $dispatcher->shouldReceive('sendNow')
             ->once()
+            ->with(
+                Mockery::type(User::class),
+                Mockery::type(IncomingLetterSubmittedForReview::class),
+                ['mail'],
+            )
             ->andThrow(new RuntimeException('Simulasi SMTP tidak tersedia.'));
+        $dispatcher->shouldReceive('sendNow')
+            ->once()
+            ->with(
+                Mockery::type(User::class),
+                Mockery::type(IncomingLetterSubmittedForReview::class),
+                ['database'],
+            );
         $this->app->instance(Dispatcher::class, $dispatcher);
         Log::spy();
 
@@ -201,9 +225,10 @@ class IncomingLetterEmailNotificationTest extends TestCase
         Log::shouldHaveReceived('error')
             ->once()
             ->with(
-                'Email notifikasi Surat Masuk gagal dikirim.',
+                'Notifikasi Surat Masuk gagal dikirim.',
                 Mockery::on(fn (array $context) => $context['incoming_letter_id'] === $letter->id
                     && $context['notification_event'] === 'submitted_for_review'
+                    && $context['notification_channels'] === ['mail']
                     && $context['exception_class'] === RuntimeException::class),
             );
     }

@@ -130,6 +130,10 @@
                                 <div class="rs-global-subtitle">Sistem Arsip Jawa Pos Radar Kediri</div>
                             </div>
                         </div>
+
+                        <div class="rs-navbar-notifications d-flex align-items-center justify-content-end">
+                            @include('layouts.partials.notification-bell', ['currentUser' => $currentUser])
+                        </div>
                     </div>
                 </header>
 

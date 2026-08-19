@@ -32,4 +32,26 @@ class IncomingLetterForwardedToDivision extends Notification
             ->action('Lihat Surat di SIRAPI', route('incoming-letters.show', $this->incomingLetter))
             ->line('Silakan masuk ke SIRAPI untuk melihat detail dan dokumen surat.');
     }
+
+    /**
+     * @return array<string, int|string|null>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        $divisionName = $this->incomingLetter->destinationDivision?->name ?? '-';
+        $reviewer = $this->incomingLetter->review?->reviewer;
+        $sender = $this->incomingLetter->sender_name ?: '-';
+        $subject = $this->incomingLetter->subject ?: '-';
+        $reviewerName = $reviewer?->name ?? '-';
+
+        return [
+            'kind' => 'incoming_letter_forwarded',
+            'title' => "Surat Masuk Diteruskan ke Divisi {$divisionName}",
+            'message' => "Surat Masuk dari {$sender} dengan perihal {$subject} telah diperiksa oleh {$reviewerName} dan diteruskan ke Divisi {$divisionName}.",
+            'incoming_letter_id' => $this->incomingLetter->id,
+            'destination_division_id' => $this->incomingLetter->destination_division_id,
+            'reviewer_id' => $reviewer?->id,
+            'icon' => 'fa-solid fa-share-from-square',
+        ];
+    }
 }
