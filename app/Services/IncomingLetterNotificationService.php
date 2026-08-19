@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\IncomingLetter;
 use App\Models\User;
+use App\Notifications\IncomingLetterArchivedDirectly;
 use App\Notifications\IncomingLetterForwardedToDivision;
 use App\Notifications\IncomingLetterSubmittedForReview;
 use Illuminate\Contracts\Notifications\Dispatcher;
@@ -24,6 +25,11 @@ class IncomingLetterNotificationService
     public function notifyForwardedToDivisionAfterCommit(int $incomingLetterId): void
     {
         DB::afterCommit(fn () => $this->sendForwardedToDivision($incomingLetterId));
+    }
+
+    public function notifyArchivedDirectlyAfterCommit(int $incomingLetterId): void
+    {
+        DB::afterCommit(fn () => $this->sendArchivedDirectly($incomingLetterId));
     }
 
     private function sendSubmittedForReview(int $incomingLetterId): void
@@ -99,6 +105,27 @@ class IncomingLetterNotificationService
                         new IncomingLetterForwardedToDivision($incomingLetter),
                         $incomingLetterId,
                         'forwarded_to_division',
+                        ['database'],
+                    );
+                });
+        });
+    }
+
+    private function sendArchivedDirectly(int $incomingLetterId): void
+    {
+        $this->runSafely($incomingLetterId, 'archived_directly', function () use ($incomingLetterId) {
+            $incomingLetter = IncomingLetter::query()
+                ->with('review.reviewer:id,name')
+                ->findOrFail($incomingLetterId);
+
+            User::query()
+                ->where('is_active', true)
+                ->eachById(function (User $recipient) use ($incomingLetter, $incomingLetterId) {
+                    $this->notifySafely(
+                        $recipient,
+                        new IncomingLetterArchivedDirectly($incomingLetter),
+                        $incomingLetterId,
+                        'archived_directly',
                         ['database'],
                     );
                 });

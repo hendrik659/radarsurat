@@ -24,6 +24,11 @@
             'fisik' => 'Fisik',
             'lainnya' => 'Lainnya',
         ];
+        $wasArchivedDirectly = $incomingLetter->status === \App\Models\IncomingLetter::STATUS_SELESAI
+            && $incomingLetter->review !== null
+            && $incomingLetter->review->destination_division_id === null;
+        $destinationDivisionLabel = $incomingLetter->destinationDivision?->name
+            ?? ($wasArchivedDirectly ? 'Tidak diteruskan ke divisi' : 'Belum ditentukan');
         $formatFileSize = static function (?int $bytes): string {
             if ($bytes === null) {
                 return '-';
@@ -95,7 +100,7 @@
                     ['Media Penerimaan', $receivedViaLabels[$incomingLetter->received_via] ?? ($incomingLetter->received_via ?: '-')],
                     ['Perihal', $incomingLetter->subject ?: '-'],
                     ['Prioritas', $priorityLabels[$incomingLetter->priority] ?? $incomingLetter->priority],
-                    ['Divisi Tujuan', $incomingLetter->destinationDivision?->name ?? 'Belum ditentukan'],
+                    ['Divisi Tujuan', $destinationDivisionLabel],
                     ['Status', $statusLabels[$incomingLetter->status] ?? $incomingLetter->status],
                     ['Dibuat oleh', $incomingLetter->creator?->name ?? '-'],
                     ['Tanggal Dicatat', \App\Support\DateTimeFormatter::human($incomingLetter->created_at)],
@@ -127,7 +132,7 @@
                     @foreach ([
                         ['Diperiksa oleh', $incomingLetter->review->reviewer?->name ?? '-'],
                         ['Tanggal Pemeriksaan', \App\Support\DateTimeFormatter::human($incomingLetter->review->reviewed_at)],
-                        ['Divisi Tujuan', $incomingLetter->review->destinationDivision?->name ?? 'Belum ditentukan'],
+                        ['Divisi Tujuan', $incomingLetter->review->destinationDivision?->name ?? 'Tidak diteruskan ke divisi'],
                     ] as [$label, $value])
                         <div class="col-12 col-md-4 rs-detail-item border-bottom pb-3">
                             <dt class="rs-detail-label small text-body-secondary">{{ $label }}</dt>

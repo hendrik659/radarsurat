@@ -136,14 +136,17 @@ class IncomingLetterReviewFoundationTest extends TestCase
         $request = new StoreIncomingLetterReviewRequest;
 
         $valid = Validator::make([
+            'action' => 'forward',
             'destination_division_id' => $activeDivision->id,
             'review_note' => null,
         ], $request->rules());
         $inactive = Validator::make([
+            'action' => 'forward',
             'destination_division_id' => $inactiveDivision->id,
         ], $request->rules());
-        $missing = Validator::make([], $request->rules());
+        $missing = Validator::make(['action' => 'forward'], $request->rules());
         $longNote = Validator::make([
+            'action' => 'forward',
             'destination_division_id' => $activeDivision->id,
             'review_note' => str_repeat('a', 2001),
         ], $request->rules());
