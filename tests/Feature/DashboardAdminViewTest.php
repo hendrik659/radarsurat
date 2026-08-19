@@ -180,7 +180,7 @@ class DashboardAdminViewTest extends TestCase
         $this->assertSame($desktopMenuPositions->sort()->values()->all(), $desktopMenuPositions->values()->all());
     }
 
-    public function test_dashboard_omits_prohibited_sections_fake_features_and_outgoing_status(): void
+    public function test_dashboard_omits_prohibited_sections_and_exposes_the_real_notification_bell(): void
     {
         $admin = $this->makeAdmin();
 
@@ -195,7 +195,7 @@ class DashboardAdminViewTest extends TestCase
             ->assertDontSee('Arsipkan')
             ->assertDontSee('Tugas Saya')
             ->assertDontSee('Sembunyikan')
-            ->assertDontSee('notification')
+            ->assertSee('data-testid="notification-bell"', false)
             ->assertDontSee('Versi 1.0.0');
     }
 

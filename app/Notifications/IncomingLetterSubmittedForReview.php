@@ -34,4 +34,21 @@ class IncomingLetterSubmittedForReview extends Notification
             ->action('Lihat Surat di SIRAPI', route('incoming-letters.show', $this->incomingLetter))
             ->line('Silakan masuk ke SIRAPI untuk melihat detail dan dokumen surat.');
     }
+
+    /**
+     * @return array<string, int|string>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        $sender = $this->incomingLetter->sender_name ?: '-';
+        $subject = $this->incomingLetter->subject ?: '-';
+
+        return [
+            'kind' => 'incoming_letter_submitted_for_review',
+            'title' => 'Surat Masuk Menunggu Pemeriksaan',
+            'message' => "Surat Masuk dari {$sender} dengan perihal {$subject} menunggu pemeriksaan.",
+            'incoming_letter_id' => $this->incomingLetter->id,
+            'icon' => 'fa-solid fa-envelope-open-text',
+        ];
+    }
 }
