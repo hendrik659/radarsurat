@@ -6,6 +6,7 @@ use App\Http\Requests\StoreIncomingLetterRequest;
 use App\Http\Requests\UpdateIncomingLetterRequest;
 use App\Models\Division;
 use App\Models\IncomingLetter;
+use App\Services\IncomingLetterNotificationService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,10 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class IncomingLetterController extends Controller
 {
+    public function __construct(
+        private readonly IncomingLetterNotificationService $notificationService,
+    ) {}
+
     public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
@@ -263,6 +268,8 @@ class IncomingLetterController extends Controller
                 'notes' => null,
                 'changed_by' => $request->user()->id,
             ]);
+
+            $this->notificationService->notifySubmittedForReviewAfterCommit($lockedLetter->id);
 
             return $lockedLetter;
         });
