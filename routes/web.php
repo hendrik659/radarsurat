@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminRegistrationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisionController;
@@ -22,6 +23,11 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+    Route::get('/register-admin', [AdminRegistrationController::class, 'create'])
+        ->name('register-admin.create');
+    Route::post('/register-admin', [AdminRegistrationController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('register-admin.store');
 });
 
 Route::middleware(['auth', 'active'])

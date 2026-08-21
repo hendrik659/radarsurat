@@ -123,6 +123,14 @@
                             <span>Masuk</span>
                         </button>
                     </form>
+
+                    <a
+                        class="btn btn-outline-primary w-100 mt-3 d-inline-flex align-items-center justify-content-center gap-2"
+                        href="{{ route('register-admin.create') }}"
+                    >
+                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                        <span>Register Admin</span>
+                    </a>
                 </div>
             </section>
         </main>
