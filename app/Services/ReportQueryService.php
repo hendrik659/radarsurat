@@ -18,6 +18,8 @@ class ReportQueryService
     /** @var array<int, string> */
     private const DIVISION_ROLES = ['ketua_divisi', 'anggota_divisi'];
 
+    private const CROSS_DIVISION_HEAD_CODE = 'SDM';
+
     public function canAccess(User $user): bool
     {
         if (! $user->is_active) {
@@ -32,7 +34,10 @@ class ReportQueryService
 
     public function hasGlobalScope(User $user): bool
     {
-        return in_array($user->role?->slug, self::GLOBAL_ROLES, true);
+        $role = $user->role?->slug;
+
+        return in_array($role, self::GLOBAL_ROLES, true)
+            || ($role === 'ketua_divisi' && $user->division?->code === self::CROSS_DIVISION_HEAD_CODE);
     }
 
     /**

@@ -163,6 +163,51 @@ class ReportExcelTest extends TestCase
         }
     }
 
+    public function test_sdm_division_head_exports_all_divisions_or_only_the_selected_division(): void
+    {
+        Carbon::setTestNow('2026-08-07 10:30:00');
+        $sdm = $this->makeDivision('Sumber Daya Manusia', 'SDM');
+        $it = $this->makeDivision('Teknologi Informasi', 'IT');
+        $creator = $this->makeUser('admin_surat');
+        $sdmHead = $this->makeUser('ketua_divisi', $sdm);
+        $this->makeIncoming($creator, $sdm, ['agenda_number' => 'AGD-SDM']);
+        $this->makeIncoming($creator, $it, ['agenda_number' => 'AGD-IT']);
+        $this->makeOutgoing($creator, $sdm, ['reference_code' => 'SK-SDM']);
+        $this->makeOutgoing($creator, $it, ['reference_code' => 'SK-IT']);
+
+        $incomingAll = $this->actingAs($sdmHead)->get(route('reports.incoming-letters.export'));
+        $incomingAll->assertDownload('laporan-surat-masuk-2026-08.xlsx');
+        $incomingAllText = $this->workbookText($this->readWorkbookRows($incomingAll));
+        $this->assertStringContainsString('Semua Divisi', $incomingAllText);
+        $this->assertStringContainsString('AGD-SDM', $incomingAllText);
+        $this->assertStringContainsString('AGD-IT', $incomingAllText);
+
+        $incomingIt = $this->actingAs($sdmHead)->get(route('reports.incoming-letters.export', [
+            'division_id' => $it->id,
+        ]));
+        $incomingIt->assertDownload('laporan-surat-masuk-2026-08.xlsx');
+        $incomingItText = $this->workbookText($this->readWorkbookRows($incomingIt));
+        $this->assertStringContainsString($it->name, $incomingItText);
+        $this->assertStringContainsString('AGD-IT', $incomingItText);
+        $this->assertStringNotContainsString('AGD-SDM', $incomingItText);
+
+        $outgoingAll = $this->actingAs($sdmHead)->get(route('reports.outgoing-letters.export'));
+        $outgoingAll->assertDownload('laporan-surat-keluar-2026-08.xlsx');
+        $outgoingAllText = $this->workbookText($this->readWorkbookRows($outgoingAll));
+        $this->assertStringContainsString('Semua Divisi', $outgoingAllText);
+        $this->assertStringContainsString('SK-SDM', $outgoingAllText);
+        $this->assertStringContainsString('SK-IT', $outgoingAllText);
+
+        $outgoingIt = $this->actingAs($sdmHead)->get(route('reports.outgoing-letters.export', [
+            'division_id' => $it->id,
+        ]));
+        $outgoingIt->assertDownload('laporan-surat-keluar-2026-08.xlsx');
+        $outgoingItText = $this->workbookText($this->readWorkbookRows($outgoingIt));
+        $this->assertStringContainsString($it->name, $outgoingItText);
+        $this->assertStringContainsString('SK-IT', $outgoingItText);
+        $this->assertStringNotContainsString('SK-SDM', $outgoingItText);
+    }
+
     /** @return array<int, array<int, bool|float|int|string|null>> */
     private function readWorkbookRows(TestResponse $response): array
     {

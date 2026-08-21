@@ -80,6 +80,47 @@ class ReportViewTest extends TestCase
         }
     }
 
+    public function test_only_sdm_division_head_receives_the_cross_division_picker(): void
+    {
+        $sdm = $this->makeDivision('Sumber Daya Manusia', 'SDM');
+        $it = $this->makeDivision('Teknologi Informasi', 'IT');
+        $sdmHead = $this->makeUser('ketua_divisi', $sdm);
+
+        $this->actingAs($sdmHead)
+            ->get(route('reports.incoming-letters.index'))
+            ->assertOk()
+            ->assertSee('data-testid="incoming-report-division-filter"', false)
+            ->assertSee('name="division_id"', false)
+            ->assertSee('Semua Divisi')
+            ->assertSee($sdm->name)
+            ->assertSee($it->name)
+            ->assertDontSee('data-testid="incoming-report-own-division"', false);
+
+        $this->actingAs($sdmHead)
+            ->get(route('reports.outgoing-letters.index'))
+            ->assertOk()
+            ->assertSee('data-testid="outgoing-report-division-filter"', false)
+            ->assertSee('name="division_id"', false)
+            ->assertSee('Semua Divisi')
+            ->assertSee($sdm->name)
+            ->assertSee($it->name)
+            ->assertDontSee('data-testid="outgoing-report-own-division"', false);
+
+        foreach ([$this->makeUser('ketua_divisi', $it), $this->makeUser('anggota_divisi', $sdm)] as $user) {
+            $this->actingAs($user)
+                ->get(route('reports.incoming-letters.index'))
+                ->assertOk()
+                ->assertDontSee('data-testid="incoming-report-division-filter"', false)
+                ->assertSee('data-testid="incoming-report-own-division"', false);
+
+            $this->actingAs($user)
+                ->get(route('reports.outgoing-letters.index'))
+                ->assertOk()
+                ->assertDontSee('data-testid="outgoing-report-division-filter"', false)
+                ->assertSee('data-testid="outgoing-report-own-division"', false);
+        }
+    }
+
     public function test_division_roles_see_own_division_information_without_division_picker_or_cross_recap(): void
     {
         $division = $this->makeDivision('Redaksi', 'RED');

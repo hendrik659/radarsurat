@@ -104,6 +104,76 @@ class ReportBackendTest extends TestCase
         }
     }
 
+    public function test_sdm_division_head_can_view_all_divisions_and_filter_a_specific_division(): void
+    {
+        $sdm = $this->makeDivision('Sumber Daya Manusia', 'SDM');
+        $it = $this->makeDivision('Teknologi Informasi', 'IT');
+        $creator = $this->makeUser('admin_surat');
+        $sdmIncoming = $this->makeIncoming($creator, $sdm, ['subject' => 'Incoming SDM']);
+        $itIncoming = $this->makeIncoming($creator, $it, ['subject' => 'Incoming IT']);
+        $sdmOutgoing = $this->makeOutgoing($creator, $sdm, ['subject' => 'Outgoing SDM']);
+        $itOutgoing = $this->makeOutgoing($creator, $it, ['subject' => 'Outgoing IT']);
+        $sdmHead = $this->makeUser('ketua_divisi', $sdm);
+
+        $this->actingAs($sdmHead)
+            ->get(route('reports.incoming-letters.index'))
+            ->assertOk()
+            ->assertViewHas('hasGlobalScope', true)
+            ->assertViewHas(
+                'incomingLetters',
+                fn (LengthAwarePaginator $letters): bool => $letters->pluck('id')->sort()->values()->all()
+                    === collect([$sdmIncoming->id, $itIncoming->id])->sort()->values()->all(),
+            );
+
+        $this->actingAs($sdmHead)
+            ->get(route('reports.outgoing-letters.index'))
+            ->assertOk()
+            ->assertViewHas('hasGlobalScope', true)
+            ->assertViewHas(
+                'outgoingLetters',
+                fn (LengthAwarePaginator $letters): bool => $letters->pluck('id')->sort()->values()->all()
+                    === collect([$sdmOutgoing->id, $itOutgoing->id])->sort()->values()->all(),
+            );
+
+        $this->actingAs($sdmHead)
+            ->get(route('reports.incoming-letters.index', ['division_id' => $it->id]))
+            ->assertOk()
+            ->assertViewHas('incomingLetters', fn (LengthAwarePaginator $letters): bool => $letters->pluck('id')->all() === [$itIncoming->id]);
+
+        $this->actingAs($sdmHead)
+            ->get(route('reports.outgoing-letters.index', ['division_id' => $it->id]))
+            ->assertOk()
+            ->assertViewHas('outgoingLetters', fn (LengthAwarePaginator $letters): bool => $letters->pluck('id')->all() === [$itOutgoing->id]);
+    }
+
+    public function test_non_sdm_head_and_sdm_member_keep_their_own_division_scope(): void
+    {
+        $sdm = $this->makeDivision('Sumber Daya Manusia', 'SDM');
+        $it = $this->makeDivision('Teknologi Informasi', 'IT');
+        $creator = $this->makeUser('admin_surat');
+        $sdmIncoming = $this->makeIncoming($creator, $sdm, ['subject' => 'Incoming SDM']);
+        $itIncoming = $this->makeIncoming($creator, $it, ['subject' => 'Incoming IT']);
+        $sdmOutgoing = $this->makeOutgoing($creator, $sdm, ['subject' => 'Outgoing SDM']);
+        $itOutgoing = $this->makeOutgoing($creator, $it, ['subject' => 'Outgoing IT']);
+
+        foreach ([
+            [$this->makeUser('ketua_divisi', $it), $itIncoming->id, $itOutgoing->id, $sdm->id],
+            [$this->makeUser('anggota_divisi', $sdm), $sdmIncoming->id, $sdmOutgoing->id, $it->id],
+        ] as [$user, $ownIncomingId, $ownOutgoingId, $forgedDivisionId]) {
+            $this->actingAs($user)
+                ->get(route('reports.incoming-letters.index', ['division_id' => $forgedDivisionId]))
+                ->assertOk()
+                ->assertViewHas('hasGlobalScope', false)
+                ->assertViewHas('incomingLetters', fn (LengthAwarePaginator $letters): bool => $letters->pluck('id')->all() === [$ownIncomingId]);
+
+            $this->actingAs($user)
+                ->get(route('reports.outgoing-letters.index', ['division_id' => $forgedDivisionId]))
+                ->assertOk()
+                ->assertViewHas('hasGlobalScope', false)
+                ->assertViewHas('outgoingLetters', fn (LengthAwarePaginator $letters): bool => $letters->pluck('id')->all() === [$ownOutgoingId]);
+        }
+    }
+
     public function test_admin_and_leader_can_filter_another_division(): void
     {
         $redaction = $this->makeDivision('Redaksi', 'RED');
